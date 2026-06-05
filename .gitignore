@@ -1,0 +1,10 @@
+node_modules
+.env
+.env.local
+data.db
+data.db-journal
+data.db-wal
+data.db-shm
+client/dist
+*.log
+.DS_Store
