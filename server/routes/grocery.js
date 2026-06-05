@@ -3,7 +3,7 @@ import { db } from '../db/index.js';
 import { dayLogs, customFoods } from '../db/schema.js';
 import { FOODS } from '../lib/foods.js';
 import { getDayType, getPhase, generateSchedule } from '../lib/schedule.js';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, and } from 'drizzle-orm';
 
 const router = Router();
 
@@ -23,7 +23,7 @@ router.get('/', async (req, res, next) => {
   const mode = req.query.mode || 'patterns';
 
   // Get all logged days
-  const rows = await db.select().from(dayLogs).all();
+  const rows = await db.select().from(dayLogs).where(eq(dayLogs.user_id, req.user.id)).all();
   const loggedDays = rows.map(row => {
     let meals_json = {};
     try { meals_json = JSON.parse(row.meals_json || '{}'); } catch {}
@@ -39,7 +39,7 @@ router.get('/', async (req, res, next) => {
   }
 
   // Get custom foods from DB
-  const customFoodRows = await db.select().from(customFoods).all();
+  const customFoodRows = await db.select().from(customFoods).where(eq(customFoods.user_id, req.user.id)).all();
   const allFoods = { ...FOODS };
   customFoodRows.forEach(cf => {
     allFoods[cf.food_id] = cf;
@@ -123,7 +123,7 @@ router.get('/', async (req, res, next) => {
  */
 router.get('/weekly', async (req, res, next) => {
   try {
-  const rows = await db.select().from(dayLogs).all();
+  const rows = await db.select().from(dayLogs).where(eq(dayLogs.user_id, req.user.id)).all();
   const loggedDays = rows.map(row => {
     let meals_json = {};
     try { meals_json = JSON.parse(row.meals_json || '{}'); } catch {}
@@ -131,7 +131,7 @@ router.get('/weekly', async (req, res, next) => {
   }).filter(d => Object.keys(d.meals_json).length > 0);
 
   // Get custom foods
-  const customFoodRows = await db.select().from(customFoods).all();
+  const customFoodRows = await db.select().from(customFoods).where(eq(customFoods.user_id, req.user.id)).all();
   const allFoods = { ...FOODS };
   customFoodRows.forEach(cf => { allFoods[cf.food_id] = cf; });
 

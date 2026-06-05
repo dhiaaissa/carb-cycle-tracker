@@ -3,6 +3,8 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { requireAuth } from './lib/auth.js';
+import authRouter from './routes/auth.js';
 import configRouter from './routes/config.js';
 import scheduleRouter from './routes/schedule.js';
 import daysRouter from './routes/days.js';
@@ -20,15 +22,19 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/config', configRouter);
-app.use('/api/schedule', scheduleRouter);
-app.use('/api/days', daysRouter);
-app.use('/api/stats', statsRouter);
-app.use('/api/foods', foodsRouter);
-app.use('/api/presets', presetsRouter);
-app.use('/api/insights', insightsRouter);
-app.use('/api/grocery', groceryRouter);
-app.use('/api/reminders', remindersRouter);
+// Public — auth
+app.use('/api/auth', authRouter);
+
+// Protected — every API route below requires a valid JWT
+app.use('/api/config', requireAuth, configRouter);
+app.use('/api/schedule', requireAuth, scheduleRouter);
+app.use('/api/days', requireAuth, daysRouter);
+app.use('/api/stats', requireAuth, statsRouter);
+app.use('/api/foods', requireAuth, foodsRouter);
+app.use('/api/presets', requireAuth, presetsRouter);
+app.use('/api/insights', requireAuth, insightsRouter);
+app.use('/api/grocery', requireAuth, groceryRouter);
+app.use('/api/reminders', requireAuth, remindersRouter);
 
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');

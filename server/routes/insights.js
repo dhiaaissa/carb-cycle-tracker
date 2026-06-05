@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { dayLogs } from '../db/schema.js';
+import { eq } from 'drizzle-orm';
 import { CALORIE_TARGETS } from '../lib/calories.js';
 
 const router = Router();
@@ -8,7 +9,7 @@ const router = Router();
 // GET /api/insights — analytics data
 router.get('/', async (req, res, next) => {
   try {
-  const rows = await db.select().from(dayLogs).all();
+  const rows = await db.select().from(dayLogs).where(eq(dayLogs.user_id, req.user.id)).all();
 
   if (rows.length === 0) {
     return res.json({

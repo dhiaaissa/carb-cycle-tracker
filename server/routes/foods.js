@@ -1,14 +1,14 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { customFoods } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { FOODS, FOOD_CATEGORIES } from '../lib/foods.js';
 
 const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const customs = await db.select().from(customFoods).all();
+    const customs = await db.select().from(customFoods).where(eq(customFoods.user_id, req.user.id)).all();
 
     const allFoods = { ...FOODS };
     for (const c of customs) {
@@ -57,10 +57,13 @@ router.post('/custom', async (req, res, next) => {
     const food_id = 'custom_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/_+$/, '');
     const now = new Date().toISOString();
 
-    const existing = await db.select().from(customFoods).where(eq(customFoods.food_id, food_id)).get();
+    const existing = await db.select().from(customFoods)
+      .where(and(eq(customFoods.user_id, req.user.id), eq(customFoods.food_id, food_id)))
+      .get();
     if (existing) return res.status(409).json({ error: 'A custom food with a similar name already exists' });
 
     const record = {
+      user_id: req.user.id,
       food_id,
       name,
       emoji: emoji || '🍽️',
@@ -91,7 +94,9 @@ router.post('/custom', async (req, res, next) => {
 router.delete('/custom/:foodId', async (req, res, next) => {
   try {
     const { foodId } = req.params;
-    await db.delete(customFoods).where(eq(customFoods.food_id, foodId)).run();
+    await db.delete(customFoods)
+      .where(and(eq(customFoods.user_id, req.user.id), eq(customFoods.food_id, foodId)))
+      .run();
     res.json({ deleted: foodId });
   } catch (err) { next(err); }
 });

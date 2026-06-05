@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { mealPresets } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const rows = await db.select().from(mealPresets).all();
+    const rows = await db.select().from(mealPresets).where(eq(mealPresets.user_id, req.user.id)).all();
     res.json(rows.map(r => ({ ...r, items_json: JSON.parse(r.items_json) })));
   } catch (err) { next(err); }
 });
@@ -20,6 +20,7 @@ router.post('/', async (req, res, next) => {
     }
     const now = new Date().toISOString();
     const result = await db.insert(mealPresets).values({
+      user_id: req.user.id,
       name,
       items_json: JSON.stringify(items),
       created_at: now,
@@ -32,7 +33,9 @@ router.post('/', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
-    await db.delete(mealPresets).where(eq(mealPresets.id, id)).run();
+    await db.delete(mealPresets)
+      .where(and(eq(mealPresets.user_id, req.user.id), eq(mealPresets.id, id)))
+      .run();
     res.json({ ok: true });
   } catch (err) { next(err); }
 });

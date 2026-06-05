@@ -1,15 +1,15 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { dayLogs } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getDayType, getPhase } from '../lib/schedule.js';
-import { calculateDay, calculateScore, WATER_GOALS } from '../lib/calories.js';
+import { calculateDay, calculateScore } from '../lib/calories.js';
 
 const router = Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const rows = await db.select().from(dayLogs).all();
+    const rows = await db.select().from(dayLogs).where(eq(dayLogs.user_id, req.user.id)).all();
     res.json(rows.map(parseJsonFields));
   } catch (err) { next(err); }
 });
@@ -20,7 +20,9 @@ router.get('/:dayIndex', async (req, res, next) => {
     if (isNaN(idx) || idx < 0 || idx > 55)
       return res.status(400).json({ error: 'day_index must be 0–55' });
 
-    const row = await db.select().from(dayLogs).where(eq(dayLogs.day_index, idx)).get();
+    const row = await db.select().from(dayLogs)
+      .where(and(eq(dayLogs.user_id, req.user.id), eq(dayLogs.day_index, idx)))
+      .get();
     res.json(row ? parseJsonFields(row) : null);
   } catch (err) { next(err); }
 });
@@ -36,7 +38,9 @@ router.put('/:dayIndex', async (req, res, next) => {
     const now     = new Date().toISOString();
     const body    = req.body;
 
-    const existing = await db.select().from(dayLogs).where(eq(dayLogs.day_index, idx)).get();
+    const existing = await db.select().from(dayLogs)
+      .where(and(eq(dayLogs.user_id, req.user.id), eq(dayLogs.day_index, idx)))
+      .get();
     const base = existing ? parseJsonFields(existing) : {
       meals_json:   {},
       workout_json: [],
@@ -76,6 +80,7 @@ router.put('/:dayIndex', async (req, res, next) => {
     );
 
     const record = {
+      user_id:            req.user.id,
       day_index:          idx,
       day_type:           dayType,
       phase,
@@ -107,13 +112,17 @@ router.put('/:dayIndex', async (req, res, next) => {
     };
 
     if (existing) {
-      await db.update(dayLogs).set(record).where(eq(dayLogs.day_index, idx)).run();
+      await db.update(dayLogs).set(record)
+        .where(and(eq(dayLogs.user_id, req.user.id), eq(dayLogs.day_index, idx)))
+        .run();
     } else {
       record.created_at = now;
       await db.insert(dayLogs).values(record).run();
     }
 
-    const updated = await db.select().from(dayLogs).where(eq(dayLogs.day_index, idx)).get();
+    const updated = await db.select().from(dayLogs)
+      .where(and(eq(dayLogs.user_id, req.user.id), eq(dayLogs.day_index, idx)))
+      .get();
     res.json(parseJsonFields(updated));
   } catch (err) { next(err); }
 });

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAppData } from './hooks/useAppData';
 import { useReminders } from './hooks/useReminders';
+import { auth } from './lib/api';
 import Sidebar from './components/Sidebar';
 import StatsBar from './components/StatsBar';
 import ProgressCard from './components/ProgressCard';
@@ -11,8 +12,19 @@ import WeekPage from './components/WeekPage';
 import InsightsPage from './components/InsightsPage';
 import SettingsPage from './components/SettingsPage';
 import GroceryPage from './components/GroceryPage';
+import LoginPage from './components/LoginPage';
 
 export default function App() {
+  const [user, setUser] = useState(() => auth.getUser());
+
+  if (!user) {
+    return <LoginPage onAuth={setUser} />;
+  }
+
+  return <AuthedApp user={user} onLogout={() => { auth.clearSession(); setUser(null); }} />;
+}
+
+function AuthedApp({ user, onLogout }) {
   const { config, schedule, days, stats, foods, presets, loading, updateDay, savePreset, deletePreset, createCustomFood, deleteCustomFood } = useAppData();
   const { status: reminderStatus, reminderConfig, startReminders, stopReminders, sendNow, sending } = useReminders();
   const [selectedWeek, setSelectedWeek] = useState(null);
@@ -126,6 +138,16 @@ export default function App() {
                 Go to Today
               </button>
             )}
+            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-gray-200">
+              <span className="text-xs font-semibold text-gray-500">@{user.username}</span>
+              <button
+                onClick={onLogout}
+                title="Log out"
+                className="text-gray-400 hover:text-red-600 px-2 py-1 rounded text-xs font-bold transition-colors"
+              >
+                Log out
+              </button>
+            </div>
           </div>
         </header>
 

@@ -1,16 +1,28 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
 import { appConfig } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { getDayType, getPhase, getTodayIndex, getPhaseGoal } from '../lib/schedule.js';
 
 const router = Router();
 
+async function getOrCreateConfig(userId) {
+  let cfg = await db.select().from(appConfig).where(eq(appConfig.user_id, userId)).get();
+  if (!cfg) {
+    const today = new Date().toISOString().split('T')[0];
+    await db.insert(appConfig).values({
+      user_id: userId,
+      start_date: today,
+      settings_json: '{}',
+    }).run();
+    cfg = await db.select().from(appConfig).where(eq(appConfig.user_id, userId)).get();
+  }
+  return cfg;
+}
+
 router.get('/', async (req, res, next) => {
   try {
-    const config = await db.select().from(appConfig).where(eq(appConfig.id, 1)).get();
-    if (!config) return res.status(500).json({ error: 'No config found. Run seed first.' });
-
+    const config = await getOrCreateConfig(req.user.id);
     const todayIndex = getTodayIndex(config.start_date);
     const clamped = Math.max(0, Math.min(55, todayIndex));
 
@@ -31,18 +43,17 @@ router.get('/', async (req, res, next) => {
 router.put('/', async (req, res, next) => {
   try {
     const { start_date, settings } = req.body;
-    const config = await db.select().from(appConfig).where(eq(appConfig.id, 1)).get();
-    if (!config) return res.status(500).json({ error: 'No config found.' });
+    const config = await getOrCreateConfig(req.user.id);
 
     const updates = {};
     if (start_date) updates.start_date = start_date;
     if (settings !== undefined) updates.settings_json = JSON.stringify(settings);
 
     if (Object.keys(updates).length > 0) {
-      await db.update(appConfig).set(updates).where(eq(appConfig.id, 1)).run();
+      await db.update(appConfig).set(updates).where(eq(appConfig.user_id, req.user.id)).run();
     }
 
-    const updated = await db.select().from(appConfig).where(eq(appConfig.id, 1)).get();
+    const updated = await db.select().from(appConfig).where(eq(appConfig.user_id, req.user.id)).get();
     let parsedSettings = {};
     try { parsedSettings = JSON.parse(updated.settings_json || '{}'); } catch {}
 

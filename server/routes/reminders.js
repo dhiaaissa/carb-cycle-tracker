@@ -1,10 +1,17 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
-import { dayLogs, appConfig } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { users, dayLogs, appConfig } from '../db/schema.js';
+import { eq, and } from 'drizzle-orm';
 import { getTodayIndex, getDayType, getPhase, getPhaseGoal } from '../lib/schedule.js';
 import { CALORIE_TARGETS, MACRO_TARGETS, WATER_GOALS } from '../lib/calories.js';
 import { sendWhatsApp, isWhatsAppEnabled } from '../lib/whatsapp.js';
+
+async function resolveOwnerId() {
+  const ownerUsername = (process.env.OWNER_USERNAME || '').toLowerCase();
+  if (!ownerUsername) return null;
+  const u = await db.select().from(users).where(eq(users.username, ownerUsername)).get();
+  return u ? u.id : null;
+}
 
 const router = Router();
 
@@ -142,9 +149,11 @@ const SLOTS = [
   },
 ];
 
-/** Get today's full context for building messages */
+/** Get owner's full context for building messages */
 async function getTodayContext() {
-  const cfg = await db.select().from(appConfig).get();
+  const ownerId = await resolveOwnerId();
+  if (!ownerId) return null;
+  const cfg = await db.select().from(appConfig).where(eq(appConfig.user_id, ownerId)).get();
   if (!cfg || !cfg.start_date) return null;
 
   const todayIndex = getTodayIndex(cfg.start_date);
@@ -152,7 +161,9 @@ async function getTodayContext() {
 
   const dayType = getDayType(todayIndex);
   const phase = getPhase(todayIndex);
-  const row = await db.select().from(dayLogs).where(eq(dayLogs.day_index, todayIndex)).get();
+  const row = await db.select().from(dayLogs)
+    .where(and(eq(dayLogs.user_id, ownerId), eq(dayLogs.day_index, todayIndex)))
+    .get();
 
   let meals_json = {};
   if (row) {
@@ -208,6 +219,15 @@ async function checkAndSend() {
 
 // ── Routes ──────────────────────────────────────────────────────────
 
+async function requireOwner(req, res) {
+  const ownerUsername = (process.env.OWNER_USERNAME || '').toLowerCase();
+  if (!ownerUsername || req.user.username !== ownerUsername) {
+    res.status(403).json({ error: 'WhatsApp reminders are only available to the owner.' });
+    return false;
+  }
+  return true;
+}
+
 router.get('/status', async (req, res, next) => {
   try {
   const ctx = await getTodayContext();
@@ -229,6 +249,7 @@ router.get('/status', async (req, res, next) => {
 
 router.post('/send', async (req, res, next) => {
   try {
+  if (!(await requireOwner(req, res))) return;
   if (!isWhatsAppEnabled) {
     return res.json({ sent: false, disabled: true, reason: 'WhatsApp reminders are disabled in this deployment.' });
   }
@@ -253,7 +274,8 @@ router.post('/send', async (req, res, next) => {
   } catch (outerErr) { next(outerErr); }
 });
 
-router.post('/start', (req, res) => {
+router.post('/start', async (req, res) => {
+  if (!(await requireOwner(req, res))) return;
   if (!isWhatsAppEnabled) {
     return res.json({ running: false, disabled: true, message: 'WhatsApp reminders are disabled in this deployment.' });
   }
