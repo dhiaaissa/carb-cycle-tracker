@@ -6,8 +6,9 @@ import { CALORIE_TARGETS } from '../lib/calories.js';
 const router = Router();
 
 // GET /api/insights — analytics data
-router.get('/', (req, res) => {
-  const rows = db.select().from(dayLogs).all();
+router.get('/', async (req, res, next) => {
+  try {
+  const rows = await db.select().from(dayLogs).all();
 
   if (rows.length === 0) {
     return res.json({
@@ -85,6 +86,7 @@ router.get('/', (req, res) => {
     weekly_adherence: weeklyAdherence,
     total_days_logged: rows.length,
   });
+  } catch (err) { next(err); }
 });
 
 export default router;

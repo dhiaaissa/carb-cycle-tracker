@@ -5,33 +5,36 @@ import { eq } from 'drizzle-orm';
 
 const router = Router();
 
-// GET /api/presets — list all saved meal presets
-router.get('/', (req, res) => {
-  const rows = db.select().from(mealPresets).all();
-  res.json(rows.map(r => ({ ...r, items_json: JSON.parse(r.items_json) })));
+router.get('/', async (req, res, next) => {
+  try {
+    const rows = await db.select().from(mealPresets).all();
+    res.json(rows.map(r => ({ ...r, items_json: JSON.parse(r.items_json) })));
+  } catch (err) { next(err); }
 });
 
-// POST /api/presets — save a new preset
-router.post('/', (req, res) => {
-  const { name, items } = req.body;
-  if (!name || !items || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ error: 'name and items[] required' });
-  }
-  const now = new Date().toISOString();
-  const result = db.insert(mealPresets).values({
-    name,
-    items_json: JSON.stringify(items),
-    created_at: now,
-  }).run();
+router.post('/', async (req, res, next) => {
+  try {
+    const { name, items } = req.body;
+    if (!name || !items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'name and items[] required' });
+    }
+    const now = new Date().toISOString();
+    const result = await db.insert(mealPresets).values({
+      name,
+      items_json: JSON.stringify(items),
+      created_at: now,
+    }).run();
 
-  res.json({ id: result.lastInsertRowid, name, items_json: items, created_at: now });
+    res.json({ id: Number(result.lastInsertRowid), name, items_json: items, created_at: now });
+  } catch (err) { next(err); }
 });
 
-// DELETE /api/presets/:id — delete a preset
-router.delete('/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  db.delete(mealPresets).where(eq(mealPresets.id, id)).run();
-  res.json({ ok: true });
+router.delete('/:id', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id);
+    await db.delete(mealPresets).where(eq(mealPresets.id, id)).run();
+    res.json({ ok: true });
+  } catch (err) { next(err); }
 });
 
 export default router;

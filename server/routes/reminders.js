@@ -143,8 +143,8 @@ const SLOTS = [
 ];
 
 /** Get today's full context for building messages */
-function getTodayContext() {
-  const cfg = db.select().from(appConfig).get();
+async function getTodayContext() {
+  const cfg = await db.select().from(appConfig).get();
   if (!cfg || !cfg.start_date) return null;
 
   const todayIndex = getTodayIndex(cfg.start_date);
@@ -152,7 +152,7 @@ function getTodayContext() {
 
   const dayType = getDayType(todayIndex);
   const phase = getPhase(todayIndex);
-  const row = db.select().from(dayLogs).where(eq(dayLogs.day_index, todayIndex)).get();
+  const row = await db.select().from(dayLogs).where(eq(dayLogs.day_index, todayIndex)).get();
 
   let meals_json = {};
   if (row) {
@@ -183,8 +183,8 @@ function getTodayContext() {
 // ── Reminder loop ───────────────────────────────────────────────────
 let reminderInterval = null;
 
-function checkAndSend() {
-  const ctx = getTodayContext();
+async function checkAndSend() {
+  const ctx = await getTodayContext();
   if (!ctx) return;
 
   const hour = new Date().getHours();
@@ -208,8 +208,9 @@ function checkAndSend() {
 
 // ── Routes ──────────────────────────────────────────────────────────
 
-router.get('/status', (req, res) => {
-  const ctx = getTodayContext();
+router.get('/status', async (req, res, next) => {
+  try {
+  const ctx = await getTodayContext();
   if (!ctx) return res.json({ active: false });
 
   const hour = new Date().getHours();
@@ -223,13 +224,15 @@ router.get('/status', (req, res) => {
     sent_today: sentToday,
     next_reminder: nextSlot ? { id: nextSlot.id, hour: nextSlot.hour } : null,
   });
+  } catch (err) { next(err); }
 });
 
-router.post('/send', async (req, res) => {
+router.post('/send', async (req, res, next) => {
+  try {
   if (!isWhatsAppEnabled) {
     return res.json({ sent: false, disabled: true, reason: 'WhatsApp reminders are disabled in this deployment.' });
   }
-  const ctx = getTodayContext();
+  const ctx = await getTodayContext();
   if (!ctx) return res.json({ sent: false, reason: 'Programme not active' });
 
   // Send whichever slot is due, or force the next one
@@ -247,6 +250,7 @@ router.post('/send', async (req, res) => {
   } catch (err) {
     res.status(500).json({ sent: false, error: err.message });
   }
+  } catch (outerErr) { next(outerErr); }
 });
 
 router.post('/start', (req, res) => {

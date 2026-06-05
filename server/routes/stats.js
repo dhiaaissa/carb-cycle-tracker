@@ -7,12 +7,13 @@ import { getDayType, getWeek, getPhase, getTodayIndex, generateSchedule } from '
 const router = Router();
 
 // GET /api/stats
-router.get('/', (req, res) => {
-  const config = db.select().from(appConfig).where(eq(appConfig.id, 1)).get();
+router.get('/', async (req, res, next) => {
+  try {
+  const config = await db.select().from(appConfig).where(eq(appConfig.id, 1)).get();
   if (!config) return res.status(500).json({ error: 'No config found.' });
 
   const todayIndex = getTodayIndex(config.start_date);
-  const allLogs = db.select().from(dayLogs).orderBy(asc(dayLogs.day_index)).all();
+  const allLogs = await db.select().from(dayLogs).orderBy(asc(dayLogs.day_index)).all();
   const schedule = generateSchedule(config.start_date);
 
   // Build a map for quick lookup
@@ -93,6 +94,7 @@ router.get('/', (req, res) => {
     current_week_workouts,
     current_week_workout_goal,
   });
+  } catch (err) { next(err); }
 });
 
 export default router;

@@ -17,12 +17,13 @@ const router = Router();
  *   - days: number of days to generate for (default: 7)
  *   - mode: 'patterns' (from past meals) or 'upcoming' (from already-planned meals)
  */
-router.get('/', (req, res) => {
+router.get('/', async (req, res, next) => {
+  try {
   const numDays = Math.min(parseInt(req.query.days) || 7, 14);
   const mode = req.query.mode || 'patterns';
 
   // Get all logged days
-  const rows = db.select().from(dayLogs).all();
+  const rows = await db.select().from(dayLogs).all();
   const loggedDays = rows.map(row => {
     let meals_json = {};
     try { meals_json = JSON.parse(row.meals_json || '{}'); } catch {}
@@ -38,7 +39,7 @@ router.get('/', (req, res) => {
   }
 
   // Get custom foods from DB
-  const customFoodRows = db.select().from(customFoods).all();
+  const customFoodRows = await db.select().from(customFoods).all();
   const allFoods = { ...FOODS };
   customFoodRows.forEach(cf => {
     allFoods[cf.food_id] = cf;
@@ -112,6 +113,7 @@ router.get('/', (req, res) => {
       based_on_days: daysLogged,
     },
   });
+  } catch (err) { next(err); }
 });
 
 /**
@@ -119,8 +121,9 @@ router.get('/', (req, res) => {
  * Generates a grocery list for the upcoming week based on the schedule's day types
  * and the user's most common meals for each day type (low/med/high).
  */
-router.get('/weekly', (req, res) => {
-  const rows = db.select().from(dayLogs).all();
+router.get('/weekly', async (req, res, next) => {
+  try {
+  const rows = await db.select().from(dayLogs).all();
   const loggedDays = rows.map(row => {
     let meals_json = {};
     try { meals_json = JSON.parse(row.meals_json || '{}'); } catch {}
@@ -128,7 +131,7 @@ router.get('/weekly', (req, res) => {
   }).filter(d => Object.keys(d.meals_json).length > 0);
 
   // Get custom foods
-  const customFoodRows = db.select().from(customFoods).all();
+  const customFoodRows = await db.select().from(customFoods).all();
   const allFoods = { ...FOODS };
   customFoodRows.forEach(cf => { allFoods[cf.food_id] = cf; });
 
@@ -215,6 +218,7 @@ router.get('/weekly', (req, res) => {
       days_covered: upcomingDays.length,
     },
   });
+  } catch (err) { next(err); }
 });
 
 export default router;
