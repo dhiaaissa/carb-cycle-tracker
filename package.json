@@ -9,7 +9,7 @@
     "client": "cd client && npm run dev",
     "migrate": "node server/db/migrate.js",
     "seed": "node server/db/seed.js",
-    "build": "cd client && npm install && npm run build",
+    "build": "cd client && npm install --include=dev && npm run build",
     "start": "npm run migrate && npm run seed && node server/index.js"
   },
   "dependencies": {
