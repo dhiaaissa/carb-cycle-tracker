@@ -24,6 +24,13 @@ export default function SettingsPage({ config, onConfigUpdate }) {
   const [exporting, setExporting] = useState(false);
   const [showProgrammeSetup, setShowProgrammeSetup] = useState(false);
 
+  useEffect(() => {
+    if (config) {
+      setStartDate(config.start_date || '');
+      setTargets(config.settings?.calorie_targets || {});
+    }
+  }, [config]);
+
   if (showProgrammeSetup) {
     return <ProgrammeSetup
       initialProgramme={config?.programme}
@@ -31,13 +38,6 @@ export default function SettingsPage({ config, onConfigUpdate }) {
       onDone={() => { setShowProgrammeSetup(false); window.location.reload(); }}
     />;
   }
-
-  useEffect(() => {
-    if (config) {
-      setStartDate(config.start_date || '');
-      setTargets(config.settings?.calorie_targets || {});
-    }
-  }, [config]);
 
   // Merged targets: user overrides → defaults
   function getTarget(dayType, field) {
