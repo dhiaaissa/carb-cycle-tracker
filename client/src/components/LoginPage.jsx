@@ -16,7 +16,7 @@ export default function LoginPage({ onAuth }) {
       const fn = mode === 'login' ? api.login : api.register;
       const { token, user } = await fn(username.trim(), password);
       auth.setSession(token, user);
-      onAuth(user);
+      onAuth(user, mode === 'register');
     } catch (err) {
       setError(err.message || 'Something went wrong');
     } finally {

@@ -62,4 +62,7 @@ export const api = {
   startReminders: () => request('/reminders/start', { method: 'POST' }),
   stopReminders: () => request('/reminders/stop', { method: 'POST' }),
   sendReminder: () => request('/reminders/send', { method: 'POST' }),
+  getProgrammeOptions: () => request('/programme/options'),
+  getMyProgramme: () => request('/programme/me'),
+  setupProgramme: (data) => request('/programme/setup', { method: 'POST', body: JSON.stringify(data) }),
 };

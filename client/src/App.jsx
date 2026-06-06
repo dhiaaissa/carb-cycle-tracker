@@ -13,19 +13,27 @@ import InsightsPage from './components/InsightsPage';
 import SettingsPage from './components/SettingsPage';
 import GroceryPage from './components/GroceryPage';
 import LoginPage from './components/LoginPage';
+import ProgrammeSetup from './components/ProgrammeSetup';
+import MacroDailyView from './components/MacroDailyView';
 
 export default function App() {
   const [user, setUser] = useState(() => auth.getUser());
+  const [justRegistered, setJustRegistered] = useState(false);
 
   if (!user) {
-    return <LoginPage onAuth={setUser} />;
+    return <LoginPage onAuth={(u, isNew) => { setJustRegistered(!!isNew); setUser(u); }} />;
   }
 
-  return <AuthedApp user={user} onLogout={() => { auth.clearSession(); setUser(null); }} />;
+  return <AuthedApp
+    user={user}
+    justRegistered={justRegistered}
+    onSetupDone={() => setJustRegistered(false)}
+    onLogout={() => { auth.clearSession(); setUser(null); setJustRegistered(false); }}
+  />;
 }
 
-function AuthedApp({ user, onLogout }) {
-  const { config, schedule, days, stats, foods, presets, loading, updateDay, savePreset, deletePreset, createCustomFood, deleteCustomFood } = useAppData();
+function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
+  const { config, schedule, days, stats, foods, presets, loading, updateDay, savePreset, deletePreset, createCustomFood, deleteCustomFood, refetch } = useAppData();
   const { status: reminderStatus, reminderConfig, startReminders, stopReminders, sendNow, sending } = useReminders();
   const [selectedWeek, setSelectedWeek] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
@@ -38,10 +46,30 @@ function AuthedApp({ user, onLogout }) {
           <div className="text-5xl mb-4">💪</div>
           <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <div className="text-white font-semibold text-lg">Loading your tracker...</div>
-          <div className="text-gray-400 text-sm mt-1">56-day carb cycling programme</div>
+          <div className="text-gray-400 text-sm mt-1">Personalised nutrition programme</div>
         </div>
       </div>
     );
+  }
+
+  // First-time setup: new users pick their programme before they see the tracker
+  if (justRegistered) {
+    return <ProgrammeSetup onDone={() => { onSetupDone(); refetch(); }} />;
+  }
+
+  // Route to macro-based dashboard for non-carb-cycle programmes
+  if (config?.programme && config.programme !== 'carb_cycle') {
+    return <MacroDailyView
+      config={config}
+      foods={foods}
+      presets={presets}
+      onSavePreset={savePreset}
+      onDeletePreset={deletePreset}
+      onCreateCustomFood={createCustomFood}
+      onDeleteCustomFood={deleteCustomFood}
+      user={user}
+      onLogout={onLogout}
+    />;
   }
 
   const todayIndex = config?.today_index ?? -1;

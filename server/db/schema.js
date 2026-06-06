@@ -5,6 +5,10 @@ export const users = sqliteTable('users', {
   username: text('username').notNull().unique(),
   password_hash: text('password_hash').notNull(),
   created_at: text('created_at').notNull(),
+  sex: text('sex'),
+  age: integer('age'),
+  height_cm: real('height_cm'),
+  activity_level: text('activity_level'),
 });
 
 export const appConfig = sqliteTable('app_config', {
@@ -12,6 +16,15 @@ export const appConfig = sqliteTable('app_config', {
   user_id: integer('user_id').notNull(),
   start_date: text('start_date').notNull(),
   settings_json: text('settings_json').notNull().default('{}'),
+  programme: text('programme').notNull().default('carb_cycle'),
+  goal_weight_kg: real('goal_weight_kg'),
+  current_weight_kg: real('current_weight_kg'),
+  bmr: real('bmr'),
+  tdee: real('tdee'),
+  calorie_target: real('calorie_target'),
+  protein_g_target: real('protein_g_target'),
+  carbs_g_target: real('carbs_g_target'),
+  fat_g_target: real('fat_g_target'),
 });
 
 export const dayLogs = sqliteTable('day_logs', {

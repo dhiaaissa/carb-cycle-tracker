@@ -36,6 +36,15 @@ router.get('/', async (req, res, next) => {
       today_phase: todayIndex >= 0 && todayIndex <= 55 ? getPhase(clamped) : null,
       today_phase_goal: todayIndex >= 0 && todayIndex <= 55 ? getPhaseGoal(getPhase(clamped)) : null,
       settings,
+      programme: config.programme || 'carb_cycle',
+      goal_weight_kg: config.goal_weight_kg,
+      current_weight_kg: config.current_weight_kg,
+      bmr: config.bmr,
+      tdee: config.tdee,
+      calorie_target: config.calorie_target,
+      protein_g_target: config.protein_g_target,
+      carbs_g_target: config.carbs_g_target,
+      fat_g_target: config.fat_g_target,
     });
   } catch (err) { next(err); }
 });

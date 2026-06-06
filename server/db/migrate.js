@@ -111,6 +111,22 @@ async function run() {
   await addColumn('custom_foods', 'user_id', 'INTEGER NOT NULL DEFAULT 0');
   await addColumn('meal_presets', 'user_id', 'INTEGER NOT NULL DEFAULT 0');
 
+  // Programme + nutrition profile columns
+  await addColumn('users', 'sex', 'TEXT');
+  await addColumn('users', 'age', 'INTEGER');
+  await addColumn('users', 'height_cm', 'REAL');
+  await addColumn('users', 'activity_level', 'TEXT');
+
+  await addColumn('app_config', 'programme', `TEXT NOT NULL DEFAULT 'carb_cycle'`);
+  await addColumn('app_config', 'goal_weight_kg', 'REAL');
+  await addColumn('app_config', 'current_weight_kg', 'REAL');
+  await addColumn('app_config', 'bmr', 'REAL');
+  await addColumn('app_config', 'tdee', 'REAL');
+  await addColumn('app_config', 'calorie_target', 'REAL');
+  await addColumn('app_config', 'protein_g_target', 'REAL');
+  await addColumn('app_config', 'carbs_g_target', 'REAL');
+  await addColumn('app_config', 'fat_g_target', 'REAL');
+
   // Detect and drop legacy single-column UNIQUE constraints baked into table DDL.
   // Replaces them with composite UNIQUE indexes per-user.
   const dropLegacyUnique = async (table, legacyAutoindex, newDef, copyCols) => {

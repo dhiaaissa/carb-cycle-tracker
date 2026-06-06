@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { CALORIE_TARGETS, MACRO_TARGETS } from '../lib/calories';
+import ProgrammeSetup from './ProgrammeSetup';
+
+const PROGRAMME_LABELS = {
+  carb_cycle: { name: 'Carb Cycle', emoji: '🔄' },
+  weight_loss: { name: 'Weight Loss', emoji: '📉' },
+  muscle_gain: { name: 'Muscle Gain', emoji: '💪' },
+  recomp: { name: 'Body Recomposition', emoji: '⚖️' },
+};
 
 const DAY_TYPES = [
   { key: 'low', label: 'Low Carb', color: 'bg-rose-500', icon: '🔴' },
@@ -14,6 +22,15 @@ export default function SettingsPage({ config, onConfigUpdate }) {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [showProgrammeSetup, setShowProgrammeSetup] = useState(false);
+
+  if (showProgrammeSetup) {
+    return <ProgrammeSetup
+      initialProgramme={config?.programme}
+      onSkip={() => setShowProgrammeSetup(false)}
+      onDone={() => { setShowProgrammeSetup(false); window.location.reload(); }}
+    />;
+  }
 
   useEffect(() => {
     if (config) {
@@ -96,6 +113,32 @@ export default function SettingsPage({ config, onConfigUpdate }) {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-1">Settings</h1>
         <p className="text-gray-500">Customize your programme targets and preferences</p>
+      </div>
+
+      {/* Programme */}
+      <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span>🎯</span> Programme
+        </h2>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">{PROGRAMME_LABELS[config?.programme || 'carb_cycle'].emoji}</span>
+            <div>
+              <div className="font-bold text-gray-800">{PROGRAMME_LABELS[config?.programme || 'carb_cycle'].name}</div>
+              {config?.calorie_target ? (
+                <div className="text-xs text-gray-500">{config.calorie_target} kcal · {config.protein_g_target}P / {config.carbs_g_target}C / {config.fat_g_target}F</div>
+              ) : (
+                <div className="text-xs text-gray-500">56-day structured programme</div>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => setShowProgrammeSetup(true)}
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md"
+          >
+            Change
+          </button>
+        </div>
       </div>
 
       {/* Start Date */}
