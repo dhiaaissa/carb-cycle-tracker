@@ -65,4 +65,6 @@ export const api = {
   getProgrammeOptions: () => request('/programme/options'),
   getMyProgramme: () => request('/programme/me'),
   setupProgramme: (data) => request('/programme/setup', { method: 'POST', body: JSON.stringify(data) }),
+  getMacroStats: () => request('/macro-stats'),
+  getMacroWeek: (week) => request(`/macro-stats/week/${week}`),
 };

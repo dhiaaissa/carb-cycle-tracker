@@ -15,6 +15,7 @@ import insightsRouter from './routes/insights.js';
 import groceryRouter from './routes/grocery.js';
 import remindersRouter from './routes/reminders.js';
 import programmeRouter from './routes/programme.js';
+import macroStatsRouter from './routes/macroStats.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/insights', requireAuth, insightsRouter);
 app.use('/api/grocery', requireAuth, groceryRouter);
 app.use('/api/reminders', requireAuth, remindersRouter);
 app.use('/api/programme', requireAuth, programmeRouter);
+app.use('/api/macro-stats', requireAuth, macroStatsRouter);
 
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');

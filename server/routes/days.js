@@ -17,8 +17,8 @@ router.get('/', async (req, res, next) => {
 router.get('/:dayIndex', async (req, res, next) => {
   try {
     const idx = parseInt(req.params.dayIndex, 10);
-    if (isNaN(idx) || idx < 0 || idx > 55)
-      return res.status(400).json({ error: 'day_index must be 0–55' });
+    if (isNaN(idx) || idx < 0 || idx > 3650)
+      return res.status(400).json({ error: 'day_index must be 0–3650' });
 
     const row = await db.select().from(dayLogs)
       .where(and(eq(dayLogs.user_id, req.user.id), eq(dayLogs.day_index, idx)))
@@ -30,8 +30,8 @@ router.get('/:dayIndex', async (req, res, next) => {
 router.put('/:dayIndex', async (req, res, next) => {
   try {
     const idx = parseInt(req.params.dayIndex, 10);
-    if (isNaN(idx) || idx < 0 || idx > 55)
-      return res.status(400).json({ error: 'day_index must be 0–55' });
+    if (isNaN(idx) || idx < 0 || idx > 3650)
+      return res.status(400).json({ error: 'day_index must be 0–3650' });
 
     const dayType = getDayType(idx);
     const phase   = getPhase(idx);
