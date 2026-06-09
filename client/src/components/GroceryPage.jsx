@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 
 const CATEGORY_INFO = {
-  base:    { label: 'Base Foods',  emoji: '🌿' },
-  protein: { label: 'Proteins',    emoji: '💪' },
-  bread:   { label: 'Bread',       emoji: '🍞' },
-  snack:   { label: 'Snacks',      emoji: '🥜' },
-  fruit:   { label: 'Fruits',      emoji: '🍎' },
-  custom:  { label: 'Custom',      emoji: '⭐' },
-  other:   { label: 'Other',       emoji: '🍽️' },
+  base:    { labelKey: 'grocery.cat.base',    emoji: '🌿' },
+  protein: { labelKey: 'grocery.cat.protein', emoji: '💪' },
+  bread:   { labelKey: 'grocery.cat.bread',   emoji: '🍞' },
+  snack:   { labelKey: 'grocery.cat.snack',   emoji: '🥜' },
+  fruit:   { labelKey: 'grocery.cat.fruit',   emoji: '🍎' },
+  custom:  { labelKey: 'grocery.cat.custom',  emoji: '⭐' },
+  other:   { labelKey: 'grocery.cat.other',   emoji: '🍽️' },
 };
 
-// Tunisian market prices (approximate, in TND)
 const PRICES_TND = {
   eggs:              { price: 0.35, per: 'piece', label: '0.350 DT/egg' },
   bulgur_cooked:     { price: 2.5,  per: 'kg',    label: '2.500 DT/kg' },
@@ -40,14 +40,12 @@ function estimatePrice(foodId, amount, unit) {
     return p.price * amount;
   }
   if (p.per === 'can') {
-    // tuna: 160g per can, cola: 330ml per can
     const canSize = foodId === 'tuna_canned' ? 160 : 330;
     return p.price * Math.ceil(amount / canSize);
   }
   if (p.per === 'kg') {
     return p.price * (amount / 1000);
   }
-  // bread by piece weight
   if (foodId === 'bread_taaouna') return p.price * Math.ceil(amount / 200);
   if (foodId === 'bread_white') return p.price * Math.ceil(amount / 250);
   if (foodId === 'bread_cereal') return p.price * Math.ceil(amount / 300);
@@ -56,8 +54,9 @@ function estimatePrice(foodId, amount, unit) {
 }
 
 export default function GroceryPage({ config, allFoods }) {
+  const { t } = useTranslation();
   const [foods, setFoods] = useState({});
-  const [cart, setCart] = useState({}); // food_id -> { amount, checked }
+  const [cart, setCart] = useState({});
   const [loading, setLoading] = useState(true);
   const [suggestion, setSuggestion] = useState(null);
 
@@ -70,8 +69,6 @@ export default function GroceryPage({ config, allFoods }) {
     try {
       const data = await api.getFoods();
       setFoods(data.foods || {});
-
-      // Also load suggestion from patterns
       try {
         const sug = await api.getGroceryList(7);
         setSuggestion(sug);
@@ -138,7 +135,6 @@ export default function GroceryPage({ config, allFoods }) {
     return 1;
   }
 
-  // Compute total cost
   const cartItems = Object.entries(cart).map(([foodId, { amount, checked }]) => {
     const food = foods[foodId];
     if (!food) return null;
@@ -149,7 +145,6 @@ export default function GroceryPage({ config, allFoods }) {
   const totalCost = cartItems.reduce((sum, item) => sum + (item.price || 0), 0);
   const checkedCount = cartItems.filter(i => i.checked).length;
 
-  // Group all foods by category for the picker
   const foodsByCategory = {};
   Object.values(foods).forEach(food => {
     const cat = food.category || 'other';
@@ -158,7 +153,7 @@ export default function GroceryPage({ config, allFoods }) {
   });
 
   function copyToClipboard() {
-    const lines = ['🛒 Grocery List\n'];
+    const lines = [t('grocery.copyHeader') + '\n'];
     const grouped = {};
     cartItems.forEach(item => {
       const cat = item.food.category || 'other';
@@ -167,7 +162,7 @@ export default function GroceryPage({ config, allFoods }) {
     });
     Object.entries(grouped).forEach(([cat, items]) => {
       const catInfo = CATEGORY_INFO[cat] || CATEGORY_INFO.other;
-      lines.push(`${catInfo.emoji} ${catInfo.label}`);
+      lines.push(`${catInfo.emoji} ${t(catInfo.labelKey)}`);
       items.forEach(item => {
         const check = item.checked ? '✓' : '○';
         const priceStr = item.price != null ? ` (~${item.price.toFixed(3)} DT)` : '';
@@ -175,7 +170,7 @@ export default function GroceryPage({ config, allFoods }) {
       });
       lines.push('');
     });
-    lines.push(`💰 Total estimé: ${totalCost.toFixed(3)} DT`);
+    lines.push(t('grocery.copyTotal', { cost: totalCost.toFixed(3) }));
     navigator.clipboard.writeText(lines.join('\n'));
   }
 
@@ -191,9 +186,9 @@ export default function GroceryPage({ config, allFoods }) {
     <div className="animate-fadeIn">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-1 flex items-center gap-3">
-          <span>🛒</span> Grocery List
+          <span>🛒</span> {t('grocery.title')}
         </h1>
-        <p className="text-gray-500">Pick your items, adjust amounts, see the estimated cost</p>
+        <p className="text-gray-500">{t('grocery.subtitle')}</p>
       </div>
 
       {/* Quick actions */}
@@ -203,7 +198,7 @@ export default function GroceryPage({ config, allFoods }) {
             onClick={loadSuggestion}
             className="bg-amber-50 hover:bg-amber-100 text-amber-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-colors"
           >
-            🤖 Load from meal patterns
+            {t('grocery.loadFromPatterns')}
           </button>
         )}
         {cartItems.length > 0 && (
@@ -211,23 +206,23 @@ export default function GroceryPage({ config, allFoods }) {
             onClick={() => setCart({})}
             className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-1.5 rounded-lg text-sm font-bold transition-colors"
           >
-            🗑️ Clear all
+            {t('grocery.clearAll')}
           </button>
         )}
         {cartItems.length > 0 && (
           <button
             onClick={copyToClipboard}
-            className="ml-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-colors"
+            className="ms-auto bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-4 py-1.5 rounded-lg text-sm font-bold transition-colors"
           >
-            📋 Copy List
+            {t('grocery.copyList')}
           </button>
         )}
       </div>
 
-      {/* Food Picker — all available foods */}
+      {/* Food Picker */}
       <div className="bg-white rounded-2xl border-2 border-gray-100 p-5 mb-6 shadow-lg">
         <h2 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
-          <span>➕</span> Add Items
+          <span>➕</span> {t('grocery.addItems')}
         </h2>
         <div className="space-y-4">
           {Object.entries(foodsByCategory).map(([cat, catFoods]) => {
@@ -235,7 +230,7 @@ export default function GroceryPage({ config, allFoods }) {
             return (
               <div key={cat}>
                 <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                  {catInfo.emoji} {catInfo.label}
+                  {catInfo.emoji} {t(catInfo.labelKey)}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {catFoods.map(food => {
@@ -266,19 +261,18 @@ export default function GroceryPage({ config, allFoods }) {
         </div>
       </div>
 
-      {/* Cart — selected items with amounts */}
+      {/* Cart */}
       {cartItems.length > 0 && (
         <>
-          {/* Summary bar */}
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 mb-6 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-2xl font-bold">{cartItems.length}</span>
-                <span className="text-sm text-green-100 ml-2">items in list</span>
+                <span className="text-sm text-green-100 ms-2">{t('grocery.itemsInList')}</span>
               </div>
-              <div className="text-right">
+              <div className="text-end">
                 <span className="text-2xl font-bold">{checkedCount}/{cartItems.length}</span>
-                <span className="text-sm text-green-100 ml-1">checked</span>
+                <span className="text-sm text-green-100 ms-1">{t('grocery.checked')}</span>
               </div>
             </div>
             {cartItems.length > 0 && (
@@ -291,7 +285,6 @@ export default function GroceryPage({ config, allFoods }) {
             )}
           </div>
 
-          {/* Items with adjustable amounts */}
           <div className="space-y-3 mb-6">
             {cartItems.map(({ foodId, food, amount, checked, price }) => (
               <div
@@ -313,7 +306,6 @@ export default function GroceryPage({ config, allFoods }) {
                     )}
                   </div>
 
-                  {/* Amount controls */}
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => updateAmount(foodId, amount - getStep(food))}
@@ -332,9 +324,8 @@ export default function GroceryPage({ config, allFoods }) {
                     </button>
                   </div>
 
-                  {/* Price */}
                   {price != null && (
-                    <div className="text-right shrink-0 w-20">
+                    <div className="text-end shrink-0 w-20">
                       <div className="font-bold text-green-700 text-sm">{price.toFixed(3)}</div>
                       <div className="text-[10px] text-gray-400">DT</div>
                     </div>
@@ -351,17 +342,16 @@ export default function GroceryPage({ config, allFoods }) {
             ))}
           </div>
 
-          {/* Total cost */}
           <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-5 shadow-lg text-white">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-amber-100">Estimated Total (Tunisian Market)</div>
+                <div className="text-sm text-amber-100">{t('grocery.estimatedTotal')}</div>
                 <div className="text-3xl font-bold mt-1">{totalCost.toFixed(3)} DT</div>
               </div>
-              <div className="text-right text-5xl">💰</div>
+              <div className="text-end text-5xl">💰</div>
             </div>
             <div className="mt-3 text-xs text-amber-100">
-              * Prices are approximate based on Tunisian market averages. Actual prices may vary by store and season.
+              {t('grocery.priceDisclaimer')}
             </div>
           </div>
         </>
@@ -370,9 +360,9 @@ export default function GroceryPage({ config, allFoods }) {
       {cartItems.length === 0 && (
         <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-8 text-center">
           <div className="text-4xl mb-3">👆</div>
-          <p className="text-gray-500 font-medium">Click on foods above to add them to your list</p>
+          <p className="text-gray-500 font-medium">{t('grocery.empty')}</p>
           {suggestion?.grocery_list?.length > 0 && (
-            <p className="text-gray-400 text-sm mt-1">Or click "🤖 Load from meal patterns" for a smart suggestion</p>
+            <p className="text-gray-400 text-sm mt-1">{t('grocery.emptyHint')}</p>
           )}
         </div>
       )}

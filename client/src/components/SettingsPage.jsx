@@ -1,22 +1,24 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { CALORIE_TARGETS, MACRO_TARGETS } from '../lib/calories';
 import ProgrammeSetup from './ProgrammeSetup';
 
-const PROGRAMME_LABELS = {
-  carb_cycle: { name: 'Carb Cycle', emoji: '🔄' },
-  weight_loss: { name: 'Weight Loss', emoji: '📉' },
-  muscle_gain: { name: 'Muscle Gain', emoji: '💪' },
-  recomp: { name: 'Body Recomposition', emoji: '⚖️' },
+const PROGRAMME_META = {
+  carb_cycle:  { nameKey: 'programme.carb_cycle',  emoji: '🔄' },
+  weight_loss: { nameKey: 'programme.weight_loss', emoji: '📉' },
+  muscle_gain: { nameKey: 'programme.muscle_gain', emoji: '💪' },
+  recomp:      { nameKey: 'programme.body_recomp', emoji: '⚖️' },
 };
 
 const DAY_TYPES = [
-  { key: 'low', label: 'Low Carb', color: 'bg-rose-500', icon: '🔴' },
-  { key: 'med', label: 'Medium Carb', color: 'bg-amber-500', icon: '🟡' },
-  { key: 'high', label: 'High Carb', color: 'bg-emerald-500', icon: '🟢' },
+  { key: 'low',  color: 'bg-rose-500',    icon: '🔴' },
+  { key: 'med',  color: 'bg-amber-500',   icon: '🟡' },
+  { key: 'high', color: 'bg-emerald-500', icon: '🟢' },
 ];
 
 export default function SettingsPage({ config, onConfigUpdate }) {
+  const { t } = useTranslation();
   const [startDate, setStartDate] = useState('');
   const [targets, setTargets] = useState({});
   const [saving, setSaving] = useState(false);
@@ -39,7 +41,6 @@ export default function SettingsPage({ config, onConfigUpdate }) {
     />;
   }
 
-  // Merged targets: user overrides → defaults
   function getTarget(dayType, field) {
     return targets?.[dayType]?.[field] ?? getDefault(dayType, field);
   }
@@ -64,11 +65,11 @@ export default function SettingsPage({ config, onConfigUpdate }) {
         settings: { ...config.settings, calorie_targets: targets },
       });
       if (onConfigUpdate) onConfigUpdate(result);
-      setToast('Settings saved!');
+      setToast(t('settings.savedToast'));
       setTimeout(() => setToast(''), 2000);
     } catch (err) {
       console.error('Failed to save settings:', err);
-      setToast('Failed to save');
+      setToast(t('settings.saveFailedToast'));
     } finally {
       setSaving(false);
     }
@@ -84,7 +85,6 @@ export default function SettingsPage({ config, onConfigUpdate }) {
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         downloadBlob(blob, `carb-cycle-export-${new Date().toISOString().slice(0, 10)}.json`);
       } else {
-        // CSV
         const headers = ['day_index','day_type','phase','date','calories_consumed','calories_target','protein_g','carbs_g','fat_g','water_liters','workout_done','mood','energy_level','weight_kg','score'];
         const rows = daysRes.map(d => headers.map(h => d[h] ?? '').join(','));
         const csv = [headers.join(','), ...rows].join('\n');
@@ -108,27 +108,30 @@ export default function SettingsPage({ config, onConfigUpdate }) {
     URL.revokeObjectURL(url);
   }
 
+  const progKey = config?.programme || 'carb_cycle';
+  const progMeta = PROGRAMME_META[progKey];
+
   return (
     <div className="animate-fadeIn max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-1">Settings</h1>
-        <p className="text-gray-500">Customize your programme targets and preferences</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('settings.heading')}</h1>
+        <p className="text-gray-500">{t('settings.subheading')}</p>
       </div>
 
       {/* Programme */}
       <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span>🎯</span> Programme
+          <span>🎯</span> {t('settings.programme')}
         </h2>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{PROGRAMME_LABELS[config?.programme || 'carb_cycle'].emoji}</span>
+            <span className="text-3xl">{progMeta.emoji}</span>
             <div>
-              <div className="font-bold text-gray-800">{PROGRAMME_LABELS[config?.programme || 'carb_cycle'].name}</div>
+              <div className="font-bold text-gray-800">{t(progMeta.nameKey)}</div>
               {config?.calorie_target ? (
-                <div className="text-xs text-gray-500">{config.calorie_target} kcal · {config.protein_g_target}P / {config.carbs_g_target}C / {config.fat_g_target}F</div>
+                <div className="text-xs text-gray-500">{t('settings.programme.macroSummary', { cal: config.calorie_target, p: config.protein_g_target, c: config.carbs_g_target, f: config.fat_g_target })}</div>
               ) : (
-                <div className="text-xs text-gray-500">56-day structured programme</div>
+                <div className="text-xs text-gray-500">{t('settings.programme.56day')}</div>
               )}
             </div>
           </div>
@@ -136,7 +139,7 @@ export default function SettingsPage({ config, onConfigUpdate }) {
             onClick={() => setShowProgrammeSetup(true)}
             className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md"
           >
-            Change
+            {t('settings.change')}
           </button>
         </div>
       </div>
@@ -144,51 +147,51 @@ export default function SettingsPage({ config, onConfigUpdate }) {
       {/* Start Date */}
       <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span>📅</span> Programme Start Date
+          <span>📅</span> {t('settings.startDate')}
         </h2>
         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
           className="border-2 border-gray-200 rounded-xl px-4 py-2.5 text-base font-medium focus:border-indigo-400 focus:outline-none w-full sm:w-auto" />
-        <p className="text-xs text-gray-400 mt-2">Changing this recalculates which day you're on today</p>
+        <p className="text-xs text-gray-400 mt-2">{t('settings.startDateHint')}</p>
       </div>
 
       {/* Calorie & Macro Targets */}
       <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span>🎯</span> Daily Targets
+          <span>🎯</span> {t('settings.dailyTargets')}
         </h2>
-        <p className="text-xs text-gray-400 mb-4">Leave empty to use defaults. These targets apply to all future day logs.</p>
+        <p className="text-xs text-gray-400 mb-4">{t('settings.dailyTargetsHint')}</p>
 
         <div className="space-y-4">
           {DAY_TYPES.map(dt => (
             <div key={dt.key} className="border border-gray-100 rounded-xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">{dt.icon}</span>
-                <span className="font-bold text-gray-800">{dt.label} Days</span>
+                <span className="font-bold text-gray-800">{t('settings.dayTypeDays', { type: t(`dayType.${dt.key}`) })}</span>
               </div>
               <div className="grid grid-cols-4 gap-3">
                 <div>
-                  <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">Calories</label>
+                  <label className="text-[10px] font-bold text-gray-500 uppercase mb-1 block">{t('settings.col.calories')}</label>
                   <input type="number" value={getTarget(dt.key, 'calories') || ''}
                     onChange={e => setTarget(dt.key, 'calories', e.target.value)}
                     placeholder={getDefault(dt.key, 'calories')}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-center focus:outline-none focus:border-indigo-400" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-red-400 uppercase mb-1 block">Protein (g)</label>
+                  <label className="text-[10px] font-bold text-red-400 uppercase mb-1 block">{t('settings.col.protein')}</label>
                   <input type="number" value={getTarget(dt.key, 'protein_g') || ''}
                     onChange={e => setTarget(dt.key, 'protein_g', e.target.value)}
                     placeholder={getDefault(dt.key, 'protein_g')}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-center focus:outline-none focus:border-red-400" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-amber-500 uppercase mb-1 block">Carbs (g)</label>
+                  <label className="text-[10px] font-bold text-amber-500 uppercase mb-1 block">{t('settings.col.carbs')}</label>
                   <input type="number" value={getTarget(dt.key, 'carbs_g') || ''}
                     onChange={e => setTarget(dt.key, 'carbs_g', e.target.value)}
                     placeholder={getDefault(dt.key, 'carbs_g')}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-center focus:outline-none focus:border-amber-400" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-blue-400 uppercase mb-1 block">Fat (g)</label>
+                  <label className="text-[10px] font-bold text-blue-400 uppercase mb-1 block">{t('settings.col.fat')}</label>
                   <input type="number" value={getTarget(dt.key, 'fat_g') || ''}
                     onChange={e => setTarget(dt.key, 'fat_g', e.target.value)}
                     placeholder={getDefault(dt.key, 'fat_g')}
@@ -204,7 +207,7 @@ export default function SettingsPage({ config, onConfigUpdate }) {
       <div className="mb-6">
         <button onClick={handleSave} disabled={saving}
           className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-3.5 rounded-2xl text-base transition-all disabled:opacity-50 shadow-lg hover:shadow-xl active:scale-[0.98]">
-          {saving ? 'Saving...' : '💾 Save Settings'}
+          {saving ? t('settings.saving') : t('settings.save')}
         </button>
         {toast && (
           <div className="mt-2 text-center text-sm font-semibold text-green-600 animate-fadeIn">{toast}</div>
@@ -214,28 +217,28 @@ export default function SettingsPage({ config, onConfigUpdate }) {
       {/* Export & Backup */}
       <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          <span>📦</span> Export & Backup
+          <span>📦</span> {t('settings.exportBackup')}
         </h2>
-        <p className="text-xs text-gray-400 mb-4">Download your data to keep a backup or share with a nutritionist.</p>
+        <p className="text-xs text-gray-400 mb-4">{t('settings.exportHint')}</p>
         <div className="flex gap-3">
           <button onClick={() => handleExport('json')} disabled={exporting}
             className="flex-1 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 text-blue-700 font-bold rounded-xl text-sm transition-colors disabled:opacity-40 active:scale-[0.98]">
-            📄 Export JSON
+            {t('settings.exportJson')}
           </button>
           <button onClick={() => handleExport('csv')} disabled={exporting}
             className="flex-1 py-3 bg-green-50 hover:bg-green-100 border-2 border-green-200 text-green-700 font-bold rounded-xl text-sm transition-colors disabled:opacity-40 active:scale-[0.98]">
-            📊 Export CSV
+            {t('settings.exportCsv')}
           </button>
         </div>
       </div>
 
       {/* Info */}
       <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-        <h3 className="text-sm font-bold text-gray-600 mb-2">About</h3>
+        <h3 className="text-sm font-bold text-gray-600 mb-2">{t('settings.about')}</h3>
         <p className="text-xs text-gray-500">
-          56-Day Carb Cycling Tracker — Track your meals, macros, workouts, and progress throughout your carb cycling programme.
+          {t('settings.aboutText')}
         </p>
-        <p className="text-xs text-gray-400 mt-2">Built with React + Express + SQLite</p>
+        <p className="text-xs text-gray-400 mt-2">{t('settings.builtWith')}</p>
       </div>
     </div>
   );

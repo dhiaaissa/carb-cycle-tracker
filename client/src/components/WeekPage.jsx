@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DayCard from './DayCard';
-import { CALORIE_TARGETS, WATER_GOALS, scoreLabel } from '../lib/calories';
+import { CALORIE_TARGETS, WATER_GOALS } from '../lib/calories';
 import { FOODS, sumMealNutrition } from '../lib/foods';
+import { formatDate } from '../lib/format';
 
-// Suggested templates per day type
 const SUGGESTED_MEALS = {
   low: {
     meal1: [{ food_id: 'eggs', amount: 3 }, { food_id: 'cucumber', amount: 150 }],
@@ -25,78 +26,28 @@ const SUGGESTED_MEALS = {
   },
 };
 
-const PHASE_CONFIG = {
-  1: {
-    color: 'from-blue-500 to-blue-700',
-    lightBg: 'bg-blue-50',
-    border: 'border-blue-200',
-    text: 'text-blue-700',
-    icon: '🚀',
-    goal: 'Adaptation',
-    description: 'Your body is adapting to carb cycling. Focus on learning the meal structure and hitting your water goals every day.',
-    tips: [
-      'Eat meals at consistent times',
-      'Prioritize sleep (7–8 hrs) for adaptation',
-      'Track water every day — it matters',
-      'Workouts on Medium carb days only',
-    ],
-  },
-  2: {
-    color: 'from-red-500 to-red-700',
-    lightBg: 'bg-red-50',
-    border: 'border-red-200',
-    text: 'text-red-700',
-    icon: '📉',
-    goal: 'Fat Loss Increase',
-    description: 'More Low carb days intensify the fat-burning stimulus. You have fewer workouts this phase — that is intentional.',
-    tips: [
-      'Stay disciplined on Low carb days',
-      'Fewer workouts = strategic deficit days',
-      'Medium day workouts are more important now',
-      'Manage hunger with extra cucumber/water',
-    ],
-  },
-  3: {
-    color: 'from-orange-500 to-orange-700',
-    lightBg: 'bg-orange-50',
-    border: 'border-orange-200',
-    text: 'text-orange-700',
-    icon: '🔥',
-    goal: 'Strong Fat Burning',
-    description: 'The hardest phase — 6 consecutive Low carb days before each Medium. This is where the most fat loss happens.',
-    tips: [
-      'Push through the Low day stretches',
-      'The Medium day is your reward — use it well',
-      'Stay consistent with meals even if hungry',
-      'Log everything — accountability matters most here',
-    ],
-  },
-  4: {
-    color: 'from-purple-500 to-purple-700',
-    lightBg: 'bg-purple-50',
-    border: 'border-purple-200',
-    text: 'text-purple-700',
-    icon: '💪',
-    goal: 'Recovery & Performance',
-    description: 'Metabolic recovery in Week 7 with High carb days, then performance peaking in Week 8. Your body is ready to go.',
-    tips: [
-      'High carb days are full recovery — no workouts',
-      'Enjoy the higher calories — they are part of the plan',
-      'Week 8 builds into a strong performance finish',
-      'Log your weight daily — track the rebound and settle',
-    ],
-  },
+const PHASE_META = {
+  1: { color: 'from-blue-500 to-blue-700',   lightBg: 'bg-blue-50',   border: 'border-blue-200',   text: 'text-blue-700',   icon: '🚀' },
+  2: { color: 'from-red-500 to-red-700',     lightBg: 'bg-red-50',     border: 'border-red-200',    text: 'text-red-700',    icon: '📉' },
+  3: { color: 'from-orange-500 to-orange-700', lightBg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', icon: '🔥' },
+  4: { color: 'from-purple-500 to-purple-700', lightBg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', icon: '💪' },
 };
 
 const TYPE_EMOJI = { low: '🔴', med: '🟡', high: '🟢' };
-const TYPE_LABEL = { low: 'Low', med: 'Medium', high: 'High' };
 const TYPE_COLOR = {
   low: 'bg-red-100 text-red-700 border-red-300',
   med: 'bg-yellow-100 text-yellow-700 border-yellow-300',
   high: 'bg-green-100 text-green-700 border-green-300',
 };
 
+function localizedScoreLabel(t, score) {
+  if (score === 5) return t('score.perfect');
+  if (score >= 3) return t('score.good');
+  return t('score.weak');
+}
+
 export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, onDayClick, onSelectWeek }) {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('days');
 
   const weekStart = (weekNum - 1) * 7;
@@ -104,12 +55,12 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
   if (weekDays.length === 0) return null;
 
   const phase = weekDays[0].phase;
-  const cfg = PHASE_CONFIG[phase];
+  const meta = PHASE_META[phase];
   const weekStats = stats?.weekly_summary?.find(ws => ws.week_number === weekNum);
 
   const startDate = weekDays[0].date;
   const endDate = weekDays[weekDays.length - 1].date;
-  const fmtDate = (d) => new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  const fmtDate = (d) => formatDate(d + 'T12:00:00', { weekday: 'short', day: 'numeric', month: 'short' });
 
   const completed = weekStats?.completed_days ?? 0;
   const goodDays = weekStats?.good_days ?? 0;
@@ -122,7 +73,6 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
   const medCount = weekDays.filter(d => d.day_type === 'med').length;
   const highCount = weekDays.filter(d => d.day_type === 'high').length;
 
-  // Average cals consumed this week
   const weekLogs = weekDays.map(d => days[d.day_index]).filter(Boolean);
   const avgCals = weekLogs.length
     ? Math.round(weekLogs.reduce((s, l) => s + l.calories_consumed, 0) / weekLogs.length)
@@ -130,26 +80,28 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
   const totalWater = weekLogs.reduce((s, l) => s + l.water_liters, 0);
 
   const tabs = [
-    { key: 'days', label: '📅 Daily Log', emoji: '📅' },
-    { key: 'plan', label: '🍽️ Meal Plan', emoji: '🍽️' },
-    { key: 'workouts', label: '💪 Workouts', emoji: '💪' },
-    { key: 'stats', label: '📊 Stats', emoji: '📊' },
+    { key: 'days', labelKey: 'weekPage.tab.days' },
+    { key: 'plan', labelKey: 'weekPage.tab.plan' },
+    { key: 'workouts', labelKey: 'weekPage.tab.workouts' },
+    { key: 'stats', labelKey: 'weekPage.tab.stats' },
   ];
+
+  const moodEmojiMap = { great: '😄', good: '🙂', ok: '😐', tired: '😴', bad: '😞' };
 
   return (
     <div className="animate-fadeIn">
       {/* Week hero header */}
-      <div className={`bg-gradient-to-r ${cfg.color} text-white rounded-3xl shadow-2xl p-8 mb-8`}>
+      <div className={`bg-gradient-to-r ${meta.color} text-white rounded-3xl shadow-2xl p-8 mb-8`}>
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-3">
-              <span className="text-5xl">{cfg.icon}</span>
+              <span className="text-5xl">{meta.icon}</span>
               <div>
-                <h1 className="text-4xl font-bold">Week {weekNum}</h1>
-                <p className="text-white/80 text-lg">Phase {phase} — {cfg.goal}</p>
+                <h1 className="text-4xl font-bold">{t('nav.weekNum', { num: weekNum })}</h1>
+                <p className="text-white/80 text-lg">{t('weekPage.heroPhase', { phase, goal: t(`phaseGoalShort.${phase}`) })}</p>
               </div>
             </div>
-            <p className="text-white/70 text-sm max-w-lg">{cfg.description}</p>
+            <p className="text-white/70 text-sm max-w-lg">{t(`weekPage.phase.${phase}.desc`)}</p>
             <p className="text-white/60 text-xs mt-2">
               {fmtDate(startDate)} — {fmtDate(endDate)}
             </p>
@@ -158,15 +110,15 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
           {/* Quick stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Logged', value: `${completed}/7`, sub: 'days' },
-              { label: 'Good Days', value: `${goodDays}/7`, sub: 'score ≥3' },
-              { label: 'Workouts', value: `${workouts}/${workoutGoal}`, sub: 'done' },
-              { label: 'Avg Cal', value: avgCals || '—', sub: 'kcal/day' },
+              { labelKey: 'weekPage.quickStat.logged', value: `${completed}/7`, subKey: 'weekPage.quickStat.loggedSub' },
+              { labelKey: 'weekPage.quickStat.goodDays', value: `${goodDays}/7`, subKey: 'weekPage.quickStat.goodDaysSub' },
+              { labelKey: 'weekPage.quickStat.workouts', value: `${workouts}/${workoutGoal}`, subKey: 'weekPage.quickStat.workoutsSub' },
+              { labelKey: 'weekPage.quickStat.avgCal', value: avgCals || '—', subKey: 'weekPage.quickStat.avgCalSub' },
             ].map((s, i) => (
               <div key={i} className="bg-white/15 backdrop-blur rounded-2xl px-4 py-3 text-center">
                 <div className="text-2xl font-bold">{s.value}</div>
-                <div className="text-xs text-white/70 font-semibold uppercase">{s.label}</div>
-                <div className="text-xs text-white/50">{s.sub}</div>
+                <div className="text-xs text-white/70 font-semibold uppercase">{t(s.labelKey)}</div>
+                <div className="text-xs text-white/50">{t(s.subKey)}</div>
               </div>
             ))}
           </div>
@@ -175,7 +127,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
         {/* Week progress bar */}
         <div className="mt-6">
           <div className="flex justify-between text-sm text-white/80 font-semibold mb-2">
-            <span>Week Progress</span>
+            <span>{t('weekPage.weekProgress')}</span>
             <span>{Math.round((completed / 7) * 100)}%</span>
           </div>
           <div className="w-full bg-white/20 rounded-full h-3">
@@ -192,17 +144,17 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
             <button
               onClick={() => onSelectWeek(weekNum - 1)}
               disabled={weekNum <= 1}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed rtl:[&>*]:rotate-180"
             >
-              ← Week {weekNum - 1}
+              <span className="rtl:scale-x-[-1] inline-block">{t('weekPage.prevWeek', { num: weekNum - 1 })}</span>
             </button>
-            <span className="text-white/50 text-xs font-semibold">Week {weekNum} of 8</span>
+            <span className="text-white/50 text-xs font-semibold">{t('weekPage.weekOf8', { num: weekNum })}</span>
             <button
               onClick={() => onSelectWeek(weekNum + 1)}
               disabled={weekNum >= 8}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              Week {weekNum + 1} →
+              <span className="rtl:scale-x-[-1] inline-block">{t('weekPage.nextWeek', { num: weekNum + 1 })}</span>
             </button>
           </div>
         )}
@@ -216,29 +168,29 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
           ...(highCount > 0 ? [{ type: 'high', count: highCount }] : []),
         ].map(({ type, count }) => (
           <div key={type} className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 font-semibold ${TYPE_COLOR[type]}`}>
-            {TYPE_EMOJI[type]} {count}× {TYPE_LABEL[type]} Carb
+            {TYPE_EMOJI[type]} {t('weekPage.typeCount', { count, type: t(`dayType.${type}`) })}
           </div>
         ))}
         {cheatUsed && (
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 bg-orange-100 text-orange-700 border-orange-300 font-semibold">
-            🍕 Cheat meal used
+            {t('weekPage.cheatUsedLabel')}
           </div>
         )}
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-2xl mb-6 overflow-x-auto">
-        {tabs.map(t => (
+        {tabs.map(tab => (
           <button
-            key={t.key}
-            onClick={() => setActiveTab(t.key)}
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
             className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-200 ${
-              activeTab === t.key
+              activeTab === tab.key
                 ? 'bg-white text-gray-800 shadow-md'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            {t.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -268,7 +220,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                 <button
                   key={sd.day_index}
                   onClick={() => onDayClick(sd.day_index)}
-                  className={`w-full flex flex-wrap items-center gap-4 bg-white rounded-xl border-2 p-4 hover:shadow-md transition-all text-left ${
+                  className={`w-full flex flex-wrap items-center gap-4 bg-white rounded-xl border-2 p-4 hover:shadow-md transition-all text-start ${
                     isTodayDay ? 'border-indigo-400 ring-2 ring-indigo-200' : 'border-gray-100'
                   } ${isFuture ? 'opacity-60' : ''}`}
                 >
@@ -282,40 +234,39 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-gray-800">Day {sd.day_index + 1}</span>
+                        <span className="font-bold text-gray-800">{t('modal.dayNum', { num: sd.day_index + 1 })}</span>
                         <span className={`text-xs px-2 py-0.5 rounded-lg font-bold ${TYPE_COLOR[sd.day_type]}`}>
-                          {TYPE_EMOJI[sd.day_type]} {TYPE_LABEL[sd.day_type]}
+                          {TYPE_EMOJI[sd.day_type]} {t(`dayType.${sd.day_type}Short`)}
                         </span>
-                        {isTodayDay && <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-lg font-bold">TODAY</span>}
+                        {isTodayDay && <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-lg font-bold">{t('weekPage.todayBadge')}</span>}
                       </div>
                       <div className="text-xs text-gray-500 mt-0.5">
-                        {new Date(sd.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}
+                        {formatDate(sd.date + 'T12:00:00', { weekday: 'long', day: 'numeric', month: 'short' })}
                       </div>
                     </div>
                   </div>
 
                   {log ? (
-                    <div className="flex flex-wrap items-center gap-3 ml-auto text-sm">
-                      {/* Meal dots */}
+                    <div className="flex flex-wrap items-center gap-3 ms-auto text-sm">
                       <div className="flex gap-1.5">
                         {[log.meal1_done, log.meal2_done, log.meal3_done, log.meal4_done].map((m, i) => (
                           <div key={i} className={`w-3 h-3 rounded-full ${m ? 'bg-green-500' : 'bg-gray-200'}`} />
                         ))}
                       </div>
-                      <span className="text-gray-600">💧 {log.water_liters}L</span>
-                      <span className="text-gray-600">🔥 {log.calories_consumed} kcal</span>
-                      {log.workout_done && <span className="text-purple-600 font-semibold">💪 Workout</span>}
+                      <span className="text-gray-600">{t('weekPage.waterShort', { liters: log.water_liters })}</span>
+                      <span className="text-gray-600">{t('weekPage.kcal', { kcal: log.calories_consumed })}</span>
+                      {log.workout_done && <span className="text-purple-600 font-semibold">{t('weekPage.workoutBadge')}</span>}
                       <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
                         log.score === 5 ? 'bg-green-100 text-green-700' :
                         log.score >= 3 ? 'bg-blue-100 text-blue-700' :
                         'bg-gray-100 text-gray-600'
                       }`}>
-                        {log.score}/5 {scoreLabel(log.score)}
+                        {t('weekPage.scoreWithLabel', { score: log.score, label: localizedScoreLabel(t, log.score) })}
                       </span>
                     </div>
                   ) : (
-                    <div className="ml-auto text-sm text-gray-400 italic">
-                      {isFuture ? 'Future day' : 'Not logged yet — click to log'}
+                    <div className="ms-auto text-sm text-gray-400 italic">
+                      {isFuture ? t('weekPage.futureDay') : t('weekPage.notLoggedYet')}
                     </div>
                   )}
                 </button>
@@ -329,9 +280,9 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
       {activeTab === 'plan' && (
         <div className="animate-fadeIn space-y-6">
           <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 text-sm text-blue-800">
-            <strong>💡 These are suggested templates.</strong> Open any day card to compose your own meals freely — choose any food, any gram amount.
+            💡 <strong>{t('weekPage.planTip')}</strong>{t('weekPage.planTipRest')}
           </div>
-          {['low', 'med', 'high'].filter(t => weekDays.some(d => d.day_type === t)).map(dayType => {
+          {['low', 'med', 'high'].filter(ty => weekDays.some(d => d.day_type === ty)).map(dayType => {
             const suggested = SUGGESTED_MEALS[dayType];
             const typeDays = weekDays.filter(d => d.day_type === dayType).map(d => d.day_index + 1);
             const headerCls = dayType === 'low' ? 'bg-gradient-to-r from-red-500 to-red-600' : dayType === 'med' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : 'bg-gradient-to-r from-green-500 to-green-600';
@@ -342,12 +293,12 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                 <div className={`px-5 py-4 ${headerCls} text-white`}>
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
-                      <h3 className="text-xl font-bold">{TYPE_EMOJI[dayType]} {TYPE_LABEL[dayType]} Carb Day</h3>
-                      <p className="text-white/80 text-sm">Days: {typeDays.join(', ')} · Target ≈{CALORIE_TARGETS[dayType]} kcal</p>
+                      <h3 className="text-xl font-bold">{t('weekPage.dayTypeHeader', { emoji: TYPE_EMOJI[dayType], type: t(`dayType.${dayType}Short`) })}</h3>
+                      <p className="text-white/80 text-sm">{t('weekPage.daysAndTarget', { days: typeDays.join(', '), kcal: CALORIE_TARGETS[dayType] })}</p>
                     </div>
                     <div className="bg-white/20 rounded-xl px-4 py-2 text-center">
                       <div className="text-2xl font-bold">~{dayTotal}</div>
-                      <div className="text-xs text-white/80">suggested kcal</div>
+                      <div className="text-xs text-white/80">{t('weekPage.suggestedKcal')}</div>
                     </div>
                   </div>
                 </div>
@@ -359,8 +310,8 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                       return (
                         <div key={mk} className="bg-gray-50 rounded-xl p-3 border border-gray-100">
                           <div className="flex justify-between mb-2">
-                            <span className="font-bold text-sm text-gray-800">Meal {i + 1}</span>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${TYPE_COLOR[dayType]}`}>~{mKcal} kcal</span>
+                            <span className="font-bold text-sm text-gray-800">{t('weekPage.mealNum', { num: i + 1 })}</span>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${TYPE_COLOR[dayType]}`}>{t('weekPage.kcalApprox', { kcal: mKcal })}</span>
                           </div>
                           <div className="space-y-0.5">
                             {items.map((item, j) => {
@@ -378,9 +329,9 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                     })}
                   </div>
                   <div className={`mt-3 p-3 rounded-xl text-xs font-semibold flex flex-wrap gap-3 ${dayType === 'low' ? 'bg-red-50 text-red-700' : dayType === 'med' ? 'bg-yellow-50 text-yellow-700' : 'bg-green-50 text-green-700'}`}>
-                    <span>💧 Water: {WATER_GOALS[dayType]}L</span>
-                    <span>🎯 Target: {CALORIE_TARGETS[dayType]} kcal</span>
-                    {dayType === 'med' && <span>💪 +200 kcal with workout</span>}
+                    <span>{t('weekPage.waterGoal', { liters: WATER_GOALS[dayType] })}</span>
+                    <span>{t('weekPage.targetKcal', { kcal: CALORIE_TARGETS[dayType] })}</span>
+                    {dayType === 'med' && <span>{t('weekPage.medWorkoutBonus')}</span>}
                   </div>
                 </div>
               </div>
@@ -392,13 +343,16 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
       {/* Tab: Workouts */}
       {activeTab === 'workouts' && (
         <div className="animate-fadeIn space-y-4">
-          <div className={`${cfg.lightBg} border-2 ${cfg.border} rounded-2xl p-5`}>
-            <h3 className={`text-lg font-bold ${cfg.text} mb-2 flex items-center gap-2`}>
-              <span>ℹ️</span> Workout Rule This Phase
+          <div className={`${meta.lightBg} border-2 ${meta.border} rounded-2xl p-5`}>
+            <h3 className={`text-lg font-bold ${meta.text} mb-2 flex items-center gap-2`}>
+              <span>ℹ️</span> {t('weekPage.workoutRuleHeader')}
             </h3>
             <p className="text-gray-700 text-sm">
-              Workouts are only on <strong>Medium carb days</strong>. This week has <strong>{workoutGoal} Medium day{workoutGoal !== 1 ? 's' : ''}</strong>, so your workout target is <strong>{workoutGoal} workout{workoutGoal !== 1 ? 's' : ''}</strong>.
-              When completed, each workout adds <strong>+200 kcal</strong> to your daily target.
+              {t('weekPage.workoutRuleText', {
+                count: workoutGoal,
+                plural: workoutGoal === 1 ? t('weekPage.workoutRule.daySingular') : t('weekPage.workoutRule.dayPlural'),
+                wPlural: workoutGoal === 1 ? t('weekPage.workoutRule.workoutSingular') : t('weekPage.workoutRule.workoutPlural'),
+              })}
             </p>
           </div>
 
@@ -410,7 +364,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
               const workoutDone = log?.workout_done;
               const isTodayDay = sd.day_index === todayIndex;
               const isFuture = sd.day_index > todayIndex;
-              const dateLabel = new Date(sd.date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+              const dateLabel = formatDate(sd.date + 'T12:00:00', { weekday: 'long', day: 'numeric', month: 'short' });
 
               return (
                 <div
@@ -431,27 +385,27 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-gray-800">Day {sd.day_index + 1}</span>
+                      <span className="font-bold text-gray-800">{t('modal.dayNum', { num: sd.day_index + 1 })}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-lg font-bold ${TYPE_COLOR[sd.day_type]}`}>
-                        {TYPE_EMOJI[sd.day_type]} {TYPE_LABEL[sd.day_type]}
+                        {TYPE_EMOJI[sd.day_type]} {t(`dayType.${sd.day_type}Short`)}
                       </span>
-                      {isTodayDay && <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-lg font-bold">TODAY</span>}
+                      {isTodayDay && <span className="text-xs bg-indigo-500 text-white px-2 py-0.5 rounded-lg font-bold">{t('weekPage.todayBadge')}</span>}
                     </div>
                     <div className="text-xs text-gray-500 mt-0.5">{dateLabel}</div>
                   </div>
-                  <div className="text-right text-sm font-semibold">
+                  <div className="text-end text-sm font-semibold">
                     {!isWorkoutDay ? (
-                      <span className="text-gray-400">{sd.day_type === 'high' ? 'Rest (recovery)' : 'Rest (deficit)'}</span>
+                      <span className="text-gray-400">{sd.day_type === 'high' ? t('weekPage.restRecovery') : t('weekPage.restDeficit')}</span>
                     ) : workoutDone ? (
-                      <span className="text-green-600">💪 Done +200 kcal</span>
+                      <span className="text-green-600">{t('weekPage.workoutDoneBonus')}</span>
                     ) : isFuture ? (
-                      <span className="text-gray-400">Upcoming</span>
+                      <span className="text-gray-400">{t('weekPage.upcoming')}</span>
                     ) : (
                       <button
                         onClick={() => onDayClick(sd.day_index)}
                         className="text-indigo-600 hover:text-indigo-800 underline"
                       >
-                        Log workout
+                        {t('weekPage.logWorkout')}
                       </button>
                     )}
                   </div>
@@ -463,15 +417,15 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
           {/* Phase tips */}
           <div className="bg-white rounded-2xl border-2 border-gray-100 p-5 shadow-md">
             <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <span>💡</span> Tips for Phase {phase}
+              <span>💡</span> {t('weekPage.tipsForPhase', { phase })}
             </h3>
             <ul className="space-y-2">
-              {cfg.tips.map((tip, i) => (
+              {[1, 2, 3, 4].map(i => (
                 <li key={i} className="flex items-start gap-3 text-sm text-gray-700">
-                  <span className={`mt-0.5 w-5 h-5 rounded-full ${cfg.lightBg} ${cfg.text} flex items-center justify-center text-xs font-bold shrink-0`}>
-                    {i + 1}
+                  <span className={`mt-0.5 w-5 h-5 rounded-full ${meta.lightBg} ${meta.text} flex items-center justify-center text-xs font-bold shrink-0`}>
+                    {i}
                   </span>
-                  {tip}
+                  {t(`weekPage.phase.${phase}.tip.${i}`)}
                 </li>
               ))}
             </ul>
@@ -485,15 +439,15 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
           {/* Summary numbers */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {[
-              { label: 'Days Logged', value: `${completed}/7`, icon: '✅', color: 'from-blue-500 to-blue-600' },
-              { label: 'Perfect Days', value: perfect, icon: '⭐', color: 'from-yellow-500 to-yellow-600' },
-              { label: 'Workouts Done', value: `${workouts}/${workoutGoal}`, icon: '💪', color: 'from-purple-500 to-purple-600' },
-              { label: 'Total Water', value: totalWater > 0 ? `${totalWater.toFixed(1)}L` : '—', icon: '💧', color: 'from-cyan-500 to-cyan-600' },
+              { labelKey: 'weekPage.stats.daysLogged', value: `${completed}/7`, icon: '✅', color: 'from-blue-500 to-blue-600' },
+              { labelKey: 'weekPage.stats.perfectDays', value: perfect, icon: '⭐', color: 'from-yellow-500 to-yellow-600' },
+              { labelKey: 'weekPage.stats.workoutsDone', value: `${workouts}/${workoutGoal}`, icon: '💪', color: 'from-purple-500 to-purple-600' },
+              { labelKey: 'weekPage.stats.totalWater', value: totalWater > 0 ? `${totalWater.toFixed(1)}L` : '—', icon: '💧', color: 'from-cyan-500 to-cyan-600' },
             ].map((s, i) => (
               <div key={i} className={`bg-gradient-to-br ${s.color} text-white rounded-2xl p-5 shadow-lg`}>
                 <div className="text-3xl mb-2">{s.icon}</div>
                 <div className="text-2xl font-bold">{s.value}</div>
-                <div className="text-xs text-white/70 font-semibold uppercase mt-1">{s.label}</div>
+                <div className="text-xs text-white/70 font-semibold uppercase mt-1">{t(s.labelKey)}</div>
               </div>
             ))}
           </div>
@@ -501,19 +455,19 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
           {/* Per-day breakdown table */}
           <div className="bg-white rounded-2xl border-2 border-gray-100 shadow-md overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100">
-              <h3 className="font-bold text-gray-800">Daily Breakdown</h3>
+              <h3 className="font-bold text-gray-800">{t('weekPage.stats.dailyBreakdown')}</h3>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-gray-500 text-xs uppercase font-bold">
                   <tr>
-                    <th className="px-4 py-3 text-left">Day</th>
-                    <th className="px-4 py-3 text-left">Type</th>
-                    <th className="px-4 py-3 text-right">Calories</th>
-                    <th className="px-4 py-3 text-right">Water</th>
-                    <th className="px-4 py-3 text-right">Score</th>
-                    <th className="px-4 py-3 text-center">Workout</th>
-                    <th className="px-4 py-3 text-left">Mood</th>
+                    <th className="px-4 py-3 text-start">{t('weekPage.col.day')}</th>
+                    <th className="px-4 py-3 text-start">{t('weekPage.col.type')}</th>
+                    <th className="px-4 py-3 text-end">{t('weekPage.col.calories')}</th>
+                    <th className="px-4 py-3 text-end">{t('weekPage.col.water')}</th>
+                    <th className="px-4 py-3 text-end">{t('weekPage.col.score')}</th>
+                    <th className="px-4 py-3 text-center">{t('weekPage.col.workout')}</th>
+                    <th className="px-4 py-3 text-start">{t('weekPage.col.mood')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -527,21 +481,21 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                         onClick={() => onDayClick(sd.day_index)}
                       >
                         <td className="px-4 py-3 font-bold text-gray-800">
-                          Day {sd.day_index + 1}
-                          {isTodayDay && <span className="ml-2 text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded-full">Today</span>}
+                          {t('modal.dayNum', { num: sd.day_index + 1 })}
+                          {isTodayDay && <span className="ms-2 text-xs bg-indigo-500 text-white px-1.5 py-0.5 rounded-full">{t('weekPage.todayBadgeShort')}</span>}
                         </td>
                         <td className="px-4 py-3">
                           <span className={`text-xs px-2 py-1 rounded-lg font-bold ${TYPE_COLOR[sd.day_type]}`}>
-                            {TYPE_EMOJI[sd.day_type]} {TYPE_LABEL[sd.day_type]}
+                            {TYPE_EMOJI[sd.day_type]} {t(`dayType.${sd.day_type}Short`)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right font-semibold text-gray-700">
+                        <td className="px-4 py-3 text-end font-semibold text-gray-700">
                           {log ? `${log.calories_consumed} / ${log.calories_target}` : '—'}
                         </td>
-                        <td className="px-4 py-3 text-right text-gray-600">
+                        <td className="px-4 py-3 text-end text-gray-600">
                           {log ? `${log.water_liters}L` : '—'}
                         </td>
-                        <td className="px-4 py-3 text-right">
+                        <td className="px-4 py-3 text-end">
                           {log ? (
                             <span className={`font-bold ${log.score === 5 ? 'text-green-600' : log.score >= 3 ? 'text-blue-600' : 'text-gray-400'}`}>
                               {log.score}/5
@@ -555,7 +509,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                         </td>
                         <td className="px-4 py-3 text-gray-600">
                           {log?.mood ? (
-                            <span>{log.mood === 'great' ? '😄' : log.mood === 'good' ? '🙂' : log.mood === 'ok' ? '😐' : log.mood === 'tired' ? '😴' : '😞'} {log.mood}</span>
+                            <span>{moodEmojiMap[log.mood]} {t(`modal.mood.${log.mood}`)}</span>
                           ) : '—'}
                         </td>
                       </tr>

@@ -1,12 +1,7 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FOODS, getNutrition } from '../lib/foods';
 
-/**
- * AI Meal Suggester — finds food combos to match remaining macros.
- * Uses a greedy algorithm: picks best food for dominant remaining macro, adjusts amount.
- */
-
-// Foods worth suggesting (skip cola zero, cucumber is low value)
 const SUGGEST_FOODS = Object.values(FOODS).filter(f => f.id !== 'coca_cola_zero');
 
 function getMacrosPerUnit(food) {
@@ -34,16 +29,12 @@ function suggestMeal(remainingProtein, remainingCarbs, remainingFat, maxKcal) {
   let kcalLeft = Math.max(0, maxKcal);
 
   const usedFoods = new Set();
-
-  // Shuffle the food list so each call produces different combos
   const shuffled = [...SUGGEST_FOODS].sort(() => Math.random() - 0.5);
 
   for (let i = 0; i < 4 && kcalLeft > 50; i++) {
-    // Determine dominant macro needed
     const total = pLeft + cLeft + fLeft;
     if (total < 5) break;
 
-    // Collect all viable candidates with scores
     const candidates = [];
 
     for (const food of shuffled) {
@@ -51,13 +42,11 @@ function suggestMeal(remainingProtein, remainingCarbs, remainingFat, maxKcal) {
       const m = getMacrosPerUnit(food);
       if (m.kcal === 0) continue;
 
-      // Score: how well this food fills the dominant need without overshooting
       const proteinRatio = pLeft > 0 ? m.protein / (pLeft / total) : 0;
       const carbsRatio = cLeft > 0 ? m.carbs / (cLeft / total) : 0;
       const fatRatio = fLeft > 0 ? m.fat / (fLeft / total) : 0;
       const score = proteinRatio + carbsRatio + fatRatio;
 
-      // Find optimal amount (cap by kcal budget and macro needs)
       let amount;
       if (food.unit === 'g') {
         const byKcal = kcalLeft / m.kcal;
@@ -81,7 +70,6 @@ function suggestMeal(remainingProtein, remainingCarbs, remainingFat, maxKcal) {
 
     if (candidates.length === 0) break;
 
-    // Pick from top 3 candidates randomly instead of always the best
     candidates.sort((a, b) => b.score - a.score);
     const topN = candidates.slice(0, Math.min(3, candidates.length));
     const pick = topN[Math.floor(Math.random() * topN.length)];
@@ -98,6 +86,7 @@ function suggestMeal(remainingProtein, remainingCarbs, remainingFat, maxKcal) {
 }
 
 export default function MealSuggester({ remainingProtein, remainingCarbs, remainingFat, remainingKcal, onAddItems }) {
+  const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState(null);
   const [showSuggester, setShowSuggester] = useState(false);
 
@@ -115,7 +104,7 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
   }), { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
 
   if (remainingKcal < 50 && remainingProtein < 5 && remainingCarbs < 5) {
-    return null; // Already hit targets
+    return null;
   }
 
   return (
@@ -125,13 +114,13 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
           onClick={handleSuggest}
           className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold rounded-xl text-sm hover:from-amber-500 hover:to-orange-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
         >
-          <span>🤖</span> Suggest a Meal to Hit Macros
+          <span>🤖</span> {t('suggester.button')}
         </button>
       ) : (
         <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-bold text-amber-800 flex items-center gap-1">
-              <span>🤖</span> Suggested Combo
+              {t('suggester.suggestedCombo')}
             </span>
             <button onClick={() => setShowSuggester(false)} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
           </div>
@@ -150,18 +139,23 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
                         </div>
                       </div>
                     </div>
-                    <div className="text-right text-xs text-gray-500">
-                      <div className="font-bold text-gray-700">{Math.round(s.nutrition.kcal)} kcal</div>
-                      <div>P:{Math.round(s.nutrition.protein_g)} C:{Math.round(s.nutrition.carbs_g)} F:{Math.round(s.nutrition.fat_g)}</div>
+                    <div className="text-end text-xs text-gray-500">
+                      <div className="font-bold text-gray-700">{t('suggester.kcalShort', { kcal: Math.round(s.nutrition.kcal) })}</div>
+                      <div>{t('suggester.macroLine', { p: Math.round(s.nutrition.protein_g), c: Math.round(s.nutrition.carbs_g), f: Math.round(s.nutrition.fat_g) })}</div>
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="flex items-center justify-between bg-amber-100 rounded-lg px-3 py-2 mb-3">
-                <span className="text-xs font-bold text-amber-700">Total</span>
+                <span className="text-xs font-bold text-amber-700">{t('suggester.total')}</span>
                 <span className="text-xs font-bold text-amber-800">
-                  {Math.round(totalNutrition.kcal)} kcal — P:{Math.round(totalNutrition.protein_g)}g C:{Math.round(totalNutrition.carbs_g)}g F:{Math.round(totalNutrition.fat_g)}g
+                  {t('suggester.totalLine', {
+                    kcal: Math.round(totalNutrition.kcal),
+                    p: Math.round(totalNutrition.protein_g),
+                    c: Math.round(totalNutrition.carbs_g),
+                    f: Math.round(totalNutrition.fat_g),
+                  })}
                 </span>
               </div>
 
@@ -175,7 +169,7 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
                   }}
                   className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg text-sm transition-colors"
                 >
-                  Add to Meal
+                  {t('suggester.addToMeal')}
                 </button>
                 <button
                   onClick={handleSuggest}
@@ -186,7 +180,7 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
               </div>
             </>
           ) : (
-            <p className="text-sm text-amber-700">No good combination found for the remaining macros. Try logging some food manually.</p>
+            <p className="text-sm text-amber-700">{t('suggester.noCombo')}</p>
           )}
         </div>
       )}

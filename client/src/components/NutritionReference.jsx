@@ -1,8 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FOODS, FOOD_CATEGORIES, sumMealNutrition } from '../lib/foods';
-import { CALORIE_TARGETS, WATER_GOALS } from '../lib/calories';
+import { WATER_GOALS } from '../lib/calories';
 
-// Suggested daily meals per day type (for reference only — user composes freely)
 const SUGGESTED = {
   low: {
     meal1: [{ food_id: 'eggs', amount: 3 }, { food_id: 'cucumber', amount: 150 }],
@@ -25,25 +25,26 @@ const SUGGESTED = {
 };
 
 const TYPES = [
-  { key: 'low',  label: '🔴 Low Carb Day',    headerCls: 'bg-gradient-to-r from-red-500 to-red-600' },
-  { key: 'med',  label: '🟡 Medium Carb Day',  headerCls: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
-  { key: 'high', label: '🟢 High Carb Day',    headerCls: 'bg-gradient-to-r from-green-500 to-green-600' },
+  { key: 'low',  labelKey: 'nutritionRef.lowCarbDay',  headerCls: 'bg-gradient-to-r from-red-500 to-red-600' },
+  { key: 'med',  labelKey: 'nutritionRef.medCarbDay',  headerCls: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
+  { key: 'high', labelKey: 'nutritionRef.highCarbDay', headerCls: 'bg-gradient-to-r from-green-500 to-green-600' },
 ];
 
 export default function NutritionReference() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl border-2 border-gray-100 mb-8 shadow-lg overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full p-5 text-left font-bold text-gray-700 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        className="w-full p-5 text-start font-bold text-gray-700 flex items-center justify-between hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-2xl">🍽️</span>
           <div>
-            <span className="text-lg font-bold">Nutrition Reference</span>
-            <p className="text-xs text-gray-400 font-normal">Suggested meal templates · compose your own in each day</p>
+            <span className="text-lg font-bold">{t('nutritionRef.title')}</span>
+            <p className="text-xs text-gray-400 font-normal">{t('nutritionRef.subtitle')}</p>
           </div>
         </div>
         <span className="text-gray-400 text-xl" style={{ transform: open ? 'rotate(180deg)' : 'none', display: 'inline-block', transition: 'transform 0.2s' }}>▼</span>
@@ -53,13 +54,13 @@ export default function NutritionReference() {
         <div className="border-t-2 border-gray-100">
           {/* Food database table */}
           <div className="p-5 pb-3">
-            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">📊 Ingredient Calorie Reference</h3>
+            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">{t('nutritionRef.ingredientRef')}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {FOOD_CATEGORIES.map(cat =>
                 Object.values(FOODS).filter(f => f.category === cat.key).map(food => {
                   const per = food.unit === 'g'
-                    ? `${food.kcal_per_100g} kcal/100g`
-                    : `${food.kcal_per_unit} kcal/${food.unit}`;
+                    ? t('nutritionRef.kcalPer100g', { kcal: food.kcal_per_100g })
+                    : t('nutritionRef.kcalPerUnit', { kcal: food.kcal_per_unit, unit: food.unit });
                   return (
                     <div key={food.id} className="bg-gray-50 rounded-xl p-2.5 border border-gray-200 flex items-center gap-2">
                       <span className="text-xl shrink-0">{food.emoji}</span>
@@ -76,20 +77,20 @@ export default function NutritionReference() {
 
           {/* Suggested meal templates */}
           <div className="px-5 pb-5">
-            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">💡 Suggested Daily Templates</h3>
+            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">{t('nutritionRef.suggestedTemplates')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {TYPES.map(t => {
-                const suggested = SUGGESTED[t.key];
+              {TYPES.map(ty => {
+                const suggested = SUGGESTED[ty.key];
                 const dayTotal = Object.values(suggested).reduce((sum, items) => {
                   return sum + sumMealNutrition(items).kcal;
                 }, 0);
 
                 return (
-                  <div key={t.key} className="rounded-xl overflow-hidden border border-gray-200">
-                    <div className={`${t.headerCls} text-white px-4 py-3`}>
-                      <div className="font-bold">{t.label}</div>
+                  <div key={ty.key} className="rounded-xl overflow-hidden border border-gray-200">
+                    <div className={`${ty.headerCls} text-white px-4 py-3`}>
+                      <div className="font-bold">{t(ty.labelKey)}</div>
                       <div className="text-xs text-white/80 mt-0.5">
-                        ~{Math.round(dayTotal)} kcal · 💧{WATER_GOALS[t.key]}L goal
+                        {t('nutritionRef.dayTotalKcal', { kcal: Math.round(dayTotal), liters: WATER_GOALS[ty.key] })}
                       </div>
                     </div>
                     <div className="p-3 space-y-2">
@@ -99,8 +100,8 @@ export default function NutritionReference() {
                         return (
                           <div key={mk} className="text-xs">
                             <div className="flex justify-between font-bold text-gray-700 mb-0.5">
-                              <span>Meal {i + 1}</span>
-                              <span>{mealKcal} kcal</span>
+                              <span>{t('weekPage.mealNum', { num: i + 1 })}</span>
+                              <span>{t('nutritionRef.mealKcal', { kcal: mealKcal })}</span>
                             </div>
                             <div className="text-gray-500 leading-relaxed">
                               {items.map((item, j) => {

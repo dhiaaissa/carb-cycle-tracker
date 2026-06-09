@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 export default function MacroProgressCard({ consumed, target, label, color }) {
+  const { t } = useTranslation();
   const pct = target > 0 ? Math.min(100, (consumed / target) * 100) : 0;
   const remaining = Math.max(0, target - consumed);
 
@@ -21,7 +24,7 @@ export default function MacroProgressCard({ consumed, target, label, color }) {
       </div>
       <div className="mt-2 flex justify-between text-xs">
         <span className="text-gray-600 font-semibold">{Math.round(pct)}%</span>
-        <span className="text-gray-500">{Math.round(remaining)}g left</span>
+        <span className="text-gray-500">{t('macroProgress.gramsLeft', { g: Math.round(remaining) })}</span>
       </div>
     </div>
   );

@@ -1,14 +1,15 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export default function MacroInsights({ stats, config }) {
-  if (!stats) return <div className="text-gray-500">Loading insights…</div>;
+  const { t } = useTranslation();
+  if (!stats) return <div className="text-gray-500">{t('macroInsights.loading')}</div>;
 
   const target = config?.calorie_target || 0;
   const protTarget = config?.protein_g_target || 0;
 
   const weeklyAdherence = useMemo(() => {
     return (stats.weekly_summary || []).map(ws => {
-      // adherence = (good_days / completed_days) on a week-by-week basis
       const pct = ws.completed_days ? Math.round((ws.good_days / ws.completed_days) * 100) : 0;
       const calDiff = target ? ws.avg_calories - target : 0;
       return { ...ws, adherence_pct: pct, cal_diff: calDiff };
@@ -26,41 +27,41 @@ export default function MacroInsights({ stats, config }) {
   return (
     <div className="animate-fadeIn">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-1">Insights</h1>
-        <p className="text-gray-500">Trends, adherence, and progress analysis</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('macroInsights.heading')}</h1>
+        <p className="text-gray-500">{t('macroInsights.subtitle')}</p>
       </div>
 
       {/* Headline metrics */}
       <div className="grid sm:grid-cols-3 gap-3 mb-6">
-        <Headline title="Avg Calories" value={stats.avg_calories || 0} unit="kcal/day" trend={stats.avg_calories && target ? (stats.avg_calories - target) : null} better="lower" />
-        <Headline title="Avg Protein" value={stats.avg_protein || 0} unit="g/day" trend={null} pct={proteinHit} />
-        <Headline title="Adherence" value={bestWeek?.adherence_pct ?? 0} unit="%" subtitle={bestWeek ? `Best: Week ${bestWeek.week_number}` : 'No data yet'} />
+        <Headline t={t} title={t('macroInsights.avgCalories')} value={stats.avg_calories || 0} unit={t('macroInsights.kcalPerDay')} trend={stats.avg_calories && target ? (stats.avg_calories - target) : null} better="lower" />
+        <Headline t={t} title={t('macroInsights.avgProtein')} value={stats.avg_protein || 0} unit={t('macroInsights.gPerDay')} trend={null} pct={proteinHit} />
+        <Headline t={t} title={t('macroInsights.adherence')} value={bestWeek?.adherence_pct ?? 0} unit="%" subtitle={bestWeek ? t('macroInsights.bestWeek', { num: bestWeek.week_number }) : t('macroInsights.noDataYet')} />
       </div>
 
       {/* Weekly breakdown */}
       <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">📊 Weekly Breakdown</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">{t('macroInsights.weeklyBreakdown')}</h2>
         {weeklyAdherence.length === 0 ? (
-          <p className="text-sm text-gray-500">Log some days to see weekly insights.</p>
+          <p className="text-sm text-gray-500">{t('macroInsights.logSomeFirst')}</p>
         ) : (
           <div className="space-y-2">
             {weeklyAdherence.map(w => (
               <div key={w.week_number} className="border border-gray-100 rounded-xl p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-bold text-gray-800">Week {w.week_number}</span>
-                  <span className="text-xs font-semibold text-gray-500">{w.completed_days}/7 days</span>
+                  <span className="font-bold text-gray-800">{t('macroInsights.weekN', { num: w.week_number })}</span>
+                  <span className="text-xs font-semibold text-gray-500">{t('macroInsights.daysOf7', { done: w.completed_days })}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div>
-                    <div className="text-gray-500">Adherence</div>
+                    <div className="text-gray-500">{t('macroInsights.adherenceLabel')}</div>
                     <div className="font-bold text-gray-800">{w.adherence_pct}%</div>
                   </div>
                   <div>
-                    <div className="text-gray-500">Avg kcal</div>
+                    <div className="text-gray-500">{t('macroInsights.avgKcal')}</div>
                     <div className="font-bold text-gray-800">{w.avg_calories || '—'}</div>
                   </div>
                   <div>
-                    <div className="text-gray-500">vs Target</div>
+                    <div className="text-gray-500">{t('macroInsights.vsTarget')}</div>
                     <div className={`font-bold ${w.cal_diff > 0 ? 'text-red-600' : w.cal_diff < 0 ? 'text-emerald-600' : 'text-gray-800'}`}>
                       {w.cal_diff ? `${w.cal_diff > 0 ? '+' : ''}${w.cal_diff}` : '—'}
                     </div>
@@ -74,31 +75,31 @@ export default function MacroInsights({ stats, config }) {
 
       {/* Tips */}
       <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border-2 border-indigo-100 p-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">💡 Personalised Tips</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">{t('macroInsights.tips')}</h2>
         <ul className="space-y-2 text-sm text-gray-700">
           {stats.avg_calories > target + 200 && (
-            <li className="flex gap-2"><span>⚠️</span> You're averaging {stats.avg_calories - target} kcal above your target. Consider smaller portions or lower-calorie swaps.</li>
+            <li className="flex gap-2"><span>⚠️</span> {t('macroInsights.tipOver', { kcal: stats.avg_calories - target })}</li>
           )}
           {stats.avg_calories > 0 && stats.avg_calories < target - 200 && (
-            <li className="flex gap-2"><span>⚠️</span> You're {target - stats.avg_calories} kcal below target on average. Eating too little can stall progress.</li>
+            <li className="flex gap-2"><span>⚠️</span> {t('macroInsights.tipUnder', { kcal: target - stats.avg_calories })}</li>
           )}
           {stats.avg_protein > 0 && proteinHit < 80 && (
-            <li className="flex gap-2"><span>🍗</span> Your protein is at {proteinHit}% of target. Aim higher — protein protects muscle and reduces hunger.</li>
+            <li className="flex gap-2"><span>🍗</span> {t('macroInsights.tipProtein', { pct: proteinHit })}</li>
           )}
           {stats.streak >= 7 && (
-            <li className="flex gap-2"><span>🔥</span> Great streak! {stats.streak} days in a row hitting your targets.</li>
+            <li className="flex gap-2"><span>🔥</span> {t('macroInsights.tipStreak', { streak: stats.streak })}</li>
           )}
           {stats.total_completed < 7 && (
-            <li className="flex gap-2"><span>📈</span> Log at least 7 days to start seeing meaningful trends.</li>
+            <li className="flex gap-2"><span>📈</span> {t('macroInsights.tipLogMore')}</li>
           )}
-          <li className="flex gap-2"><span>📅</span> Reassess targets every 2–4 weeks based on actual weight change.</li>
+          <li className="flex gap-2"><span>📅</span> {t('macroInsights.tipReassess')}</li>
         </ul>
       </div>
     </div>
   );
 }
 
-function Headline({ title, value, unit, trend, subtitle, pct, better }) {
+function Headline({ t, title, value, unit, trend, subtitle, pct, better }) {
   let trendColor = 'text-gray-400';
   let trendStr = '';
   if (trend != null) {
@@ -112,8 +113,8 @@ function Headline({ title, value, unit, trend, subtitle, pct, better }) {
       <div className="text-xs font-bold uppercase tracking-wide text-gray-500">{title}</div>
       <div className="text-3xl font-extrabold text-gray-800 mt-1">{value}</div>
       <div className="text-xs text-gray-400">{unit}</div>
-      {trendStr && <div className={`text-xs font-bold mt-2 ${trendColor}`}>{trendStr} vs target</div>}
-      {pct != null && <div className="text-xs font-bold mt-2 text-gray-600">{pct}% of target</div>}
+      {trendStr && <div className={`text-xs font-bold mt-2 ${trendColor}`}>{trendStr} {t('macroInsights.vsTargetShort')}</div>}
+      {pct != null && <div className="text-xs font-bold mt-2 text-gray-600">{t('macroInsights.ofTarget', { pct })}</div>}
       {subtitle && <div className="text-xs text-gray-500 mt-2">{subtitle}</div>}
     </div>
   );

@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import MacroProgressCard from './MacroProgressCard';
 import MealComposer from './MealComposer';
 import { FOODS as BUILTIN_FOODS } from '../lib/foods';
 
 const EMPTY_MEALS = { meal1: [], meal2: [], meal3: [], meal4: [] };
-const MEAL_NAMES = { meal1: 'Breakfast', meal2: 'Lunch', meal3: 'Dinner', meal4: 'Snack' };
+const MEAL_KEYS = ['meal1', 'meal2', 'meal3', 'meal4'];
 const MEAL_ICONS = { meal1: '☀️', meal2: '🌤️', meal3: '🌙', meal4: '🍪' };
 const MEAL_NUM = { meal1: 1, meal2: 2, meal3: 3, meal4: 4 };
 
@@ -46,6 +47,7 @@ export default function MacroDayEditor({
   onSavePreset, onDeletePreset, onCreateCustomFood, onDeleteCustomFood,
   onSaved,
 }) {
+  const { t } = useTranslation();
   const isFuture = dayIndex > todayIndex;
 
   const [meals, setMeals] = useState(EMPTY_MEALS);
@@ -105,11 +107,11 @@ export default function MacroDayEditor({
         notes,
         workout_done: workoutDone,
       });
-      setToast('Saved!');
+      setToast(t('macroEditor.saved'));
       setTimeout(() => setToast(''), 2000);
       if (onSaved) onSaved();
     } catch (err) {
-      setToast(err.message || 'Save failed');
+      setToast(err.message || t('macroEditor.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -123,8 +125,8 @@ export default function MacroDayEditor({
     return (
       <div className="text-center py-12">
         <div className="text-5xl mb-3">🔒</div>
-        <h2 className="text-xl font-bold text-gray-800 mb-1">Day {dayIndex + 1}</h2>
-        <p className="text-gray-500 text-sm">This day hasn't happened yet — come back later.</p>
+        <h2 className="text-xl font-bold text-gray-800 mb-1">{t('macroEditor.future.title', { num: dayIndex + 1 })}</h2>
+        <p className="text-gray-500 text-sm">{t('macroEditor.future.text')}</p>
       </div>
     );
   }
@@ -134,7 +136,7 @@ export default function MacroDayEditor({
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <div className="text-gray-600 font-semibold">Loading day…</div>
+          <div className="text-gray-600 font-semibold">{t('macroEditor.loading')}</div>
         </div>
       </div>
     );
@@ -143,29 +145,29 @@ export default function MacroDayEditor({
   const isToday = dayIndex === todayIndex;
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 18) return 'Good afternoon';
-    return 'Good evening';
+    if (h < 12) return t('macroEditor.greeting.morning');
+    if (h < 18) return t('macroEditor.greeting.afternoon');
+    return t('macroEditor.greeting.evening');
   })();
 
   return (
     <div className="animate-fadeIn pb-24">
       {/* Heading */}
       <div className="mb-5">
-        <h1 className="text-3xl font-bold text-gray-800 mb-1">{isToday ? `${greeting} 👋` : `Day ${dayIndex + 1}`}</h1>
-        <p className="text-gray-500">{isToday ? `Today's log — Day ${dayIndex + 1}` : 'Review or update this day'}</p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-1">{isToday ? t('macroEditor.titleToday', { greeting }) : t('macroEditor.titleDay', { num: dayIndex + 1 })}</h1>
+        <p className="text-gray-500">{isToday ? t('macroEditor.subtitleToday', { num: dayIndex + 1 }) : t('macroEditor.subtitleReview')}</p>
       </div>
 
       {/* Calorie summary card */}
       <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-700 rounded-3xl shadow-2xl p-6 mb-5 text-white">
         <div className="text-center">
-          <div className="text-xs font-bold uppercase tracking-widest text-white/80">Calories Today</div>
+          <div className="text-xs font-bold uppercase tracking-widest text-white/80">{t('macroEditor.caloriesToday')}</div>
           <div className="flex items-baseline justify-center gap-2 mt-1">
             <span className="text-6xl font-extrabold">{Math.round(totals.kcal)}</span>
             <span className="text-xl text-white/70">/ {calTarget}</span>
           </div>
           <div className="text-sm text-white/80 mt-1">
-            {overBudget ? `${Math.abs(Math.round(caloriesRemaining))} kcal over` : `${Math.round(caloriesRemaining)} kcal remaining`}
+            {overBudget ? t('macroEditor.kcalOver', { kcal: Math.abs(Math.round(caloriesRemaining)) }) : t('macroEditor.kcalRemaining', { kcal: Math.round(caloriesRemaining) })}
           </div>
           <div className="mt-4 w-full bg-white/20 rounded-full h-3 overflow-hidden">
             <div className={`h-full rounded-full transition-all duration-500 ${overBudget ? 'bg-amber-300' : 'bg-white'}`} style={{ width: `${caloriePct}%` }} />
@@ -175,27 +177,33 @@ export default function MacroDayEditor({
 
       {/* Macros */}
       <div className="grid sm:grid-cols-3 gap-3 mb-5">
-        <MacroProgressCard consumed={totals.protein} target={protTarget} label="Protein" color="red" />
-        <MacroProgressCard consumed={totals.carbs}   target={carbTarget} label="Carbs"   color="amber" />
-        <MacroProgressCard consumed={totals.fat}     target={fatTarget}  label="Fat"     color="blue" />
+        <MacroProgressCard consumed={totals.protein} target={protTarget} label={t('macro.protein')} color="red" />
+        <MacroProgressCard consumed={totals.carbs}   target={carbTarget} label={t('macro.carbs')}   color="amber" />
+        <MacroProgressCard consumed={totals.fat}     target={fatTarget}  label={t('macro.fat')}     color="blue" />
       </div>
 
       {/* Meals */}
       <div className="bg-white rounded-3xl border-2 border-gray-100 shadow-lg p-4 sm:p-6 mb-5">
-        <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">🍽️ Meals</h2>
+        <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">{t('macroEditor.meals')}</h2>
         <div className="space-y-2">
-          {Object.entries(MEAL_NAMES).map(([key, label]) => {
+          {MEAL_KEYS.map(key => {
             const items = meals[key] || [];
-            const t = computeMealTotals(items, foodDb);
+            const totals = computeMealTotals(items, foodDb);
             const isOpen = expandedMeal === key;
             return (
               <div key={key} className={`border-2 rounded-2xl overflow-hidden transition-colors ${isOpen ? 'border-indigo-300' : 'border-gray-100'}`}>
                 <button onClick={() => setExpandedMeal(isOpen ? null : key)} className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition">
-                  <div className="text-left flex items-center gap-3">
+                  <div className="text-start flex items-center gap-3">
                     <span className="text-2xl">{MEAL_ICONS[key]}</span>
                     <div>
-                      <div className="font-bold text-gray-800">{label}</div>
-                      <div className="text-xs text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''} · {Math.round(t.kcal)} kcal · P{Math.round(t.protein)} C{Math.round(t.carbs)} F{Math.round(t.fat)}</div>
+                      <div className="font-bold text-gray-800">{t(`meal.${MEAL_NUM[key]}`)}</div>
+                      <div className="text-xs text-gray-500">{t('macroEditor.itemSummary', {
+                        count: items.length,
+                        kcal: Math.round(totals.kcal),
+                        p: Math.round(totals.protein),
+                        c: Math.round(totals.carbs),
+                        f: Math.round(totals.fat),
+                      })}</div>
                     </div>
                   </div>
                   <div className="text-gray-400 text-2xl">{isOpen ? '−' : '+'}</div>
@@ -225,9 +233,9 @@ export default function MacroDayEditor({
       <div className="bg-white rounded-3xl border-2 border-gray-100 shadow-lg p-5 mb-5">
         <button
           onClick={() => setWorkoutDone(v => !v)}
-          className={`w-full text-left px-4 py-3 rounded-xl font-bold transition flex items-center justify-between ${workoutDone ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-200' : 'bg-gray-50 text-gray-600 border-2 border-gray-200 hover:bg-gray-100'}`}
+          className={`w-full text-start px-4 py-3 rounded-xl font-bold transition flex items-center justify-between ${workoutDone ? 'bg-emerald-50 text-emerald-700 border-2 border-emerald-200' : 'bg-gray-50 text-gray-600 border-2 border-gray-200 hover:bg-gray-100'}`}
         >
-          <span className="flex items-center gap-2">💪 Workout done?</span>
+          <span className="flex items-center gap-2">{t('macroEditor.workoutDone')}</span>
           <span className="text-xl">{workoutDone ? '✓' : ' '}</span>
         </button>
       </div>
@@ -236,30 +244,30 @@ export default function MacroDayEditor({
       <div className="bg-white rounded-3xl border-2 border-gray-100 shadow-lg p-6 mb-5">
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">💧 Water (L)</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">{t('macroEditor.waterL')}</label>
             <input type="number" step="0.25" value={water} onChange={e => setWater(parseFloat(e.target.value) || 0)}
               className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl outline-none focus:border-indigo-400" />
           </div>
           <div>
-            <label className="block text-sm font-bold text-gray-700 mb-1">⚖️ Weight (kg)</label>
+            <label className="block text-sm font-bold text-gray-700 mb-1">{t('macroEditor.weightKg')}</label>
             <input type="number" step="0.1" value={weight} onChange={e => setWeight(e.target.value)}
               className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl outline-none focus:border-indigo-400" />
           </div>
         </div>
         <div className="mt-4">
-          <label className="block text-sm font-bold text-gray-700 mb-1">📝 Notes</label>
+          <label className="block text-sm font-bold text-gray-700 mb-1">{t('macroEditor.notes')}</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
             className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-xl outline-none focus:border-indigo-400 resize-none" />
         </div>
       </div>
 
       {/* Save bar */}
-      <div className="fixed bottom-0 inset-x-0 lg:left-72 bg-white border-t-2 border-gray-100 shadow-2xl px-4 py-3 z-20">
+      <div className="fixed bottom-0 inset-x-0 lg:start-72 bg-white border-t-2 border-gray-100 shadow-2xl px-4 py-3 z-20">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
-          {toast && <div className={`text-sm font-semibold ${toast === 'Saved!' ? 'text-green-600' : 'text-red-600'}`}>{toast}</div>}
+          {toast && <div className={`text-sm font-semibold ${toast === t('macroEditor.saved') ? 'text-green-600' : 'text-red-600'}`}>{toast}</div>}
           <button onClick={handleSave} disabled={saving}
-            className="ml-auto px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold shadow-lg disabled:opacity-50">
-            {saving ? 'Saving…' : '💾 Save Day'}
+            className="ms-auto px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold shadow-lg disabled:opacity-50">
+            {saving ? t('macroEditor.saving') : t('macroEditor.saveDay')}
           </button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { WATER_GOALS } from '../lib/calories';
 
 const TYPE_COLORS = {
@@ -6,10 +7,10 @@ const TYPE_COLORS = {
   high: { bg: 'bg-gradient-to-br from-green-50 to-green-100', text: 'text-green-700', border: 'border-green-200' },
 };
 
-const TYPE_LABELS = { low: 'Low Carb', med: 'Medium Carb', high: 'High Carb' };
 const TYPE_EMOJI = { low: '🔴', med: '🟡', high: '🟢' };
 
 export default function StatsBar({ config, days, stats }) {
+  const { t } = useTranslation();
   if (!config || !stats) return null;
 
   const todayIdx = config.today_index;
@@ -23,42 +24,42 @@ export default function StatsBar({ config, days, stats }) {
 
   const cards = [
     {
-      label: "Today's Type",
-      value: todayType ? `${TYPE_EMOJI[todayType]} ${TYPE_LABELS[todayType]}` : 'N/A',
+      label: t('stats.todayType'),
+      value: todayType ? `${TYPE_EMOJI[todayType]} ${t(`dayType.${todayType}`)}` : t('stats.notAvailable'),
       colors: todayType ? TYPE_COLORS[todayType] : { bg: 'bg-gradient-to-br from-gray-50 to-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
       icon: '📅',
     },
     {
-      label: 'Streak',
-      value: `${stats.streak} days`,
+      label: t('stats.streak'),
+      value: t('stats.streakDays', { count: stats.streak }),
       colors: { bg: 'bg-gradient-to-br from-orange-50 to-orange-100', text: 'text-orange-700', border: 'border-orange-200' },
       icon: '🔥',
     },
     {
-      label: 'Completed Days',
-      value: `${stats.total_completed} / 56`,
+      label: t('stats.completedDays'),
+      value: t('stats.completedOfTotal', { done: stats.total_completed, total: 56 }),
       colors: { bg: 'bg-gradient-to-br from-blue-50 to-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
       icon: '✅',
     },
     {
-      label: "Today's Score",
-      value: `${todayScore} / 5`,
+      label: t('stats.todayScore'),
+      value: t('stats.dayScoreOfMax', { score: todayScore }),
       colors: todayScore >= 3 ?
         { bg: 'bg-gradient-to-br from-green-50 to-green-100', text: 'text-green-700', border: 'border-green-200' } :
         { bg: 'bg-gradient-to-br from-gray-50 to-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
       icon: '⭐',
     },
     {
-      label: 'Water',
-      value: `${todayWater}L / ${waterGoal}L`,
+      label: t('stats.water'),
+      value: t('stats.waterOfGoal', { actual: todayWater, goal: waterGoal }),
       colors: todayWater >= waterGoal ?
         { bg: 'bg-gradient-to-br from-cyan-50 to-cyan-100', text: 'text-cyan-700', border: 'border-cyan-200' } :
         { bg: 'bg-gradient-to-br from-gray-50 to-gray-100', text: 'text-gray-700', border: 'border-gray-200' },
       icon: '💧',
     },
     {
-      label: 'Calories',
-      value: todayTarget ? `${todayCals} / ${todayTarget}` : '—',
+      label: t('stats.calories'),
+      value: todayTarget ? t('stats.caloriesOfTarget', { actual: todayCals, target: todayTarget }) : '—',
       colors: { bg: 'bg-gradient-to-br from-amber-50 to-amber-100', text: 'text-amber-700', border: 'border-amber-200' },
       icon: '🔥',
     },

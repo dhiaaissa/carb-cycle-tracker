@@ -1,14 +1,17 @@
+import { useTranslation } from 'react-i18next';
+import { formatDate } from '../lib/format';
+
 const PHASE_CONFIG = {
-  1: { color: 'from-blue-500 to-blue-600',   ring: 'ring-blue-400',   dot: 'bg-blue-500',   icon: '🚀', label: 'Adaptation' },
-  2: { color: 'from-red-500 to-red-600',     ring: 'ring-red-400',    dot: 'bg-red-500',    icon: '📉', label: 'Fat Loss' },
-  3: { color: 'from-orange-500 to-orange-600', ring: 'ring-orange-400', dot: 'bg-orange-500', icon: '🔥', label: 'Fat Burning' },
-  4: { color: 'from-purple-500 to-purple-600', ring: 'ring-purple-400', dot: 'bg-purple-500', icon: '💪', label: 'Recovery' },
+  1: { color: 'from-blue-500 to-blue-600',   ring: 'ring-blue-400',   dot: 'bg-blue-500',   icon: '🚀' },
+  2: { color: 'from-red-500 to-red-600',     ring: 'ring-red-400',    dot: 'bg-red-500',    icon: '📉' },
+  3: { color: 'from-orange-500 to-orange-600', ring: 'ring-orange-400', dot: 'bg-orange-500', icon: '🔥' },
+  4: { color: 'from-purple-500 to-purple-600', ring: 'ring-purple-400', dot: 'bg-purple-500', icon: '💪' },
 };
 
 export default function Sidebar({ schedule, days, stats, todayIndex, selectedWeek, onSelectWeek, sidebarOpen, onToggle }) {
+  const { t } = useTranslation();
   const weeks = Array.from({ length: 8 }, (_, i) => i + 1);
 
-  // Determine which week today falls in (1-indexed)
   const todayWeek = todayIndex >= 0 && todayIndex <= 55
     ? Math.floor(todayIndex / 7) + 1
     : null;
@@ -25,10 +28,10 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 left-0 h-full z-30 bg-gray-900 text-white flex flex-col
+        fixed top-0 start-0 h-full z-30 bg-gray-900 text-white flex flex-col
         transition-transform duration-300 ease-in-out
         w-72
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'}
         lg:translate-x-0 lg:static lg:h-auto lg:min-h-screen
       `}>
         {/* Logo */}
@@ -36,9 +39,9 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
           <div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">💪</span>
-              <span className="font-bold text-lg">Carb Cycle</span>
+              <span className="font-bold text-lg">{t('sidebar.appName')}</span>
             </div>
-            <p className="text-xs text-gray-400 mt-0.5">56-day programme</p>
+            <p className="text-xs text-gray-400 mt-0.5">{t('sidebar.tagline')}</p>
           </div>
           <button
             onClick={onToggle}
@@ -59,7 +62,7 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
             }`}
           >
             <span className="text-lg">📊</span>
-            <span>Overview & Stats</span>
+            <span>{t('sidebar.overviewStats')}</span>
           </button>
           <button
             onClick={() => { onSelectWeek('insights'); if (sidebarOpen) onToggle(); }}
@@ -70,7 +73,7 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
             }`}
           >
             <span className="text-lg">💡</span>
-            <span>Insights</span>
+            <span>{t('nav.insights')}</span>
           </button>
           <button
             onClick={() => { onSelectWeek('grocery'); if (sidebarOpen) onToggle(); }}
@@ -81,7 +84,7 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
             }`}
           >
             <span className="text-lg">🛒</span>
-            <span>Grocery List</span>
+            <span>{t('nav.grocery')}</span>
           </button>
           <button
             onClick={() => { onSelectWeek('settings'); if (sidebarOpen) onToggle(); }}
@@ -92,13 +95,13 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
             }`}
           >
             <span className="text-lg">⚙️</span>
-            <span>Settings</span>
+            <span>{t('nav.settings')}</span>
           </button>
         </div>
 
         {/* Week list */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          <div className="text-xs text-gray-500 uppercase tracking-widest px-3 py-1 font-bold">Weeks</div>
+          <div className="text-xs text-gray-500 uppercase tracking-widest px-3 py-1 font-bold">{t('sidebar.weeks')}</div>
           {weeks.map(w => {
             const weekStart = (w - 1) * 7;
             const weekEnd = w * 7 - 1;
@@ -113,14 +116,13 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
             const isSelected = selectedWeek === w;
 
             const startDate = weekDays[0]?.date;
-            const endDate = weekDays[weekDays.length - 1]?.date;
-            const fmtShort = (d) => d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+            const fmtShort = (d) => d ? formatDate(d + 'T12:00:00', { day: 'numeric', month: 'short' }) : '';
 
             return (
               <button
                 key={w}
                 onClick={() => { onSelectWeek(w); if (sidebarOpen) onToggle(); }}
-                className={`w-full text-left px-3 py-3 rounded-xl transition-all duration-200 group ${
+                className={`w-full text-start px-3 py-3 rounded-xl transition-all duration-200 group ${
                   isSelected
                     ? `bg-gradient-to-r ${cfg.color} text-white shadow-lg`
                     : 'text-gray-300 hover:bg-gray-800'
@@ -134,20 +136,20 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm">Week {w}</span>
+                      <span className="font-semibold text-sm">{t('nav.weekNum', { num: w })}</span>
                       {isToday && (
                         <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold">
-                          NOW
+                          {t('nav.now')}
                         </span>
                       )}
                     </div>
                     <div className={`text-xs mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>
-                      {cfg.icon} {cfg.label} · {fmtShort(startDate)}
+                      {cfg.icon} {t(`phase.${phase}`)} · {fmtShort(startDate)}
                     </div>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-end shrink-0">
                     <div className={`text-xs font-bold ${isSelected ? 'text-white/90' : 'text-gray-400'}`}>
-                      {completed}/7
+                      {t('sidebar.weekProgress', { done: completed })}
                     </div>
                     {weekStats?.cheat_used && <span className="text-xs">🍕</span>}
                   </div>
@@ -168,8 +170,8 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
         {/* Bottom: today info */}
         {todayIndex >= 0 && todayIndex <= 55 && (
           <div className="p-3 border-t border-gray-700 bg-gray-800">
-            <div className="text-xs text-gray-400 mb-1">Today</div>
-            <div className="text-sm font-bold">Day {todayIndex + 1} of 56</div>
+            <div className="text-xs text-gray-400 mb-1">{t('sidebar.today')}</div>
+            <div className="text-sm font-bold">{t('header.dayOfTotal', { day: todayIndex + 1, total: 56 })}</div>
             <div className="w-full bg-gray-700 rounded-full h-1.5 mt-2">
               <div
                 className="bg-indigo-400 rounded-full h-1.5 transition-all"
@@ -177,7 +179,7 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
               />
             </div>
             <div className="text-xs text-gray-400 mt-1">
-              {Math.round(((todayIndex + 1) / 56) * 100)}% complete
+              {t('sidebar.percentComplete', { value: Math.round(((todayIndex + 1) / 56) * 100) })}
             </div>
           </div>
         )}
