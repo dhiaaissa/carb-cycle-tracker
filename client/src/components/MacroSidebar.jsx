@@ -38,6 +38,7 @@ export default function MacroSidebar({ stats, programme, currentView, onSelectVi
           <NavLink active={currentView === 'today'} onClick={() => { onSelectView('today'); if (sidebarOpen) onToggle(); }} icon="🍽️" label={t('macroSidebar.today')} />
           <NavLink active={currentView === 'overview'} onClick={() => { onSelectView('overview'); if (sidebarOpen) onToggle(); }} icon="📊" label={t('sidebar.overviewStats')} />
           <NavLink active={currentView === 'insights'} onClick={() => { onSelectView('insights'); if (sidebarOpen) onToggle(); }} icon="💡" label={t('nav.insights')} />
+          <NavLink active={currentView === 'profile'} onClick={() => { onSelectView('profile'); if (sidebarOpen) onToggle(); }} icon="👤" label={t('nav.profile')} />
           <NavLink active={currentView === 'settings'} onClick={() => { onSelectView('settings'); if (sidebarOpen) onToggle(); }} icon="⚙️" label={t('nav.settings')} />
         </div>
 

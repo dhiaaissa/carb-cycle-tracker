@@ -87,6 +87,17 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
             <span>{t('nav.grocery')}</span>
           </button>
           <button
+            onClick={() => { onSelectWeek('profile'); if (sidebarOpen) onToggle(); }}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
+              selectedWeek === 'profile'
+                ? 'bg-indigo-600 text-white shadow-lg'
+                : 'text-gray-300 hover:bg-gray-800'
+            }`}
+          >
+            <span className="text-lg">👤</span>
+            <span>{t('nav.profile')}</span>
+          </button>
+          <button
             onClick={() => { onSelectWeek('settings'); if (sidebarOpen) onToggle(); }}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
               selectedWeek === 'settings'

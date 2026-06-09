@@ -67,4 +67,7 @@ export const api = {
   setupProgramme: (data) => request('/programme/setup', { method: 'POST', body: JSON.stringify(data) }),
   getMacroStats: () => request('/macro-stats'),
   getMacroWeek: (week) => request(`/macro-stats/week/${week}`),
+  getProfile: () => request('/auth/profile'),
+  changePassword: (current_password, new_password) =>
+    request('/auth/change-password', { method: 'POST', body: JSON.stringify({ current_password, new_password }) }),
 };

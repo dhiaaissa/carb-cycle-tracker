@@ -12,6 +12,7 @@ import MacroWeekPage from './MacroWeekPage';
 import MacroDayEditor from './MacroDayEditor';
 import SettingsPage from './SettingsPage';
 import ProgrammeSetup from './ProgrammeSetup';
+import ProfilePage from './ProfilePage';
 
 export default function MacroDailyView({ config, foods, presets, onSavePreset, onDeletePreset, onCreateCustomFood, onDeleteCustomFood, onLogout, user }) {
   const { t } = useTranslation();
@@ -51,6 +52,7 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
     if (view === 'today') return t('macroView.today');
     if (view === 'overview') return t('nav.overview');
     if (view === 'insights') return t('nav.insights');
+    if (view === 'profile') return t('nav.profile');
     if (view === 'settings') return t('nav.settings');
     if (view?.startsWith('week-')) return t('macroView.weekN', { num: view.replace('week-', '') });
     return '';
@@ -146,6 +148,8 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
               <MacroOverview stats={stats} config={config} onSelectView={setView} />
             ) : view === 'insights' ? (
               <MacroInsights stats={stats} config={config} />
+            ) : view === 'profile' ? (
+              <ProfilePage onEditProgramme={() => setShowProgrammeSetup(true)} />
             ) : view === 'settings' ? (
               <SettingsPage config={config} onConfigUpdate={() => window.location.reload()} />
             ) : view?.startsWith('week-') ? (

@@ -16,6 +16,7 @@ import NutritionReference from './components/NutritionReference';
 import WeekPage from './components/WeekPage';
 import InsightsPage from './components/InsightsPage';
 import SettingsPage from './components/SettingsPage';
+import ProfilePage from './components/ProfilePage';
 import GroceryPage from './components/GroceryPage';
 import LoginPage from './components/LoginPage';
 import ProgrammeSetup from './components/ProgrammeSetup';
@@ -133,7 +134,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
                   {t('nav.overview')}
                 </button>
                 <span className="text-gray-300">/</span>
-                <span className="text-gray-800 font-bold">{selectedWeek === 'insights' ? t('nav.insights') : selectedWeek === 'settings' ? t('nav.settings') : selectedWeek === 'grocery' ? t('nav.grocery') : t('nav.weekNum', { num: selectedWeek })}</span>
+                <span className="text-gray-800 font-bold">{selectedWeek === 'insights' ? t('nav.insights') : selectedWeek === 'profile' ? t('nav.profile') : selectedWeek === 'settings' ? t('nav.settings') : selectedWeek === 'grocery' ? t('nav.grocery') : t('nav.weekNum', { num: selectedWeek })}</span>
               </div>
             ) : (
               <span className="text-gray-800 font-bold text-lg">{t('nav.overview')}</span>
@@ -260,6 +261,9 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
             ) : selectedWeek === 'insights' ? (
               /* Insights page */
               <InsightsPage />
+            ) : selectedWeek === 'profile' ? (
+              /* Profile page */
+              <ProfilePage onEditProgramme={() => setSelectedWeek('settings')} />
             ) : selectedWeek === 'settings' ? (
               /* Settings page */
               <SettingsPage config={config} onConfigUpdate={(newConfig) => {
