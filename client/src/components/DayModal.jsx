@@ -163,9 +163,9 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4" onClick={onClose}>
       <div
-        className="bg-gray-100 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] overflow-hidden flex flex-col"
+        className="bg-gray-100 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-2xl h-[92dvh] sm:h-auto sm:max-h-[92vh] overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -287,14 +287,14 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
             <div className="flex items-center gap-3">
               <button onClick={() => !isFuture && setWater(w => Math.max(0, +(w - 0.25).toFixed(2)))}
                 disabled={isFuture || water <= 0}
-                className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-cyan-100 text-gray-600 font-bold flex items-center justify-center disabled:opacity-30 transition-colors text-lg">−</button>
+                className="w-11 h-11 shrink-0 rounded-xl bg-gray-100 hover:bg-cyan-100 text-gray-600 font-bold flex items-center justify-center disabled:opacity-30 transition-colors text-lg">−</button>
               <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
                 <div className={`h-3 rounded-full transition-all duration-300 ${water >= waterGoal ? 'bg-cyan-500' : 'bg-cyan-400'}`}
                   style={{ width: `${Math.min(100, (water / waterGoal) * 100)}%` }} />
               </div>
               <button onClick={() => !isFuture && setWater(w => +(w + 0.25).toFixed(2))}
                 disabled={isFuture}
-                className="w-9 h-9 rounded-xl bg-gray-100 hover:bg-cyan-100 text-gray-600 font-bold flex items-center justify-center disabled:opacity-30 transition-colors text-lg">+</button>
+                className="w-11 h-11 shrink-0 rounded-xl bg-gray-100 hover:bg-cyan-100 text-gray-600 font-bold flex items-center justify-center disabled:opacity-30 transition-colors text-lg">+</button>
             </div>
           </div>
 
@@ -479,7 +479,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
 
         {/* Save Footer */}
         {!isFuture && (
-          <div className="px-4 py-3 bg-gray-100 shrink-0">
+          <div className="px-4 py-3 pb-safe bg-gray-100 shrink-0 border-t border-gray-200">
             <button onClick={handleSave} disabled={saving || !!toast}
               className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-3.5 rounded-2xl text-base transition-all disabled:opacity-50 shadow-lg hover:shadow-xl active:scale-[0.98]">
               {saving ? t('modal.saving') : t('modal.saveDay')}

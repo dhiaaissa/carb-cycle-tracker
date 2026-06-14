@@ -44,9 +44,9 @@ export default function LoginPage({ onAuth }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-slate-950">
+    <div className="min-h-screen-safe flex flex-col lg:flex-row bg-slate-950">
       {/* ===== Left / Hero ===== */}
-      <div className="relative lg:w-3/5 overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-950 text-white flex flex-col">
+      <div className="relative lg:w-3/5 overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-950 text-white flex flex-col order-1">
         {/* Decorative animated blobs */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute -top-24 -start-24 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl animate-pulse" />
@@ -55,7 +55,7 @@ export default function LoginPage({ onAuth }) {
         </div>
 
         {/* Top bar */}
-        <div className="relative z-10 flex items-center justify-between p-5 sm:p-8">
+        <div className="relative z-10 flex items-center justify-between p-5 sm:p-8 pt-safe ps-safe pe-safe">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg">💪</div>
             <span className="font-bold text-lg tracking-tight">{t('auth.brand')}</span>
@@ -70,10 +70,10 @@ export default function LoginPage({ onAuth }) {
             {t('auth.hero.badge')}
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight mb-5">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight mb-4 sm:mb-5">
             {t('auth.hero.title')}
           </h1>
-          <p className="text-base sm:text-lg text-indigo-100/80 leading-relaxed mb-8 max-w-xl">
+          <p className="text-base sm:text-lg text-indigo-100/80 leading-relaxed mb-6 sm:mb-8 max-w-xl">
             {t('auth.hero.subtitle')}
           </p>
 
@@ -86,14 +86,14 @@ export default function LoginPage({ onAuth }) {
           </button>
 
           {/* Stats row */}
-          <div className="grid grid-cols-3 gap-3 max-w-md mb-10">
+          <div className="hidden sm:grid grid-cols-3 gap-3 max-w-md mb-10">
             <Stat value={t('auth.hero.stat1Value')} label={t('auth.hero.stat1Label')} />
             <Stat value={t('auth.hero.stat2Value')} label={t('auth.hero.stat2Label')} />
             <Stat value={t('auth.hero.stat3Value')} label={t('auth.hero.stat3Label')} />
           </div>
 
           {/* Feature grid */}
-          <div className="grid sm:grid-cols-2 gap-3 max-w-2xl">
+          <div className="hidden sm:grid sm:grid-cols-2 gap-3 max-w-2xl">
             {FEATURES.map(f => (
               <div key={f.titleKey} className="flex items-start gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 hover:bg-white/10 transition-colors">
                 <div className="text-2xl shrink-0">{f.icon}</div>
@@ -106,13 +106,13 @@ export default function LoginPage({ onAuth }) {
           </div>
         </div>
 
-        <div className="relative z-10 px-6 sm:px-10 lg:px-16 pb-6 text-xs text-indigo-200/50">
+        <div className="relative z-10 px-6 sm:px-10 lg:px-16 pb-6 text-xs text-indigo-200/50 hidden lg:block">
           {t('auth.footer')}
         </div>
       </div>
 
       {/* ===== Right / Auth card ===== */}
-      <div className="lg:w-2/5 bg-slate-50 flex items-center justify-center p-5 sm:p-8 lg:p-10">
+      <div className="lg:w-2/5 bg-slate-50 flex items-center justify-center p-5 sm:p-8 lg:p-10 pb-safe ps-safe pe-safe order-2 lg:order-none">
         <div ref={formRef} className="w-full max-w-md">
           <div className="bg-white rounded-3xl shadow-2xl shadow-indigo-900/10 border border-gray-100 p-7 sm:p-9">
             {/* Heading */}

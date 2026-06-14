@@ -35,7 +35,7 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
         lg:translate-x-0 lg:static lg:h-auto lg:min-h-screen
       `}>
         {/* Logo */}
-        <div className="p-5 border-b border-gray-700 flex items-center justify-between">
+        <div className="p-5 pt-safe border-b border-gray-700 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
               <span className="text-2xl">💪</span>
@@ -45,7 +45,8 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
           </div>
           <button
             onClick={onToggle}
-            className="lg:hidden text-gray-400 hover:text-white text-xl p-1"
+            aria-label="Close menu"
+            className="lg:hidden text-gray-400 hover:text-white text-2xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-800 shrink-0"
           >
             ×
           </button>

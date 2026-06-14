@@ -3,8 +3,46 @@
 @tailwind utilities;
 
 @layer base {
-  * {
+  /* Interactive elements get the colour transition — not every node on the page
+     (a global `*` transition is a real perf drag on low-end phones).
+     Anything else that needs it can add the `transition-colors` class directly. */
+  a, button, input, select, textarea, [role="button"] {
     @apply transition-colors duration-200;
+  }
+
+  /* Stop iOS Safari from zooming the page when a text field is focused:
+     inputs must be >= 16px. We bump them on small screens only. */
+  @media (max-width: 640px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
+  }
+
+  html {
+    /* Avoid the rubber-band white flash and lock horizontal overflow on phones */
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  /* Safe-area helpers for notched / rounded phones (viewport-fit=cover) */
+  .pt-safe { padding-top: env(safe-area-inset-top); }
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+  .ps-safe { padding-inline-start: env(safe-area-inset-left); }
+  .pe-safe { padding-inline-end: env(safe-area-inset-right); }
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh; /* dynamic viewport height — accounts for mobile browser chrome */
+  }
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
   }
 }
 

@@ -97,7 +97,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
   const todayWeek = todayIndex >= 0 && todayIndex <= 55 ? Math.floor(todayIndex / 7) + 1 : null;
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
+    <div className="flex h-screen-safe bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
       {/* Sidebar */}
       <Sidebar
         schedule={schedule}
@@ -113,35 +113,36 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top navbar */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-4 shrink-0 shadow-sm z-10">
+        <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 shrink-0 shadow-sm z-10 pt-safe ps-safe pe-safe">
           {/* Hamburger (mobile) */}
           <button
             onClick={() => setSidebarOpen(o => !o)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+            aria-label="Open menu"
+            className="lg:hidden w-11 h-11 -ms-1.5 flex flex-col items-center justify-center rounded-xl hover:bg-gray-100 text-gray-600 transition-colors shrink-0"
           >
             <span className="block w-5 h-0.5 bg-current mb-1"></span>
             <span className="block w-5 h-0.5 bg-current mb-1"></span>
             <span className="block w-5 h-0.5 bg-current"></span>
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {selectedWeek ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 <button
                   onClick={() => setSelectedWeek(null)}
-                  className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors"
+                  className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors shrink-0"
                 >
                   {t('nav.overview')}
                 </button>
-                <span className="text-gray-300">/</span>
-                <span className="text-gray-800 font-bold">{selectedWeek === 'insights' ? t('nav.insights') : selectedWeek === 'profile' ? t('nav.profile') : selectedWeek === 'settings' ? t('nav.settings') : selectedWeek === 'grocery' ? t('nav.grocery') : t('nav.weekNum', { num: selectedWeek })}</span>
+                <span className="text-gray-300 shrink-0">/</span>
+                <span className="text-gray-800 font-bold truncate">{selectedWeek === 'insights' ? t('nav.insights') : selectedWeek === 'profile' ? t('nav.profile') : selectedWeek === 'settings' ? t('nav.settings') : selectedWeek === 'grocery' ? t('nav.grocery') : t('nav.weekNum', { num: selectedWeek })}</span>
               </div>
             ) : (
-              <span className="text-gray-800 font-bold text-lg">{t('nav.overview')}</span>
+              <span className="text-gray-800 font-bold text-base sm:text-lg truncate">{t('nav.overview')}</span>
             )}
           </div>
 
-          <div className="ms-auto flex items-center gap-3">
+          <div className="ms-auto flex items-center gap-1.5 sm:gap-3 shrink-0">
             {!reminderConfig?.running ? (
               <button
                 onClick={startReminders}
@@ -174,15 +175,18 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
             {todayIndex >= 0 && todayIndex <= 55 && (
               <button
                 onClick={() => setSelectedDay(todayIndex)}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-xl text-sm font-bold transition-colors shadow-md"
+                title={t('action.logToday')}
+                className="bg-green-500 hover:bg-green-600 text-white px-3 sm:px-4 py-2 sm:py-1.5 rounded-xl text-sm font-bold transition-colors shadow-md shrink-0"
               >
-                {t('action.logToday')}
+                <span className="sm:hidden text-base leading-none">✏️</span>
+                <span className="hidden sm:inline">{t('action.logToday')}</span>
               </button>
             )}
             {todayWeek && selectedWeek !== todayWeek && (
               <button
                 onClick={() => setSelectedWeek(todayWeek)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold transition-colors shadow-md"
+                title={t('action.goToToday')}
+                className="hidden sm:block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold transition-colors shadow-md shrink-0"
               >
                 {t('action.goToToday')}
               </button>
@@ -197,14 +201,14 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <main className="flex-1 overflow-y-auto pb-safe ps-safe pe-safe">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
             {selectedWeek === null ? (
               /* Overview page */
               <div className="animate-fadeIn">
-                <div className="mb-8">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('overview.heading')}</h1>
-                  <p className="text-gray-500">{t('overview.subheading')}</p>
+                <div className="mb-6 sm:mb-8">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">{t('overview.heading')}</h1>
+                  <p className="text-sm sm:text-base text-gray-500">{t('overview.subheading')}</p>
                 </div>
 
                 <StatsBar config={config} days={days} stats={stats} />
