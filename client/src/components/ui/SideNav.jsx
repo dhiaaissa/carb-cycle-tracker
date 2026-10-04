@@ -13,7 +13,7 @@ export function BrandMark({ size = 28 }) {
       <g transform="rotate(-90 14 14)" fill="none" strokeWidth="4.5" strokeLinecap="butt">
         <circle cx="14" cy="14" r={r} stroke="rgb(var(--c-door-600))" strokeDasharray={arc(0.5)} />
         <circle cx="14" cy="14" r={r} stroke="rgb(var(--c-saffron-500))" strokeDasharray={arc(0.3)} strokeDashoffset={-c * 0.5} />
-        <circle cx="14" cy="14" r={r} stroke="rgb(var(--c-olive-500))" strokeDasharray={arc(0.2)} strokeDashoffset={-c * 0.8} />
+        <circle cx="14" cy="14" r={r} stroke="rgb(var(--c-olive-600))" strokeDasharray={arc(0.2)} strokeDashoffset={-c * 0.8} />
       </g>
     </svg>
   );

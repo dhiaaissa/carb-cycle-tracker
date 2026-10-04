@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
-import MacroStatsBar from './MacroStatsBar';
 import WeightChart from './WeightChart';
+import { formatDate, formatNumber } from '../lib/format';
+import { PageHeader, Panel, Ledger } from './ui/primitives';
 
 const PROGRAMME_NAME_KEY = {
   weight_loss: 'macroOverview.programmeWeightLoss',
@@ -8,111 +9,106 @@ const PROGRAMME_NAME_KEY = {
   recomp: 'macroOverview.programmeRecomp',
 };
 
+const MACROS = [
+  ['protein_g', 'macroOverview.protein', 'bg-door-600'],
+  ['carbs_g', 'macroOverview.carbs', 'bg-saffron-500'],
+  ['fat_g', 'macroOverview.fat', 'bg-olive-600'],
+];
+
 export default function MacroOverview({ stats, config, onSelectView }) {
   const { t } = useTranslation();
-  if (!stats) return <div className="text-center text-gray-500 py-10">{t('macroOverview.loading')}</div>;
+  if (!stats) return <p className="text-center text-sm text-ink-500 py-10" role="status">{t('macroOverview.loading')}</p>;
 
-  const programmeKey = PROGRAMME_NAME_KEY[config?.programme] || 'macroOverview.programmeRecomp';
-  const programmeName = t(programmeKey);
-
-  const weightChange = stats.weight_change;
-  const weightChangeLabel = weightChange == null ? '—' : `${weightChange > 0 ? '+' : ''}${weightChange} kg`;
+  const target = config?.day_targets?.flat;
+  const delta = target?.calories && config?.tdee ? target.calories - Math.round(config.tdee) : null;
+  const fmt = (d) => (d ? formatDate(d + 'T12:00:00', { day: 'numeric', month: 'short' }) : '');
 
   return (
-    <div className="">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('overview.heading')}</h1>
-        <p className="text-gray-500">{t('macroOverview.subtitle', { programme: programmeName })}</p>
-      </div>
+    <div>
+      <PageHeader
+        eyebrow={t(PROGRAMME_NAME_KEY[config?.programme] || 'macroOverview.programmeRecomp')}
+        title={t('macroOverview.title')}
+      />
 
-      <MacroStatsBar stats={stats} config={config} />
+      <Ledger className="mb-6" items={[
+        { label: t('macroStats.streak'), value: stats.streak, suffix: t('macroOverview.daysUnit') },
+        { label: t('macroStats.logged'), value: stats.total_completed },
+        { label: t('macroStats.perfectDays'), value: stats.total_perfect },
+        { label: t('macroStats.avgCalories'), value: stats.avg_calories ? formatNumber(stats.avg_calories) : '—', suffix: stats.avg_calories ? 'kcal' : '' },
+      ]} />
 
-      {/* Targets card */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">{t('macroOverview.dailyTargets')}</h2>
-        <div className="grid grid-cols-4 gap-3">
-          <Stat label={t('macroOverview.calories')} value={config?.day_targets?.flat?.calories} suffix={t('macroOverview.kcal')} color="indigo" />
-          <Stat label={t('macroOverview.protein')}  value={config?.day_targets?.flat?.protein_g} suffix={t('macroOverview.gramsSuffix')} color="red" />
-          <Stat label={t('macroOverview.carbs')}    value={config?.day_targets?.flat?.carbs_g}   suffix={t('macroOverview.gramsSuffix')} color="amber" />
-          <Stat label={t('macroOverview.fat')}      value={config?.day_targets?.flat?.fat_g}     suffix={t('macroOverview.gramsSuffix')} color="blue" />
-        </div>
-        <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs">
-          <Mini label={t('macroOverview.bmr')}  value={`${config?.bmr ?? '—'} ${t('macroOverview.kcal')}`} />
-          <Mini label={t('macroOverview.tdee')} value={`${config?.tdee ?? '—'} ${t('macroOverview.kcal')}`} />
-          <Mini label={t('macroOverview.adj')}  value={config?.day_targets?.flat?.calories && config?.tdee ? `${config.day_targets.flat.calories - Math.round(config.tdee) > 0 ? '+' : ''}${config.day_targets.flat.calories - Math.round(config.tdee)}` : '—'} />
-        </div>
-      </div>
-
-      {/* Weight progress */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">{t('macroOverview.weightProgress')}</h2>
-          <div className={`text-sm font-bold ${weightChange != null && weightChange < 0 ? 'text-emerald-600' : weightChange != null && weightChange > 0 ? 'text-amber-600' : 'text-gray-500'}`}>
-            {weightChangeLabel}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <Panel title={t('macroOverview.dailyTargets')}>
+          <div className="flex items-baseline gap-2">
+            <span className="font-display text-4xl font-semibold text-ink-900 tabular-nums">{target?.calories ? formatNumber(target.calories) : '—'}</span>
+            <span className="text-sm text-ink-500">{t('macroOverview.kcal')}</span>
           </div>
-        </div>
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <Mini label={t('macroOverview.start')} value={stats.start_weight ? `${stats.start_weight} kg` : '—'} />
-          <Mini label={t('macroOverview.now')}   value={stats.latest_weight ? `${stats.latest_weight} kg` : '—'} />
-          <Mini label={t('macroOverview.goal')}  value={stats.goal_weight ? `${stats.goal_weight} kg` : '—'} />
-        </div>
-        <WeightChart weightEntries={stats.weight_entries} />
+          <dl className="grid grid-cols-3 gap-3 mt-4">
+            {MACROS.map(([k, label, fill]) => (
+              <div key={k}>
+                <dt className="flex items-center gap-1.5 text-xs text-ink-500"><span aria-hidden="true" className={`w-2 h-2 rounded-[2px] ${fill}`} />{t(label)}</dt>
+                <dd className="font-display text-xl font-semibold text-ink-900 tabular-nums mt-0.5">{target?.[k] ?? '—'}<span className="text-sm font-sans font-normal text-ink-500 ms-0.5">g</span></dd>
+              </div>
+            ))}
+          </dl>
+          <p className="text-xs text-ink-500 mt-4 pt-3 border-t border-ink-200 tabular-nums">
+            {t('macroOverview.targetMath', {
+              bmr: config?.bmr ? formatNumber(config.bmr) : '—',
+              tdee: config?.tdee ? formatNumber(config.tdee) : '—',
+              delta: delta == null ? '—' : `${delta > 0 ? '+' : ''}${formatNumber(delta)}`,
+            })}
+          </p>
+        </Panel>
+
+        <Panel title={t('macroOverview.weightProgress')}>
+          <dl className="grid grid-cols-3 gap-3">
+            {[
+              ['macroOverview.start', stats.start_weight],
+              ['macroOverview.now', stats.latest_weight],
+              ['macroOverview.goal', stats.goal_weight],
+            ].map(([label, v]) => (
+              <div key={label}>
+                <dt className="text-xs text-ink-500">{t(label)}</dt>
+                <dd className="font-display text-xl font-semibold text-ink-900 tabular-nums mt-0.5">{v ?? '—'}{v != null && <span className="text-sm font-sans font-normal text-ink-500 ms-0.5">kg</span>}</dd>
+              </div>
+            ))}
+          </dl>
+          {stats.weight_change != null && (
+            <p className="text-sm mt-4 pt-3 border-t border-ink-200 text-ink-700 tabular-nums">
+              {t('macroOverview.changeSoFar', { change: `${stats.weight_change > 0 ? '+' : ''}${stats.weight_change}` })}
+            </p>
+          )}
+        </Panel>
       </div>
 
-      {/* Weeks grid */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">{t('macroOverview.jumpWeek')}</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {(stats.weekly_summary || []).map(ws => {
-            const isToday = ws.week_number === stats.current_week;
-            const completed = ws.completed_days;
-            return (
-              <button
-                key={ws.week_number}
-                onClick={() => onSelectView(`week-${ws.week_number}`)}
-                className={` bg-indigo-500 text-white rounded-xl p-4 text-start transition-all ${isToday ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  
-                  {isToday && <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold">{t('macroOverview.now2')}</span>}
-                </div>
-                <div className="font-bold text-lg">{t('nav.weekNum', { num: ws.week_number })}</div>
-                <div className="text-xs text-white/70">{ws.avg_calories ? t('macroOverview.avgKcal', { kcal: ws.avg_calories }) : t('macroOverview.noLogsYet')}</div>
-                <div className="mt-2 w-full bg-white/20 rounded-full h-1.5">
-                  <div className="bg-white rounded-full h-1.5" style={{ width: `${Math.round((completed / 7) * 100)}%` }} />
-                </div>
-                <div className="text-xs text-white/70 mt-1">{t('macroOverview.daysOf7', { done: completed })}</div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
+      <WeightChart weightEntries={stats.weight_entries} />
 
-function Stat({ label, value, suffix, color }) {
-  const colorMap = {
-    red: 'bg-red-50 text-red-600 border-red-100',
-    amber: 'bg-amber-50 text-amber-600 border-amber-100',
-    blue: 'bg-blue-50 text-blue-600 border-blue-100',
-    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100',
-  };
-  const c = colorMap[color] || colorMap.indigo;
-  return (
-    <div className={`rounded-xl border p-3 text-center ${c}`}>
-      <div className="text-[10px] font-bold">{label}</div>
-      <div className="text-2xl font-extrabold text-gray-800 mt-1">{value ?? '—'}</div>
-      <div className="text-[10px] text-gray-500">{suffix}</div>
-    </div>
-  );
-}
-
-function Mini({ label, value }) {
-  return (
-    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-      <div className="text-[10px] font-bold text-gray-500">{label}</div>
-      <div className="text-sm font-bold text-gray-800 mt-1">{value}</div>
+      {(stats.weekly_summary || []).length > 0 && (
+        <Panel title={t('macroOverview.weeks')} bodyClassName="px-5 sm:px-6 pb-3 pt-2">
+          <ol className="divide-y divide-ink-200">
+            {stats.weekly_summary.map((ws) => (
+              <li key={ws.week_number}>
+                <button type="button" onClick={() => onSelectView(`week-${ws.week_number}`)}
+                  className="w-full flex items-center gap-4 py-3 text-start hover:bg-ink-50 -mx-2 px-2 rounded-md">
+                  <span className="w-20 shrink-0 text-sm font-semibold text-ink-900">
+                    {t('nav.weekNum', { num: ws.week_number })}
+                    {ws.week_number === stats.current_week && <span className="block text-[11px] font-semibold text-door-700">{t('nav.now')}</span>}
+                  </span>
+                  <span className="hidden sm:block w-28 shrink-0 text-xs text-ink-500 tabular-nums">{fmt(ws.start_date)} – {fmt(ws.end_date)}</span>
+                  <span className="flex-1 flex gap-1" aria-label={t('macroOverview.daysOf7', { done: ws.completed_days })}>
+                    {Array.from({ length: 7 }, (_, i) => (
+                      <span key={i} className={`h-2 flex-1 max-w-6 rounded-[2px] border ${i < ws.completed_days ? 'bg-door-500 border-door-500' : 'border-ink-300'}`} />
+                    ))}
+                  </span>
+                  <span className="w-24 shrink-0 text-end text-sm text-ink-600 tabular-nums">
+                    {ws.avg_calories ? t('macroOverview.avgKcal', { kcal: formatNumber(ws.avg_calories) }) : t('macroOverview.noLogsYet')}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+        </Panel>
+      )}
     </div>
   );
 }

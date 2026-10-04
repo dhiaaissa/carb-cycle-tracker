@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CaretDown, MagnifyingGlass } from '@phosphor-icons/react';
+import { DayTypeSwatch } from './ui/primitives';
 import { FOODS, FOOD_CATEGORIES, sumMealNutrition } from '../lib/foods';
 import { WATER_GOALS } from '../lib/calories';
 
@@ -25,90 +27,64 @@ const SUGGESTED = {
 };
 
 const TYPES = [
-  { key: 'low',  labelKey: 'nutritionRef.lowCarbDay',  headerCls: 'bg-sky-500' },
-  { key: 'med',  labelKey: 'nutritionRef.medCarbDay',  headerCls: 'bg-yellow-500' },
-  { key: 'high', labelKey: 'nutritionRef.highCarbDay', headerCls: 'bg-green-500' },
+  { key: 'low',  labelKey: 'nutritionRef.lowCarbDay' },
+  { key: 'med',  labelKey: 'nutritionRef.medCarbDay' },
+  { key: 'high', labelKey: 'nutritionRef.highCarbDay' },
 ];
+
+const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 export default function NutritionReference() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const q = norm(query.trim());
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 mb-8 overflow-hidden">
+    <section className="bg-white border border-ink-200 rounded-xl mb-6">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="w-full p-5 text-start font-bold text-gray-700 flex items-center justify-between hover:bg-gray-50 transition-colors"
+        aria-expanded={open}
+        className="w-full px-5 sm:px-6 py-4 text-start flex items-center justify-between gap-4 hover:bg-ink-50 rounded-xl"
       >
-        <div className="flex items-center gap-3">
-          
-          <div>
-            <span className="text-lg font-bold">{t('nutritionRef.title')}</span>
-            <p className="text-xs text-gray-400 font-normal">{t('nutritionRef.subtitle')}</p>
-          </div>
+        <div>
+          <h2 className="font-display text-lg font-semibold text-ink-900">{t('nutritionRef.title')}</h2>
+          <p className="text-sm text-ink-500">{t('nutritionRef.subtitle')}</p>
         </div>
-        <span className="text-gray-400 text-xl" style={{ transform: open ? 'rotate(180deg)' : 'none', display: 'inline-block', transition: 'transform 0.2s' }}>▼</span>
+        <CaretDown size={20} className={`text-ink-500 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 
       {open && (
-        <div className="border-t-2 border-gray-100">
-          {/* Food database table */}
-          <div className="p-5 pb-3">
-            <h3 className="font-bold text-gray-700 mb-3 text-sm">{t('nutritionRef.ingredientRef')}</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-              {FOOD_CATEGORIES.map(cat =>
-                Object.values(FOODS).filter(f => f.category === cat.key).map(food => {
-                  const per = food.unit === 'g'
-                    ? t('nutritionRef.kcalPer100g', { kcal: food.kcal_per_100g })
-                    : t('nutritionRef.kcalPerUnit', { kcal: food.kcal_per_unit, unit: food.unit });
-                  return (
-                    <div key={food.id} className="bg-gray-50 rounded-xl p-2.5 border border-gray-200 flex items-center gap-2">
-                      <span className="text-xl shrink-0">{food.emoji}</span>
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold text-gray-800 truncate">{food.name}</div>
-                        <div className="text-xs text-gray-500">{per}</div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Suggested meal templates */}
-          <div className="px-5 pb-5">
-            <h3 className="font-bold text-gray-700 mb-3 text-sm">{t('nutritionRef.suggestedTemplates')}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {TYPES.map(ty => {
+        <div className="border-t border-ink-200 px-5 sm:px-6 py-5 space-y-8">
+          <div>
+            <h3 className="text-sm font-semibold text-ink-900 mb-3">{t('nutritionRef.suggestedTemplates')}</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              {TYPES.map((ty) => {
                 const suggested = SUGGESTED[ty.key];
-                const dayTotal = Object.values(suggested).reduce((sum, items) => {
-                  return sum + sumMealNutrition(items).kcal;
-                }, 0);
-
+                const dayTotal = Object.values(suggested).reduce((sum, items) => sum + sumMealNutrition(items).kcal, 0);
                 return (
-                  <div key={ty.key} className="rounded-xl overflow-hidden border border-gray-200">
-                    <div className={`${ty.headerCls} text-white px-4 py-3`}>
-                      <div className="font-bold">{t(ty.labelKey)}</div>
-                      <div className="text-xs text-white/80 mt-0.5">
-                        {t('nutritionRef.dayTotalKcal', { kcal: Math.round(dayTotal), liters: WATER_GOALS[ty.key] })}
-                      </div>
+                  <div key={ty.key}>
+                    <div className="flex items-center gap-2 pb-2 border-b border-ink-200">
+                      <DayTypeSwatch type={ty.key} className="w-3 h-3" />
+                      <span className="font-semibold text-sm text-ink-900">{t(ty.labelKey)}</span>
                     </div>
-                    <div className="p-3 space-y-2">
+                    <p className="text-xs text-ink-500 mt-1.5 mb-3 tabular-nums">{t('nutritionRef.dayTotalKcal', { kcal: Math.round(dayTotal), liters: WATER_GOALS[ty.key] })}</p>
+                    <div className="space-y-3">
                       {['meal1', 'meal2', 'meal3', 'meal4'].map((mk, i) => {
                         const items = suggested[mk];
-                        const mealKcal = Math.round(sumMealNutrition(items).kcal);
                         return (
                           <div key={mk} className="text-xs">
-                            <div className="flex justify-between font-bold text-gray-700 mb-0.5">
+                            <div className="flex justify-between font-semibold text-ink-800 mb-0.5">
                               <span>{t('weekPage.mealNum', { num: i + 1 })}</span>
-                              <span>{t('nutritionRef.mealKcal', { kcal: mealKcal })}</span>
+                              <span className="tabular-nums font-normal text-ink-500">{t('nutritionRef.mealKcal', { kcal: Math.round(sumMealNutrition(items).kcal) })}</span>
                             </div>
-                            <div className="text-gray-500 leading-relaxed">
+                            <div className="text-ink-600 leading-relaxed">
                               {items.map((item, j) => {
                                 const f = FOODS[item.food_id];
                                 return (
                                   <span key={j}>
-                                    {f?.emoji} {item.amount}{f?.unit === 'g' ? 'g' : f?.unit === 'piece' ? 'x' : ''} {f?.name.split(' ')[0]}
+                                    {item.amount}{f?.unit === 'g' ? 'g' : f?.unit === 'piece' ? '×' : ''} {f?.name.split(' (')[0] ?? item.food_id}
                                     {j < items.length - 1 ? ' · ' : ''}
                                   </span>
                                 );
@@ -123,8 +99,56 @@ export default function NutritionReference() {
               })}
             </div>
           </div>
+
+          <div>
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <h3 className="text-sm font-semibold text-ink-900">{t('nutritionRef.ingredientRef')}</h3>
+              <label className="relative">
+                <span className="sr-only">{t('grocery.search')}</span>
+                <MagnifyingGlass size={16} className="absolute start-2.5 top-1/2 -translate-y-1/2 text-ink-400" aria-hidden="true" />
+                <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('grocery.search')}
+                  className="h-9 w-56 ps-8 pe-3 rounded-lg border border-ink-300 bg-white text-sm text-ink-900 placeholder:text-ink-400 outline-none focus:border-door-600 focus:ring-2 focus:ring-door-200" />
+              </label>
+            </div>
+            <div className="max-h-[420px] overflow-y-auto border border-ink-200 rounded-lg" data-scroll>
+              <table className="w-full text-sm tabular-nums">
+                <thead className="sticky top-0 bg-white">
+                  <tr className="text-xs text-ink-500 border-b border-ink-200">
+                    <th className="px-3 py-2 text-start font-medium">{t('nutritionRef.food')}</th>
+                    <th className="px-3 py-2 text-end font-medium">kcal</th>
+                    <th className="px-3 py-2 text-end font-medium">{t('macro.protein_short')}</th>
+                    <th className="px-3 py-2 text-end font-medium">{t('macro.carbs_short')}</th>
+                    <th className="px-3 py-2 text-end font-medium">{t('macro.fat_short')}</th>
+                    <th className="px-3 py-2 text-end font-medium">{t('nutritionRef.per')}</th>
+                  </tr>
+                </thead>
+                {FOOD_CATEGORIES.map((cat) => {
+                  const rows = Object.values(FOODS).filter((f) => f.category === cat.key && (!q || norm(f.name).includes(q)));
+                  if (!rows.length) return null;
+                  return (
+                    <tbody key={cat.key} className="divide-y divide-ink-200">
+                      <tr><th colSpan={6} className="px-3 pt-3 pb-1 text-start text-xs font-semibold text-ink-600 bg-ink-50">{t(`foodCat.${cat.key}`)}</th></tr>
+                      {rows.map((f) => {
+                        const g = f.unit === 'g';
+                        return (
+                          <tr key={f.id}>
+                            <td className="px-3 py-1.5 text-ink-900"><span aria-hidden="true" className="me-2">{f.emoji}</span>{f.name}</td>
+                            <td className="px-3 py-1.5 text-end text-ink-900 font-medium">{g ? f.kcal_per_100g : f.kcal_per_unit}</td>
+                            <td className="px-3 py-1.5 text-end text-ink-600">{g ? f.protein_per_100g : f.protein_per_unit}</td>
+                            <td className="px-3 py-1.5 text-end text-ink-600">{g ? f.carbs_per_100g : f.carbs_per_unit}</td>
+                            <td className="px-3 py-1.5 text-end text-ink-600">{g ? f.fat_per_100g : f.fat_per_unit}</td>
+                            <td className="px-3 py-1.5 text-end text-ink-500 text-xs">{g ? '100 g' : f.unit}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  );
+                })}
+              </table>
+            </div>
+          </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

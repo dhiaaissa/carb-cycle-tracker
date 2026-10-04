@@ -23,9 +23,9 @@ lime-washed walls, with saffron and olive as the food colours.
 | `page` `#F3F1EA` | Page background (lime-wash) | `bg-page`, also the `theme-color` meta |
 | `bg-white` | Raised surfaces (panels, sheets) | Becomes warm charcoal in dark mode |
 
-Legacy Tailwind names (`indigo`, `purple`, `green`, `amber`, `red`, `gray`…) are
-aliased onto these scales in `client/tailwind.config.js`, so old markup can't
-reintroduce stock colours. New code should use the brand names.
+All components use the brand names. Stock Tailwind names (`indigo`, `gray`,
+`green`…) are still aliased onto these scales in `client/tailwind.config.js` as a
+safety net, so a stray stock class can't reintroduce off-brand colours.
 
 Dark mode mirrors every scale (see the config). It is a user choice
 (system / light / dark), not the default.
@@ -64,6 +64,29 @@ Dark mode mirrors every scale (see the config). It is a user choice
 - `BrandMark` — a ring in three arcs (door / saffron / olive), the three day types.
 - Week strips in the sidebar — seven small squares per week instead of a
   progress bar.
+
+## Page building blocks
+
+Inner pages are composed only from `client/src/components/ui/primitives.jsx`:
+`PageHeader` (context line + condensed title + actions), `Pager`, `Panel`,
+`Ledger` (a hairline-divided row of label/value pairs — use this instead of
+stat cards), underline `Tabs`, `DayTypeChip`, `DayTypeSwatch`, `EmptyState`,
+`TextButton`. Lists are hairline-divided rows, not stacks of cards.
+
+## Charts
+
+Colours in charts were validated with the dataviz skill's palette checker
+(CVD separation, normal-vision floor, contrast) in both themes:
+
+- Macros (adjacent in stacked bars): protein `door-600`, carbs `saffron-500`,
+  fat `olive-600`. Not `olive-500` — it is indistinguishable from saffron for
+  protanopes.
+- Adherence is **diverging** around 100%: under `door-500`, on target
+  `ink-400` (neutral midpoint), over `saffron-500`.
+- Every chart has a legend or direct label, a hover/tap tooltip, and a
+  "Show as table" view. Weight shows the 7-day trend line over daily weigh-ins.
+
+Re-run the validator if you change any of these.
 
 ## Motion
 

@@ -441,10 +441,10 @@
   "insights.mostEaten": "Most Eaten Foods",
   "insights.timesEaten": "{{count}} times",
   "insights.bestDay": "Best Day",
-  "insights.needsWork": "Needs Work",
+  "insights.needsWork": "Toughest day",
   "insights.dayScoreAndKcal": "Score {{score}} · {{kcal}} kcal",
   "insights.dailyAdherence": "Daily Calorie Adherence",
-  "insights.legendOnTarget": "85-115% (on target)",
+  "insights.legendOnTarget": "On target (85–115%)",
   "insights.legendUnder": "Under 85%",
   "insights.legendOver": "Above 115%",
 
@@ -842,5 +842,56 @@
   "day.rest": "Rest day",
   "common.close": "Close",
   "weight.title": "Weight trend",
-  "weight.needTwo": "Log your weight on at least two days to see the trend."
+  "weight.needTwo": "Log your weight on at least two days to see the trend.",
+
+  "weekPage.mealsLogged": "{{count}} of 4 meals logged",
+
+  "insights.showTable": "Show as table",
+  "insights.showChart": "Show as chart",
+  "insights.chartAria": "Daily calories as a share of target over {{days}} days, averaging {{avg}}%",
+  "insights.perDay": "a day",
+  "insights.splitByCalories": "Share of calories, not grams — fat has 9 kcal per gram, protein and carbs 4.",
+
+  "foodCat.proteines": "Protein",
+  "foodCat.glucides": "Carbs & grains",
+  "foodCat.legumes": "Vegetables",
+  "foodCat.fruits": "Fruit",
+  "foodCat.snacks": "Snacks & nuts",
+  "foodCat.laitiers": "Dairy",
+  "foodCat.matieres_grasses": "Fats & oils",
+  "foodCat.sucres": "Sweets & condiments",
+  "foodCat.custom": "My foods",
+  "grocery.yourList": "Your list",
+  "grocery.search": "Search foods",
+  "grocery.categories": "Categories",
+  "grocery.allCategories": "All",
+  "grocery.noResults": "No foods match that search.",
+  "grocery.copied": "Copied",
+  "grocery.less": "Less {{name}}",
+  "grocery.more": "More {{name}}",
+  "grocery.remove": "Remove {{name}}",
+
+  "settings.everyDay": "Every day",
+
+  "macroOverview.title": "Overview",
+  "macroOverview.daysUnit": "days",
+  "macroOverview.weeks": "Weeks",
+  "macroOverview.targetMath": "BMR {{bmr}} · TDEE {{tdee}} · {{delta}} kcal/day for your goal",
+  "macroOverview.changeSoFar": "{{change}} kg so far",
+  "weight.date": "Date",
+  "weight.scale": "Scale",
+  "weight.trend": "Trend",
+  "weight.trendNow": "trend weight",
+  "weight.since": "since {{date}}",
+  "weight.trendLegend": "7-day trend",
+  "weight.scaleLegend": "Daily weigh-in",
+  "weight.aria": "Weight trend from {{from}} kg to {{to}} kg over {{days}} weigh-ins",
+
+  "macroInsights.weekCol": "Week",
+  "macroInsights.daysCol": "Days logged",
+
+  "macroWeek.macroShort": "P {{p}} · C {{c}} · F {{f}} g",
+
+  "nutritionRef.food": "Food",
+  "nutritionRef.per": "Per"
 }

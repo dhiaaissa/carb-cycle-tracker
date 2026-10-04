@@ -441,10 +441,10 @@
   "insights.mostEaten": "الأطعمة الأكثر استهلاكًا",
   "insights.timesEaten": "{{count}} مرة",
   "insights.bestDay": "أفضل يوم",
-  "insights.needsWork": "يحتاج تحسين",
+  "insights.needsWork": "اليوم الأصعب",
   "insights.dayScoreAndKcal": "النتيجة {{score}} · {{kcal}} سعرة",
   "insights.dailyAdherence": "الالتزام اليومي بالسعرات",
-  "insights.legendOnTarget": "85-115% (ضمن الهدف)",
+  "insights.legendOnTarget": "ضمن الهدف (85–115%)",
   "insights.legendUnder": "أقل من 85%",
   "insights.legendOver": "فوق 115%",
 
@@ -842,5 +842,56 @@
   "day.rest": "يوم راحة",
   "common.close": "إغلاق",
   "weight.title": "تطوّر الوزن",
-  "weight.needTwo": "سجّل وزنك في يومين على الأقل لرؤية التطوّر."
+  "weight.needTwo": "سجّل وزنك في يومين على الأقل لرؤية التطوّر.",
+
+  "weekPage.mealsLogged": "{{count}} من 4 وجبات مسجلة",
+
+  "insights.showTable": "عرض كجدول",
+  "insights.showChart": "عرض كرسم بياني",
+  "insights.chartAria": "السعرات اليومية كنسبة من الهدف خلال {{days}} يومًا، بمتوسط {{avg}}%",
+  "insights.perDay": "يوميًا",
+  "insights.splitByCalories": "نسبة من السعرات وليس الغرامات — الدهون 9 سعرات لكل غرام، والبروتين والكربوهيدرات 4.",
+
+  "foodCat.proteines": "بروتينات",
+  "foodCat.glucides": "نشويات وحبوب",
+  "foodCat.legumes": "خضروات",
+  "foodCat.fruits": "فواكه",
+  "foodCat.snacks": "وجبات خفيفة ومكسرات",
+  "foodCat.laitiers": "ألبان",
+  "foodCat.matieres_grasses": "دهون وزيوت",
+  "foodCat.sucres": "سكريات وتوابل",
+  "foodCat.custom": "أطعمتي",
+  "grocery.yourList": "قائمتك",
+  "grocery.search": "ابحث عن طعام",
+  "grocery.categories": "الفئات",
+  "grocery.allCategories": "الكل",
+  "grocery.noResults": "لا توجد أطعمة مطابقة.",
+  "grocery.copied": "تم النسخ",
+  "grocery.less": "أقل من {{name}}",
+  "grocery.more": "أكثر من {{name}}",
+  "grocery.remove": "إزالة {{name}}",
+
+  "settings.everyDay": "كل يوم",
+
+  "macroOverview.title": "نظرة عامة",
+  "macroOverview.daysUnit": "أيام",
+  "macroOverview.weeks": "الأسابيع",
+  "macroOverview.targetMath": "الأيض الأساسي {{bmr}} · إجمالي الإنفاق {{tdee}} · {{delta}} سعرة/يوم لهدفك",
+  "macroOverview.changeSoFar": "{{change}} كغ حتى الآن",
+  "weight.date": "التاريخ",
+  "weight.scale": "الميزان",
+  "weight.trend": "الاتجاه",
+  "weight.trendNow": "الوزن الاتجاهي",
+  "weight.since": "منذ {{date}}",
+  "weight.trendLegend": "اتجاه 7 أيام",
+  "weight.scaleLegend": "وزن اليوم",
+  "weight.aria": "اتجاه الوزن من {{from}} كغ إلى {{to}} كغ خلال {{days}} وزنات",
+
+  "macroInsights.weekCol": "الأسبوع",
+  "macroInsights.daysCol": "أيام مسجّلة",
+
+  "macroWeek.macroShort": "ب {{p}} · ك {{c}} · د {{f}} غ",
+
+  "nutritionRef.food": "الطعام",
+  "nutritionRef.per": "لكل"
 }

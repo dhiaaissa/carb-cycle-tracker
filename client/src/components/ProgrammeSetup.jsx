@@ -9,10 +9,10 @@ import {
 } from '../../../shared/nutrition.js';
 
 const PROGRAMMES = [
-  { id: 'carb_cycle', color: 'bg-indigo-500' },
-  { id: 'weight_loss', color: 'bg-sky-500' },
-  { id: 'muscle_gain', color: 'bg-violet-500' },
-  { id: 'recomp', color: 'bg-emerald-500' },
+  { id: 'carb_cycle', color: 'bg-door-500' },
+  { id: 'weight_loss', color: 'bg-door-500' },
+  { id: 'muscle_gain', color: 'bg-door-500' },
+  { id: 'recomp', color: 'bg-olive-500' },
 ];
 
 const PROGRAMME_NAME_KEY = {
@@ -31,17 +31,17 @@ const round1 = (v) => Math.round(v * 10) / 10;
 function Choice({ legend, options, value, onChange, columns = 'grid-cols-2', hideLegend = false }) {
   return (
     <fieldset>
-      <legend className={hideLegend ? 'sr-only' : 'block text-sm font-semibold text-gray-700 mb-1.5'}>{legend}</legend>
+      <legend className={hideLegend ? 'sr-only' : 'block text-sm font-semibold text-ink-700 mb-1.5'}>{legend}</legend>
       <div className={`grid ${columns} gap-2`}>
         {options.map((o) => {
           const checked = value === o.value;
           return (
             <label key={o.value}
-              className={`relative cursor-pointer rounded-xl border px-3 py-2.5 transition-colors focus-within:ring-2 focus-within:ring-indigo-400 ${
- checked ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
+              className={`relative cursor-pointer rounded-xl border px-3 py-2.5 transition-colors focus-within:ring-2 focus-within:ring-door-400 ${
+ checked ? 'border-door-500 bg-door-50' : 'border-ink-200 hover:border-ink-300 bg-white'}`}>
               <input type="radio" className="sr-only" checked={checked} onChange={() => onChange(o.value)} />
-              <span className={`block font-bold text-sm ${checked ? 'text-indigo-700' : 'text-gray-800'}`}>{o.label}</span>
-              {o.detail && <span className="block text-xs text-gray-500 mt-0.5">{o.detail}</span>}
+              <span className={`block font-bold text-sm ${checked ? 'text-door-700' : 'text-ink-800'}`}>{o.label}</span>
+              {o.detail && <span className="block text-xs text-ink-500 mt-0.5">{o.detail}</span>}
             </label>
           );
         })}
@@ -53,16 +53,16 @@ function Choice({ legend, options, value, onChange, columns = 'grid-cols-2', hid
 function Field({ id, label, hint, error, suffix, ...input }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
+      <label htmlFor={id} className="block text-sm font-semibold text-ink-700 mb-1">{label}</label>
       <div className="relative">
         <input id={id} type="number" inputMode="decimal"
           aria-invalid={!!error} aria-describedby={error ? `${id}-err` : hint ? `${id}-hint` : undefined}
-          className={`w-full px-3 py-2.5 border rounded-xl bg-white text-gray-800 outline-none focus:ring-2 focus:ring-indigo-500 ${suffix ? 'pe-10' : ''} ${error ? 'border-amber-500' : 'border-gray-200'}`}
+          className={`w-full px-3 py-2.5 border rounded-xl bg-white text-ink-800 outline-none focus:ring-2 focus:ring-door-500 ${suffix ? 'pe-10' : ''} ${error ? 'border-saffron-500' : 'border-ink-200'}`}
           {...input} />
-        {suffix && <span className="absolute inset-y-0 end-3 flex items-center text-xs text-gray-400 pointer-events-none">{suffix}</span>}
+        {suffix && <span className="absolute inset-y-0 end-3 flex items-center text-xs text-ink-400 pointer-events-none">{suffix}</span>}
       </div>
-      {error ? <p id={`${id}-err`} className="text-xs text-amber-700 mt-1">{error}</p>
-        : hint ? <p id={`${id}-hint`} className="text-xs text-gray-500 mt-1">{hint}</p> : null}
+      {error ? <p id={`${id}-err`} className="text-xs text-saffron-700 mt-1">{error}</p>
+        : hint ? <p id={`${id}-hint`} className="text-xs text-ink-500 mt-1">{hint}</p> : null}
     </div>
   );
 }
@@ -197,13 +197,13 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
     : t('setup.rate.kg', { rate: r }));
 
   return (
-    <div className="theme-fixed min-h-screen-safe bg-indigo-900 flex items-center justify-center p-4">
+    <div className="theme-fixed min-h-screen-safe bg-door-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Progress */}
         <ol className="flex items-center justify-center gap-2 mb-5" aria-label={t('setup.progress')}>
           {STEPS.map((s, i) => (
             <li key={s} aria-current={i === step ? 'step' : undefined}
-              className={`h-1.5 rounded-full transition-all ${i === step ? 'w-10 bg-indigo-200' : i < step ? 'w-6 bg-indigo-300/70' : 'w-6 bg-indigo-300/25'}`}>
+              className={`h-1.5 rounded-full transition-all ${i === step ? 'w-10 bg-door-200' : i < step ? 'w-6 bg-door-300/70' : 'w-6 bg-door-300/25'}`}>
               <span className="sr-only">{t('setup.stepOf', { n: i + 1, total: STEPS.length })}</span>
             </li>
           ))}
@@ -212,7 +212,7 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
         <div className="text-center mb-6">
           <div className="text-sm text-door-200 mb-2">{t('setup.stepOf', { n: step + 1, total: STEPS.length })}</div>
           <h1 className="text-2xl font-bold text-white mb-1">{t(`setup.${stepKey}.title`)}</h1>
-          <p className="text-indigo-200 text-sm">{t(`setup.${stepKey}.subtitle`)}</p>
+          <p className="text-door-200 text-sm">{t(`setup.${stepKey}.subtitle`)}</p>
         </div>
 
         <div className="theme-auto bg-white rounded-2xl p-6 sm:p-8">
@@ -224,11 +224,11 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                   const checked = programme === p.id;
                   return (
                     <label key={p.id}
-                      className={`cursor-pointer text-start p-4 rounded-xl border transition-all focus-within:ring-2 focus-within:ring-indigo-400 ${checked ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
+                      className={`cursor-pointer text-start p-4 rounded-xl border transition-all focus-within:ring-2 focus-within:ring-door-400 ${checked ? 'border-door-500 ring-2 ring-door-200 bg-door-50' : 'border-ink-200 hover:border-ink-300 bg-white'}`}>
                       <input type="radio" name="programme" className="sr-only" checked={checked} onChange={() => setProgramme(p.id)} />
                       <span aria-hidden="true" className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${p.color} text-2xl mb-2`}></span>
-                      <span className="block font-bold text-gray-800">{t(PROGRAMME_NAME_KEY[p.id])}</span>
-                      <span className="block text-xs text-gray-500 mt-1 leading-relaxed">{t(`setup.programme.${p.id}.desc`)}</span>
+                      <span className="block font-bold text-ink-800">{t(PROGRAMME_NAME_KEY[p.id])}</span>
+                      <span className="block text-xs text-ink-500 mt-1 leading-relaxed">{t(`setup.programme.${p.id}.desc`)}</span>
                     </label>
                   );
                 })}
@@ -251,14 +251,14 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                     onChange={(e) => setHeightCm(e.target.value)} placeholder="175" error={fieldError('height')} />
                 ) : (
                   <fieldset>
-                    <legend className="block text-sm font-semibold text-gray-700 mb-1">{t('setup.height')}</legend>
+                    <legend className="block text-sm font-semibold text-ink-700 mb-1">{t('setup.height')}</legend>
                     <div className="grid grid-cols-2 gap-1.5">
                       <Field id="height-ft" label={<span className="sr-only">{t('setup.ft')}</span>} suffix="ft" value={heightFt}
                         onChange={(e) => setHeightFt(e.target.value)} placeholder="5" />
                       <Field id="height-in" label={<span className="sr-only">{t('setup.in')}</span>} suffix="in" value={heightIn}
                         onChange={(e) => setHeightIn(e.target.value)} placeholder="9" />
                     </div>
-                    {fieldError('height') && <p className="text-xs text-amber-700 mt-1">{fieldError('height')}</p>}
+                    {fieldError('height') && <p className="text-xs text-saffron-700 mt-1">{fieldError('height')}</p>}
                   </fieldset>
                 )}
                 <Field id="weight" label={t('setup.weight')} suffix={units === 'imperial' ? 'lb' : 'kg'} step="0.1"
@@ -306,14 +306,14 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                 options={Object.keys(MACRO_PRESETS).map((p) => ({ value: p, label: t(`setup.preset.${p}`), detail: t(`setup.preset.${p}Detail`) }))} />
 
               {plan?.ok && (
-                <section aria-live="polite" className="rounded-2xl bg-indigo-50 border border-indigo-100 p-5">
+                <section aria-live="polite" className="rounded-2xl bg-door-50 border border-door-100 p-5">
                   {isCycle ? (
                     <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
                       {['low', 'med', 'high'].map((type) => (
-                        <div key={type} className="text-center bg-white rounded-xl p-3 border border-indigo-100">
-                          <div className="text-[11px] font-bold text-indigo-600">{t(`dayType.${type}Short`)}</div>
-                          <div className="text-xl sm:text-2xl font-extrabold text-gray-800 my-0.5 tabular-nums">{formatNumber(plan.dayTargets[type].calories)}</div>
-                          <dl className="text-[11px] text-gray-600 tabular-nums leading-snug">
+                        <div key={type} className="text-center bg-white rounded-xl p-3 border border-door-100">
+                          <div className="text-[11px] font-bold text-door-600">{t(`dayType.${type}Short`)}</div>
+                          <div className="text-xl sm:text-2xl font-extrabold text-ink-800 my-0.5 tabular-nums">{formatNumber(plan.dayTargets[type].calories)}</div>
+                          <dl className="text-[11px] text-ink-600 tabular-nums leading-snug">
                             {[['protein', 'protein_g'], ['carbs', 'carbs_g'], ['fat', 'fat_g']].map(([m, k]) => (
                               <div key={m} className="flex justify-center gap-1">
                                 <dt>{t(`macro.${m}_short`)}</dt><dd>{plan.dayTargets[type][k]}g</dd>
@@ -325,14 +325,14 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                     </div>
                   ) : (
                     <div className="text-center mb-4">
-                      <div className="text-xs font-bold text-indigo-600">{t('setup.dailyCalorieTarget')}</div>
-                      <div className="text-5xl font-extrabold text-gray-800 my-1 tabular-nums">{formatNumber(plan.calories)}</div>
-                      <div className="text-sm text-gray-600">{t('setup.macroLine', { p: plan.protein_g, c: plan.carbs_g, f: plan.fat_g })}</div>
+                      <div className="text-xs font-bold text-door-600">{t('setup.dailyCalorieTarget')}</div>
+                      <div className="text-5xl font-extrabold text-ink-800 my-1 tabular-nums">{formatNumber(plan.calories)}</div>
+                      <div className="text-sm text-ink-600">{t('setup.macroLine', { p: plan.protein_g, c: plan.carbs_g, f: plan.fat_g })}</div>
                     </div>
                   )}
 
-                  <h2 className="text-sm font-bold text-gray-800 mb-1.5">{t('setup.plan.howTitle')}</h2>
-                  <ul className="text-sm text-gray-700 space-y-1 list-disc ps-5">
+                  <h2 className="text-sm font-bold text-ink-800 mb-1.5">{t('setup.plan.howTitle')}</h2>
+                  <ul className="text-sm text-ink-700 space-y-1 list-disc ps-5">
                     <li>{t('setup.plan.tdeeLine', {
                       tdee: formatNumber(plan.tdee), bmr: formatNumber(plan.bmr),
                       method: t(`setup.method.${plan.bmrMethod}`), factor: ACTIVITY_LEVELS[activity].factor,
@@ -344,32 +344,32 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                   </ul>
 
                   {plan.warnings.length > 0 && (
-                    <div className="mt-3 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl p-3 space-y-1" role="status">
+                    <div className="mt-3 bg-saffron-50 border border-saffron-200 text-saffron-800 text-sm rounded-xl p-3 space-y-1" role="status">
                       {plan.warnings.map((w) => (
                         <p key={w.code}>{t(`setup.warning.${w.code}`, { ...w, applied: w.applied != null ? rateLabel(w.applied) : undefined })}</p>
                       ))}
                     </div>
                   )}
-                  <p className="text-xs text-gray-500 mt-3">{t('setup.plan.adjustHint')}</p>
+                  <p className="text-xs text-ink-500 mt-3">{t('setup.plan.adjustHint')}</p>
                 </section>
               )}
             </div>
           )}
 
-          {error && <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-lg p-3 mt-4" role="alert">{error}</div>}
+          {error && <div className="bg-saffron-50 border border-saffron-200 text-saffron-800 text-sm rounded-lg p-3 mt-4" role="alert">{error}</div>}
 
           <div className="flex gap-2 mt-6">
             {step === 0
-              ? onSkip && <button type="button" onClick={onSkip} className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50">{t('setup.skip')}</button>
-              : <button type="button" onClick={() => setStep((s) => s - 1)} className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50">{t('setup.back')}</button>}
+              ? onSkip && <button type="button" onClick={onSkip} className="flex-1 py-3 rounded-xl border border-ink-200 text-ink-600 font-bold hover:bg-ink-50">{t('setup.skip')}</button>
+              : <button type="button" onClick={() => setStep((s) => s - 1)} className="flex-1 py-3 rounded-xl border border-ink-200 text-ink-600 font-bold hover:bg-ink-50">{t('setup.back')}</button>}
             {stepKey === 'plan' ? (
               <button type="button" onClick={handleSubmit} disabled={submitting || !plan?.ok}
-                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold">
+                className="flex-1 py-3 rounded-xl bg-door-600 hover:bg-door-700 disabled:opacity-50 text-white font-bold">
                 {submitting ? t('setup.savingDots') : t('setup.startTracking')}
               </button>
             ) : (
               <button type="button" onClick={next} disabled={!programme}
-                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold">
+                className="flex-1 py-3 rounded-xl bg-door-600 hover:bg-door-700 disabled:opacity-50 text-white font-bold">
                 {t('setup.continue')}
               </button>
             )}

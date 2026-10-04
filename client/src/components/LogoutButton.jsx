@@ -34,19 +34,19 @@ export default function LogoutButton({ onLogout, username, compact = false }) {
             onClick={(e) => e.stopPropagation()}
           >
             
-            <h3 className="text-xl font-extrabold text-gray-900 mb-1">{t('logout.confirmTitle')}</h3>
-            {username && <p className="text-sm font-semibold text-indigo-600 mb-1">@{username}</p>}
-            <p className="text-sm text-gray-500 mb-6">{t('logout.confirmText')}</p>
+            <h3 className="text-xl font-extrabold text-ink-900 mb-1">{t('logout.confirmTitle')}</h3>
+            {username && <p className="text-sm font-semibold text-door-600 mb-1">@{username}</p>}
+            <p className="text-sm text-ink-500 mb-6">{t('logout.confirmText')}</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirming(false)}
-                className="flex-1 py-3 rounded-2xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50 transition-colors"
+                className="flex-1 py-3 rounded-2xl border border-ink-200 text-ink-600 font-bold hover:bg-ink-50 transition-colors"
               >
                 {t('logout.cancel')}
               </button>
               <button
                 onClick={onLogout}
-                className="flex-1 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold transition-colors"
+                className="flex-1 py-3 rounded-2xl bg-clay-600 hover:bg-clay-700 text-white font-bold transition-colors"
               >
                 {t('logout.confirm')}
               </button>

@@ -4,9 +4,9 @@ import { formatNumber } from '../lib/format';
 import { MEAL_KEYS, MEAL_ICON_COMPONENTS, MEAL_NUM, computeMealTotals } from '../lib/mealTotals';
 
 const MACROS = [
-  { key: 'protein', targetKey: 'protein_g', color: 'text-violet-500', labelKey: 'macro.protein' },
-  { key: 'carbs',   targetKey: 'carbs_g',   color: 'text-amber-500',  labelKey: 'macro.carbs' },
-  { key: 'fat',     targetKey: 'fat_g',     color: 'text-teal-500',   labelKey: 'macro.fat' },
+  { key: 'protein', targetKey: 'protein_g', color: 'text-door-600', labelKey: 'macro.protein' },
+  { key: 'carbs',   targetKey: 'carbs_g',   color: 'text-saffron-500',  labelKey: 'macro.carbs' },
+  { key: 'fat',     targetKey: 'fat_g',     color: 'text-olive-600',   labelKey: 'macro.fat' },
 ];
 
 /**
@@ -38,7 +38,7 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
   const over = left < 0;
 
   return (
-    <section aria-labelledby="today-title" className="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-6 mb-6">
+    <section aria-labelledby="today-title" className="bg-white rounded-3xl border border-ink-200 shadow-sm p-5 sm:p-6 mb-6">
       <div className="flex items-center justify-between gap-3 mb-5">
         <h2 id="today-title" className="font-display text-lg font-semibold text-ink-900">{title ?? t('today.title')}</h2>
         {badge}
@@ -48,20 +48,20 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
         {/* Calories remaining */}
         <div className="flex flex-col items-center">
           <ProgressRing
-            value={eaten} max={goal} size={176} stroke={14} colorClass="text-indigo-500"
+            value={eaten} max={goal} size={176} stroke={14} colorClass="text-door-600"
             label={t('today.ringLabel', { eaten: formatNumber(eaten), goal: formatNumber(goal) })}
           >
             <span className={`font-display text-[40px] leading-none font-semibold tabular-nums ${over ? 'text-saffron-700' : 'text-ink-900'}`}>
               {formatNumber(Math.abs(left))}
             </span>
-            <span className="text-xs font-semibold text-gray-500 mt-0.5">
+            <span className="text-xs font-semibold text-ink-500 mt-0.5">
               {over ? t('today.kcalAbove') : t('today.kcalLeft')}
             </span>
           </ProgressRing>
-          <p className="text-sm text-gray-500 mt-3 tabular-nums">
+          <p className="text-sm text-ink-500 mt-3 tabular-nums">
             {t('today.eatenOfGoal', { eaten: formatNumber(eaten), goal: formatNumber(goal) })}
           </p>
-          {over && <p className="text-xs text-amber-700 mt-1 max-w-[16rem] text-center">{t('today.overNote')}</p>}
+          {over && <p className="text-xs text-saffron-700 mt-1 max-w-[16rem] text-center">{t('today.overNote')}</p>}
         </div>
 
         {/* Macros */}
@@ -76,11 +76,11 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
                   value={have} max={need} size={84} stroke={8} colorClass={m.color}
                   label={t('today.macroRingLabel', { macro: t(m.labelKey), have, need })}
                 >
-                  <span className="text-base font-bold text-gray-800 tabular-nums">{Math.abs(mLeft)}g</span>
-                  <span className="text-[10px] font-semibold text-gray-500">{mLeft < 0 ? t('today.above') : t('today.left')}</span>
+                  <span className="text-base font-bold text-ink-800 tabular-nums">{Math.abs(mLeft)}g</span>
+                  <span className="text-[10px] font-semibold text-ink-500">{mLeft < 0 ? t('today.above') : t('today.left')}</span>
                 </ProgressRing>
-                <span className="text-xs font-bold text-gray-700 mt-2">{t(m.labelKey)}</span>
-                <span className="text-[11px] text-gray-500 tabular-nums">{have} / {need}g</span>
+                <span className="text-xs font-bold text-ink-700 mt-2">{t(m.labelKey)}</span>
+                <span className="text-[11px] text-ink-500 tabular-nums">{have} / {need}g</span>
               </div>
             );
           })}
@@ -101,17 +101,17 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
                 onClick={() => onOpenMeal?.(k)}
                 aria-label={items.length ? t('today.mealLogged', { meal: name, kcal }) : t('today.mealAdd', { meal: name })}
                 className={`w-full text-start rounded-2xl px-3 py-2.5 border transition-colors ${
-                  items.length ? 'bg-gray-50 border-gray-200 hover:border-indigo-300' : 'bg-white border-dashed border-gray-300 hover:border-indigo-400 hover:bg-indigo-50'
+                  items.length ? 'bg-ink-50 border-ink-200 hover:border-door-300' : 'bg-white border-dashed border-ink-300 hover:border-door-400 hover:bg-door-50'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <Icon size={18} aria-hidden="true" className="text-ink-500" />
-                  <span className="font-semibold text-sm text-gray-800 truncate">{name}</span>
+                  <span className="font-semibold text-sm text-ink-800 truncate">{name}</span>
                 </div>
                 <div className="text-xs mt-0.5 tabular-nums">
                   {items.length
-                    ? <span className="text-gray-500">{t('today.mealSummary', { count: items.length, kcal: formatNumber(kcal) })}</span>
-                    : <span className="text-indigo-600 font-semibold">+ {t('today.add')}</span>}
+                    ? <span className="text-ink-500">{t('today.mealSummary', { count: items.length, kcal: formatNumber(kcal) })}</span>
+                    : <span className="text-door-600 font-semibold">+ {t('today.add')}</span>}
                 </div>
               </button>
             </li>

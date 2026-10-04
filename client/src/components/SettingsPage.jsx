@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { DEFAULT_DAY_TARGETS } from '../lib/calories';
 import ProgrammeSetup from './ProgrammeSetup';
+import { DownloadSimple } from '@phosphor-icons/react';
+import { PageHeader, Panel, DayTypeChip } from './ui/primitives';
 
 const PROGRAMME_META = {
   carb_cycle:  { nameKey: 'programme.carb_cycle' },
@@ -11,11 +13,6 @@ const PROGRAMME_META = {
   recomp:      { nameKey: 'programme.body_recomp' },
 };
 
-const DAY_TYPES = [
-  { key: 'low',  color: 'bg-sky-500' },
-  { key: 'med',  color: 'bg-amber-500' },
-  { key: 'high', color: 'bg-emerald-500' },
-];
 
 export default function SettingsPage({ config, onConfigUpdate }) {
   const { t } = useTranslation();
@@ -111,135 +108,95 @@ export default function SettingsPage({ config, onConfigUpdate }) {
   const progKey = config?.programme || 'carb_cycle';
   const progMeta = PROGRAMME_META[progKey];
 
+  const typesToEdit = progKey === 'carb_cycle' ? ['low', 'med', 'high'] : ['flat'];
+  const FIELDS = [
+    ['calories', 'settings.col.calories', 'bg-ink-300'],
+    ['protein_g', 'settings.col.protein', 'bg-door-600'],
+    ['carbs_g', 'settings.col.carbs', 'bg-saffron-500'],
+    ['fat_g', 'settings.col.fat', 'bg-olive-600'],
+  ];
+  const input = 'w-full h-10 px-2 rounded-lg border border-ink-300 bg-white text-ink-900 text-sm text-end tabular-nums placeholder:text-ink-400 outline-none focus:border-door-600 focus:ring-2 focus:ring-door-200';
+
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('settings.heading')}</h1>
-        <p className="text-gray-500">{t('settings.subheading')}</p>
-      </div>
+    <div className="max-w-2xl">
+      <PageHeader title={t('settings.heading')} subtitle={t('settings.subheading')} />
 
-      {/* Programme */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          {t('settings.programme')}
-        </h2>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">{progMeta.emoji}</span>
-            <div>
-              <div className="font-bold text-gray-800">{t(progMeta.nameKey)}</div>
-              {config?.calorie_target ? (
-                <div className="text-xs text-gray-500">{t('settings.programme.macroSummary', { cal: config.calorie_target, p: config.protein_g_target, c: config.carbs_g_target, f: config.fat_g_target })}</div>
-              ) : (
-                <div className="text-xs text-gray-500">{t('settings.programme.56day')}</div>
-              )}
-            </div>
+      <Panel title={t('settings.programme')} className="mb-6"
+        action={<button onClick={() => setShowProgrammeSetup(true)} className="h-9 px-3 rounded-lg border border-ink-200 bg-white hover:bg-ink-100 text-sm font-semibold text-ink-900">{t('settings.change')}</button>}>
+        <div className="-mt-2">
+          <div className="font-semibold text-ink-900">{t(progMeta.nameKey)}</div>
+          <div className="text-sm text-ink-500 mt-0.5 tabular-nums">
+            {progKey !== 'carb_cycle' && config?.day_targets?.flat
+              ? t('settings.programme.macroSummary', { cal: config.day_targets.flat.calories, p: config.day_targets.flat.protein_g, c: config.day_targets.flat.carbs_g, f: config.day_targets.flat.fat_g })
+              : t('settings.programme.56day')}
           </div>
-          <button
-            onClick={() => setShowProgrammeSetup(true)}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold"
-          >
-            {t('settings.change')}
-          </button>
         </div>
-      </div>
+      </Panel>
 
-      {/* Start Date */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          {t('settings.startDate')}
-        </h2>
-        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
-          className="border border-gray-200 rounded-xl px-4 py-2.5 text-base font-medium focus:border-indigo-400 focus:outline-none w-full sm:w-auto" />
-        <p className="text-xs text-gray-400 mt-2">{t('settings.startDateHint')}</p>
-      </div>
+      <Panel title={t('settings.startDate')} className="mb-6">
+        <label htmlFor="start-date" className="sr-only">{t('settings.startDate')}</label>
+        <input id="start-date" type="date" value={startDate} onChange={e => setStartDate(e.target.value)}
+          className="h-11 px-3 rounded-lg border border-ink-300 bg-white text-ink-900 outline-none focus:border-door-600 focus:ring-2 focus:ring-door-200 -mt-1" />
+        <p className="text-xs text-ink-500 mt-2">{t('settings.startDateHint')}</p>
+      </Panel>
 
-      {/* Calorie & Macro Targets */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          {t('settings.dailyTargets')}
-        </h2>
-        <p className="text-xs text-gray-400 mb-4">{t('settings.dailyTargetsHint')}</p>
+      <Panel title={t('settings.dailyTargets')} className="mb-6">
+        <p className="text-sm text-ink-500 -mt-1 mb-4">{t('settings.dailyTargetsHint')}</p>
+        <div className="overflow-x-auto -mx-1 px-1">
+          <table className="w-full min-w-[420px] text-sm">
+            <thead>
+              <tr className="text-xs text-ink-500">
+                <th className="text-start font-medium pb-2 w-28"><span className="sr-only">{t('weekPage.col.type')}</span></th>
+                {FIELDS.map(([key, label, fill]) => (
+                  <th key={key} className="text-end font-medium pb-2 px-1">
+                    <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className={`w-2 h-2 rounded-[2px] ${fill}`} />{t(label)}</span>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {typesToEdit.map((type) => (
+                <tr key={type} className="border-t border-ink-200">
+                  <th scope="row" className="text-start font-semibold text-ink-900 py-2.5 pe-2">
+                    {type === 'flat' ? t('settings.everyDay') : <DayTypeChip type={type} />}
+                  </th>
+                  {FIELDS.map(([key, label]) => (
+                    <td key={key} className="py-2.5 px-1">
+                      <input type="number" inputMode="numeric" aria-label={`${type === 'flat' ? t('settings.everyDay') : t(`dayType.${type}`)} — ${t(label)}`}
+                        value={getTarget(type, key) || ''} onChange={e => setTarget(type, key, e.target.value)}
+                        placeholder={String(getDefault(type, key))} className={input} />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex items-center gap-4 mt-5">
+          <button onClick={handleSave} disabled={saving}
+            className="h-11 px-5 rounded-lg bg-door-600 hover:bg-door-700 text-white font-semibold disabled:opacity-50">
+            {saving ? t('settings.saving') : t('settings.save')}
+          </button>
+          {toast && <span role="status" className="text-sm text-olive-700">{toast}</span>}
+        </div>
+      </Panel>
 
-        <div className="space-y-4">
-          {DAY_TYPES.map(dt => (
-            <div key={dt.key} className="border border-gray-100 rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg"></span>
-                <span className="font-bold text-gray-800">{t('settings.dayTypeDays', { type: t(`dayType.${dt.key}`) })}</span>
-              </div>
-              <div className="grid grid-cols-4 gap-3">
-                <div>
-                  <label className="text-[10px] font-bold text-gray-500 mb-1 block">{t('settings.col.calories')}</label>
-                  <input type="number" value={getTarget(dt.key, 'calories') || ''}
-                    onChange={e => setTarget(dt.key, 'calories', e.target.value)}
-                    placeholder={getDefault(dt.key, 'calories')}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-center focus:outline-none focus:border-indigo-400" />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-red-400 mb-1 block">{t('settings.col.protein')}</label>
-                  <input type="number" value={getTarget(dt.key, 'protein_g') || ''}
-                    onChange={e => setTarget(dt.key, 'protein_g', e.target.value)}
-                    placeholder={getDefault(dt.key, 'protein_g')}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-center focus:outline-none focus:border-red-400" />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-amber-500 mb-1 block">{t('settings.col.carbs')}</label>
-                  <input type="number" value={getTarget(dt.key, 'carbs_g') || ''}
-                    onChange={e => setTarget(dt.key, 'carbs_g', e.target.value)}
-                    placeholder={getDefault(dt.key, 'carbs_g')}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-center focus:outline-none focus:border-amber-400" />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-blue-400 mb-1 block">{t('settings.col.fat')}</label>
-                  <input type="number" value={getTarget(dt.key, 'fat_g') || ''}
-                    onChange={e => setTarget(dt.key, 'fat_g', e.target.value)}
-                    placeholder={getDefault(dt.key, 'fat_g')}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-center focus:outline-none focus:border-blue-400" />
-                </div>
-              </div>
-            </div>
+      <Panel title={t('settings.exportBackup')} className="mb-6">
+        <p className="text-sm text-ink-500 -mt-1 mb-4">{t('settings.exportHint')}</p>
+        <div className="flex flex-wrap gap-3">
+          {[['json', 'settings.exportJson'], ['csv', 'settings.exportCsv']].map(([fmt, label]) => (
+            <button key={fmt} onClick={() => handleExport(fmt)} disabled={exporting}
+              className="h-10 px-4 rounded-lg border border-ink-200 bg-white hover:bg-ink-100 text-sm font-semibold text-ink-900 flex items-center gap-2 disabled:opacity-40">
+              <DownloadSimple size={16} aria-hidden="true" />{t(label)}
+            </button>
           ))}
         </div>
-      </div>
+      </Panel>
 
-      {/* Save button */}
-      <div className="mb-6">
-        <button onClick={handleSave} disabled={saving}
-          className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3.5 rounded-2xl text-base transition-all disabled:opacity-50 active:scale-[0.98]">
-          {saving ? t('settings.saving') : t('settings.save')}
-        </button>
-        {toast && (
-          <div className="mt-2 text-center text-sm font-semibold text-green-600">{toast}</div>
-        )}
-      </div>
-
-      {/* Export & Backup */}
-      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-          {t('settings.exportBackup')}
-        </h2>
-        <p className="text-xs text-gray-400 mb-4">{t('settings.exportHint')}</p>
-        <div className="flex gap-3">
-          <button onClick={() => handleExport('json')} disabled={exporting}
-            className="flex-1 py-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 font-bold rounded-xl text-sm transition-colors disabled:opacity-40 active:scale-[0.98]">
-            {t('settings.exportJson')}
-          </button>
-          <button onClick={() => handleExport('csv')} disabled={exporting}
-            className="flex-1 py-3 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 font-bold rounded-xl text-sm transition-colors disabled:opacity-40 active:scale-[0.98]">
-            {t('settings.exportCsv')}
-          </button>
-        </div>
-      </div>
-
-      {/* Info */}
-      <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-        <h3 className="text-sm font-bold text-gray-600 mb-2">{t('settings.about')}</h3>
-        <p className="text-xs text-gray-500">
-          {t('settings.aboutText')}
-        </p>
-        <p className="text-xs text-gray-400 mt-2">{t('settings.builtWith')}</p>
-      </div>
+      <section className="px-1 text-sm text-ink-500">
+        <h2 className="font-semibold text-ink-700 mb-1">{t('settings.about')}</h2>
+        <p>{t('settings.aboutText')}</p>
+      </section>
     </div>
   );
 }

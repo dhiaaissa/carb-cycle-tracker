@@ -441,10 +441,10 @@
   "insights.mostEaten": "Aliments les plus consommés",
   "insights.timesEaten": "{{count}} fois",
   "insights.bestDay": "Meilleur jour",
-  "insights.needsWork": "À améliorer",
+  "insights.needsWork": "Journée la plus difficile",
   "insights.dayScoreAndKcal": "Score {{score}} · {{kcal}} kcal",
   "insights.dailyAdherence": "Adhérence calorique quotidienne",
-  "insights.legendOnTarget": "85-115 % (dans la cible)",
+  "insights.legendOnTarget": "Dans l'objectif (85–115 %)",
   "insights.legendUnder": "Moins de 85 %",
   "insights.legendOver": "Au-dessus de 115 %",
 
@@ -842,5 +842,56 @@
   "day.rest": "Jour de repos",
   "common.close": "Fermer",
   "weight.title": "Évolution du poids",
-  "weight.needTwo": "Notez votre poids au moins deux jours pour voir l'évolution."
+  "weight.needTwo": "Notez votre poids au moins deux jours pour voir l'évolution.",
+
+  "weekPage.mealsLogged": "{{count}} repas sur 4 enregistrés",
+
+  "insights.showTable": "Afficher en tableau",
+  "insights.showChart": "Afficher en graphique",
+  "insights.chartAria": "Calories quotidiennes en pourcentage de l'objectif sur {{days}} jours, moyenne {{avg}} %",
+  "insights.perDay": "par jour",
+  "insights.splitByCalories": "Part des calories, pas des grammes — les lipides font 9 kcal par gramme, protéines et glucides 4.",
+
+  "foodCat.proteines": "Protéines",
+  "foodCat.glucides": "Féculents & céréales",
+  "foodCat.legumes": "Légumes",
+  "foodCat.fruits": "Fruits",
+  "foodCat.snacks": "Snacks & oléagineux",
+  "foodCat.laitiers": "Produits laitiers",
+  "foodCat.matieres_grasses": "Matières grasses",
+  "foodCat.sucres": "Sucres & condiments",
+  "foodCat.custom": "Mes aliments",
+  "grocery.yourList": "Votre liste",
+  "grocery.search": "Rechercher un aliment",
+  "grocery.categories": "Catégories",
+  "grocery.allCategories": "Tout",
+  "grocery.noResults": "Aucun aliment ne correspond.",
+  "grocery.copied": "Copié",
+  "grocery.less": "Moins de {{name}}",
+  "grocery.more": "Plus de {{name}}",
+  "grocery.remove": "Retirer {{name}}",
+
+  "settings.everyDay": "Chaque jour",
+
+  "macroOverview.title": "Vue d'ensemble",
+  "macroOverview.daysUnit": "jours",
+  "macroOverview.weeks": "Semaines",
+  "macroOverview.targetMath": "BMR {{bmr}} · TDEE {{tdee}} · {{delta}} kcal/jour pour votre objectif",
+  "macroOverview.changeSoFar": "{{change}} kg jusqu'ici",
+  "weight.date": "Date",
+  "weight.scale": "Balance",
+  "weight.trend": "Tendance",
+  "weight.trendNow": "poids tendance",
+  "weight.since": "depuis le {{date}}",
+  "weight.trendLegend": "Tendance sur 7 jours",
+  "weight.scaleLegend": "Pesée du jour",
+  "weight.aria": "Tendance du poids de {{from}} kg à {{to}} kg sur {{days}} pesées",
+
+  "macroInsights.weekCol": "Semaine",
+  "macroInsights.daysCol": "Jours notés",
+
+  "macroWeek.macroShort": "P {{p}} · G {{c}} · L {{f}} g",
+
+  "nutritionRef.food": "Aliment",
+  "nutritionRef.per": "Pour"
 }

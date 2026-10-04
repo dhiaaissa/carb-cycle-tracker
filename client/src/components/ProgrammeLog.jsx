@@ -6,7 +6,7 @@ import { WATER_GOALS } from '../lib/calories';
 const CELL = {
   low:  { done: 'bg-door-500 text-white',      plan: 'bg-door-50 text-door-700' },
   med:  { done: 'bg-saffron-400 text-ink-900', plan: 'bg-saffron-50 text-saffron-800' },
-  high: { done: 'bg-olive-500 text-white',     plan: 'bg-olive-50 text-olive-800' },
+  high: { done: 'bg-olive-600 text-white',     plan: 'bg-olive-50 text-olive-800' },
 };
 
 /**

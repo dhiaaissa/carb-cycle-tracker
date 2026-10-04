@@ -41,7 +41,7 @@ const NEUTRAL_NAMES = new Set(['ink', 'gray', 'slate', 'zinc', 'neutral', 'stone
 
 // Dark mode mirrors each scale so light-mode pairs keep their contrast.
 const NEUTRAL_DARK = { 50: '950', 100: '900', 200: '800', 300: '700', 400: '500', 500: '400', 600: '300', 700: '200', 800: '100', 900: '50', 950: '50' };
-const HUE_DARK = { 50: '950', 100: '900', 200: '800', 300: '700', 400: '400', 500: '500', 600: '500', 700: '300', 800: '200', 900: '100', 950: '50' };
+const HUE_DARK = { 50: '950', 100: '900', 200: '800', 300: '700', 400: '400', 500: '400', 600: '500', 700: '300', 800: '200', 900: '100', 950: '50' };
 
 const hexToRgb = (hex) => {
   const n = parseInt(hex.slice(1), 16);

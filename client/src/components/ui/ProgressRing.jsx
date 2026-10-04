@@ -8,9 +8,9 @@ export default function ProgressRing({
   max,
   size = 80,
   stroke = 8,
-  colorClass = 'text-indigo-500',
-  overClass = 'text-amber-500',
-  trackClass = 'text-gray-100',
+  colorClass = 'text-door-500',
+  overClass = 'text-saffron-500',
+  trackClass = 'text-ink-100',
   label,
   children,
 }) {

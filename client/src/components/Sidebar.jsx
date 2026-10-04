@@ -7,7 +7,7 @@ import { SidebarShell, SidebarHeader, NavItem, SectionLabel } from './ui/SideNav
 const DAY_SQUARE = {
   low:  'bg-door-500 border-door-500',
   med:  'bg-saffron-400 border-saffron-400',
-  high: 'bg-olive-500 border-olive-500',
+  high: 'bg-olive-600 border-olive-600',
 };
 
 export default function Sidebar({ schedule, days, stats, todayIndex, selectedWeek, onSelectWeek, sidebarOpen, onToggle }) {

@@ -14,7 +14,7 @@ const SAMPLE_WEEKS = [
   ['med', 'low', 'med', 'low', 'med', 'low', 'med'],
   ['low', 'low', 'low', 'med', 'low', 'low', 'low'],
 ];
-const SAMPLE_CELL = { low: 'bg-door-500', med: 'bg-saffron-400', high: 'bg-olive-500' };
+const SAMPLE_CELL = { low: 'bg-door-500', med: 'bg-saffron-400', high: 'bg-olive-600' };
 
 function Specimen() {
   const { t } = useTranslation();
@@ -29,7 +29,7 @@ function Specimen() {
           <div className="text-xs text-ink-500">{t('auth.sample.day')}</div>
           <div className="font-display text-lg font-semibold text-ink-900">{t('dayType.low')}</div>
           <dl className="mt-2 grid grid-cols-3 gap-3 text-xs">
-            {[['protein', 96, 128, 'bg-door-600'], ['carbs', 58, 99, 'bg-saffron-500'], ['fat', 61, 120, 'bg-olive-500']].map(([m, have, need, bar]) => (
+            {[['protein', 96, 128, 'bg-door-600'], ['carbs', 58, 99, 'bg-saffron-500'], ['fat', 61, 120, 'bg-olive-600']].map(([m, have, need, bar]) => (
               <div key={m}>
                 <dt className="text-ink-500">{t(`macro.${m}`)}</dt>
                 <dd className="font-semibold text-ink-900 tabular-nums">{have}<span className="text-ink-400 font-normal">/{need}g</span></dd>

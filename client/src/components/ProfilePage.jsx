@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { formatDate } from '../lib/format';
+import { PageHeader, Panel } from './ui/primitives';
 
 
 export default function ProfilePage({ onEditProgramme }) {
@@ -47,11 +48,11 @@ export default function ProfilePage({ onEditProgramme }) {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-sm text-ink-500" role="status">{t('app.loading')}</p>
       </div>
     );
   }
-  if (!profile) return <div className="text-gray-500">{t('auth.error.generic')}</div>;
+  if (!profile) return <div className="text-ink-500">{t('auth.error.generic')}</div>;
 
   const initial = (profile.username || '?').charAt(0).toUpperCase();
   const memberSince = profile.created_at ? formatDate(profile.created_at, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
@@ -60,24 +61,12 @@ export default function ProfilePage({ onEditProgramme }) {
   const fmtVal = (val, fmtKey, params) => (val == null || val === '') ? t('profile.notSet') : t(fmtKey, params);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Header card */}
-      <div className="bg-indigo-500 rounded-3xl p-6 mb-6 text-white">
-        <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-3xl bg-white/15 flex items-center justify-center text-4xl font-extrabold shrink-0">
-            {initial}
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-extrabold truncate">@{profile.username}</h1>
-              {profile.is_owner && (
-                <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-bold">{t('profile.ownerBadge')}</span>
-              )}
-            </div>
-            {memberSince && <p className="text-indigo-100/80 text-sm mt-0.5">{t('profile.memberSince', { date: memberSince })}</p>}
-          </div>
-        </div>
-      </div>
+    <div className="max-w-2xl">
+      <PageHeader
+        eyebrow={memberSince ? t('profile.memberSince', { date: memberSince }) : undefined}
+        title={`@${profile.username}`}
+        actions={profile.is_owner && <span className="text-xs font-semibold text-door-700 border border-door-200 bg-door-50 px-2 py-1 rounded-md">{t('profile.ownerBadge')}</span>}
+      />
 
       {/* Account */}
       <Section title={t('profile.section.account')}>
@@ -98,7 +87,7 @@ export default function ProfilePage({ onEditProgramme }) {
         {onEditProgramme && (
           <button
             onClick={onEditProgramme}
-            className="mt-4 w-full py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-sm transition-colors"
+            className="mt-4 h-10 px-4 rounded-lg border border-ink-200 bg-white hover:bg-ink-100 text-ink-900 font-semibold text-sm"
           >
             {t('profile.editProgramme')}
           </button>
@@ -137,18 +126,18 @@ export default function ProfilePage({ onEditProgramme }) {
             autoComplete="new-password" show={showPw} type={showPw ? 'text' : 'password'}
           />
 
-          <label className="flex items-center gap-2 text-sm text-gray-500 select-none cursor-pointer">
-            <input type="checkbox" checked={showPw} onChange={() => setShowPw(s => !s)} className="rounded" />
+          <label className="flex items-center gap-2 text-sm text-ink-600 select-none cursor-pointer">
+            <input type="checkbox" checked={showPw} onChange={() => setShowPw(s => !s)} className="w-4 h-4 rounded border-ink-300 accent-door-600" />
             {showPw ? t('profile.password.hide') : t('profile.password.show')}
           </label>
 
           {pwError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3 flex items-start gap-2">
+            <div role="alert" className="bg-clay-50 border border-clay-200 text-clay-700 text-sm rounded-lg p-3">
               <span>{pwError}</span>
             </div>
           )}
           {pwSuccess && (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl p-3 flex items-start gap-2">
+            <div role="status" className="bg-olive-50 border border-olive-200 text-olive-800 text-sm rounded-lg p-3">
               <span>{pwSuccess}</span>
             </div>
           )}
@@ -156,7 +145,7 @@ export default function ProfilePage({ onEditProgramme }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold py-3 rounded-2xl transition-all active:scale-[0.98]"
+            className="h-11 px-5 bg-door-600 hover:bg-door-700 disabled:opacity-60 text-white font-semibold rounded-lg"
           >
             {submitting ? t('profile.password.saving') : t('profile.password.submit')}
           </button>
@@ -168,34 +157,33 @@ export default function ProfilePage({ onEditProgramme }) {
 
 function Section({ title, children }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
-      <h2 className="font-display text-lg font-semibold text-ink-900 mb-4">{title}</h2>
-      {children}
-    </div>
+    <Panel title={title} className="mb-6" bodyClassName="px-5 sm:px-6 pb-5 pt-2">{children}</Panel>
   );
 }
 
 function Row({ label, value, last }) {
   return (
-    <div className={`flex items-center justify-between py-2.5 ${last ? '' : 'border-b border-gray-100'}`}>
-      <span className="text-sm text-gray-500">{label}</span>
-      <span className="text-sm font-bold text-gray-800 text-end">{value}</span>
+    <div className={`flex items-center justify-between gap-4 py-2.5 ${last ? '' : 'border-b border-ink-200'}`}>
+      <span className="text-sm text-ink-500">{label}</span>
+      <span className="text-sm font-medium text-ink-900 text-end tabular-nums">{value}</span>
     </div>
   );
 }
 
 function PwField({ label, value, onChange, placeholder, autoComplete, type }) {
+  const id = `pw-${autoComplete}-${label.length}`;
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1.5">{label}</label>
+      <label htmlFor={id} className="block text-sm font-medium text-ink-700 mb-1.5">{label}</label>
       <input
+        id={id}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
         required
-        className="w-full px-4 py-3 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition bg-gray-50 focus:bg-white"
+        className="w-full h-11 px-3.5 border border-ink-300 rounded-lg bg-white text-ink-900 placeholder:text-ink-400 outline-none focus:border-door-600 focus:ring-2 focus:ring-door-200"
       />
     </div>
   );

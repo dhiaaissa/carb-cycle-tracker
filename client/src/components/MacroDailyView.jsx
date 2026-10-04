@@ -60,7 +60,7 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
   })();
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen bg-ink-50 overflow-hidden">
       <MacroSidebar
         stats={stats}
         programme={config?.programme}
@@ -71,11 +71,11 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
       />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 shrink-0 shadow-sm z-10">
+        <header className="bg-white border-b border-ink-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 shrink-0 shadow-sm z-10">
           <button
             onClick={() => setSidebarOpen(o => !o)}
             aria-label={t('nav.openMenu')}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+            className="lg:hidden p-2 rounded-lg hover:bg-ink-100 text-ink-600"
           >
             <span className="block w-5 h-0.5 bg-current mb-1"></span>
             <span className="block w-5 h-0.5 bg-current mb-1"></span>
@@ -85,20 +85,20 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
           <div className="flex items-center gap-2 min-w-0">
             {selectedDay != null && (
               <>
-                <button onClick={() => setSelectedDay(null)} className="text-gray-400 hover:text-gray-600 text-sm font-medium">
+                <button onClick={() => setSelectedDay(null)} className="text-ink-400 hover:text-ink-600 text-sm font-medium">
                   {t('macroView.back')}
                 </button>
-                <span className="text-gray-300">/</span>
+                <span className="text-ink-300">/</span>
               </>
             )}
-            <span className="text-gray-800 font-bold text-lg truncate">{breadcrumb}</span>
+            <span className="text-ink-800 font-bold text-lg truncate">{breadcrumb}</span>
           </div>
 
           <div className="ms-auto flex items-center gap-2">
             {view !== 'today' && selectedDay == null && (
               <button
                 onClick={() => setView('today')}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold"
+                className="bg-door-600 hover:bg-door-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold"
               >
                 {t('action.logToday')}
               </button>
@@ -106,15 +106,15 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
             <button
               onClick={() => setShowProgrammeSetup(true)}
               aria-label={t('macroView.programme')}
-              className="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 w-10 h-10 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-xl flex items-center justify-center"
+              className="text-xs font-bold text-door-600 bg-door-50 hover:bg-door-100 w-10 h-10 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-xl flex items-center justify-center"
             >
               
               <span className="hidden sm:inline">{t('macroView.programme')}</span>
             </button>
             <ThemeToggle />
             <LanguageSwitcher />
-            <div className="hidden sm:flex items-center gap-2 ps-2 border-s border-gray-200">
-              <span className="text-xs font-semibold text-gray-500">@{user?.username}</span>
+            <div className="hidden sm:flex items-center gap-2 ps-2 border-s border-ink-200">
+              <span className="text-xs font-semibold text-ink-500">@{user?.username}</span>
               <LogoutButton onLogout={onLogout} username={user?.username} />
             </div>
             <LogoutButton onLogout={onLogout} username={user?.username} compact />

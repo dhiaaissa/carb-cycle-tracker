@@ -113,17 +113,17 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
       {!showSuggester ? (
         <button
           onClick={handleSuggest}
-          className="w-full py-2.5 px-4 bg-amber-400 text-white font-bold rounded-xl text-sm hover:bg-amber-500 transition-all flex items-center justify-center gap-2"
+          className="w-full py-2.5 px-4 bg-saffron-400 text-white font-bold rounded-xl text-sm hover:bg-saffron-500 transition-all flex items-center justify-center gap-2"
         >
           {t('suggester.button')}
         </button>
       ) : (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="bg-saffron-50 border border-saffron-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-bold text-amber-800 flex items-center gap-1">
+            <span className="text-sm font-bold text-saffron-800 flex items-center gap-1">
               {t('suggester.suggestedCombo')}
             </span>
-            <button onClick={() => setShowSuggester(false)} className="text-xs text-gray-400 hover:text-gray-600" aria-label={t('common.close')}><X size={16} aria-hidden="true" /></button>
+            <button onClick={() => setShowSuggester(false)} className="text-xs text-ink-400 hover:text-ink-600" aria-label={t('common.close')}><X size={16} aria-hidden="true" /></button>
           </div>
 
           {suggestions && suggestions.length > 0 ? (
@@ -134,23 +134,23 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{s.food.emoji}</span>
                       <div>
-                        <div className="text-sm font-semibold text-gray-800">{s.food.name}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-sm font-semibold text-ink-800">{s.food.name}</div>
+                        <div className="text-xs text-ink-500">
                           {s.amount}{s.food.unit === 'g' ? 'g' : ` ${s.food.unit}${s.amount > 1 ? 's' : ''}`}
                         </div>
                       </div>
                     </div>
-                    <div className="text-end text-xs text-gray-500">
-                      <div className="font-bold text-gray-700">{t('suggester.kcalShort', { kcal: Math.round(s.nutrition.kcal) })}</div>
+                    <div className="text-end text-xs text-ink-500">
+                      <div className="font-bold text-ink-700">{t('suggester.kcalShort', { kcal: Math.round(s.nutrition.kcal) })}</div>
                       <div>{t('suggester.macroLine', { p: Math.round(s.nutrition.protein_g), c: Math.round(s.nutrition.carbs_g), f: Math.round(s.nutrition.fat_g) })}</div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="flex items-center justify-between bg-amber-100 rounded-lg px-3 py-2 mb-3">
-                <span className="text-xs font-bold text-amber-700">{t('suggester.total')}</span>
-                <span className="text-xs font-bold text-amber-800">
+              <div className="flex items-center justify-between bg-saffron-100 rounded-lg px-3 py-2 mb-3">
+                <span className="text-xs font-bold text-saffron-700">{t('suggester.total')}</span>
+                <span className="text-xs font-bold text-saffron-800">
                   {t('suggester.totalLine', {
                     kcal: Math.round(totalNutrition.kcal),
                     p: Math.round(totalNutrition.protein_g),
@@ -168,20 +168,20 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
                     setShowSuggester(false);
                     setSuggestions(null);
                   }}
-                  className="flex-1 py-2 bg-green-500 hover:bg-green-600 text-white font-bold rounded-lg text-sm transition-colors"
+                  className="flex-1 py-2 bg-olive-500 hover:bg-olive-600 text-white font-bold rounded-lg text-sm transition-colors"
                 >
                   {t('suggester.addToMeal')}
                 </button>
                 <button
                   onClick={handleSuggest}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-lg text-sm transition-colors"
+                  className="px-4 py-2 bg-ink-200 hover:bg-ink-300 text-ink-700 font-bold rounded-lg text-sm transition-colors"
                 >
                   <ArrowsClockwise size={18} aria-hidden="true" />
                 </button>
               </div>
             </>
           ) : (
-            <p className="text-sm text-amber-700">{t('suggester.noCombo')}</p>
+            <p className="text-sm text-saffron-700">{t('suggester.noCombo')}</p>
           )}
         </div>
       )}

@@ -47,7 +47,7 @@ export default function LanguageSwitcher({ persist = true, variant = 'default' }
             <button
               key={l.code}
               onClick={() => { changeLanguage(l.code); setOpen(false); }}
-              className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-start hover:bg-gray-50 transition-colors ${l.code === language ? 'bg-indigo-50 text-indigo-700 font-bold' : 'text-gray-700'}`}
+              className={`w-full flex items-center gap-3 px-3 py-2 text-sm text-start hover:bg-ink-50 transition-colors ${l.code === language ? 'bg-door-50 text-door-700 font-bold' : 'text-ink-700'}`}
             >
               <span className="w-6 text-xs font-semibold uppercase text-ink-500">{l.code}</span>
               <span>{t(l.labelKey)}</span>
