@@ -18,7 +18,7 @@ export default function MacroSidebar({ stats, programme, currentView, onSelectVi
       {sidebarOpen && <div className="fixed inset-0 bg-black/40 z-20 lg:hidden" onClick={onToggle} />}
 
       <aside className={`
-        fixed top-0 start-0 h-full z-30 bg-gray-900 text-white flex flex-col
+        theme-fixed fixed top-0 start-0 h-full z-30 bg-gray-900 text-white flex flex-col
         transition-transform duration-300 ease-in-out w-72
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'}
         lg:translate-x-0 lg:static lg:h-auto lg:min-h-screen
@@ -31,7 +31,7 @@ export default function MacroSidebar({ stats, programme, currentView, onSelectVi
             </div>
             <p className="text-xs text-gray-400 mt-0.5">{t(meta.taglineKey)}</p>
           </div>
-          <button onClick={onToggle} className="lg:hidden text-gray-400 hover:text-white text-xl p-1">×</button>
+          <button onClick={onToggle} aria-label={t('nav.closeMenu')} className="lg:hidden text-gray-400 hover:text-white text-xl w-10 h-10 flex items-center justify-center rounded-lg">×</button>
         </div>
 
         <div className="p-3 border-b border-gray-700 space-y-1">

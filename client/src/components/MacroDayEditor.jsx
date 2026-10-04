@@ -1,47 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import MacroProgressCard from './MacroProgressCard';
+import { DEFAULT_DAY_TARGETS } from '../lib/calories';
+import TodaySummary from './TodaySummary';
 import MealComposer from './MealComposer';
-import { FOODS as BUILTIN_FOODS } from '../lib/foods';
+import { MEAL_KEYS, MEAL_ICONS, MEAL_NUM, computeMealTotals, buildFoodDb } from '../lib/mealTotals';
 
 const EMPTY_MEALS = { meal1: [], meal2: [], meal3: [], meal4: [] };
-const MEAL_KEYS = ['meal1', 'meal2', 'meal3', 'meal4'];
-const MEAL_ICONS = { meal1: '☀️', meal2: '🌤️', meal3: '🌙', meal4: '🍪' };
-const MEAL_NUM = { meal1: 1, meal2: 2, meal3: 3, meal4: 4 };
-
-function itemNutrition(foodDb, foodId, amount) {
-  const food = foodDb[foodId];
-  if (!food || !amount || amount <= 0) return { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-  if (food.unit === 'g') {
-    const r = amount / 100;
-    return {
-      kcal: (food.kcal_per_100g || 0) * r,
-      protein: (food.protein_per_100g || 0) * r,
-      carbs: (food.carbs_per_100g || 0) * r,
-      fat: (food.fat_per_100g || 0) * r,
-    };
-  }
-  return {
-    kcal: (food.kcal_per_unit || 0) * amount,
-    protein: (food.protein_per_unit || 0) * amount,
-    carbs: (food.carbs_per_unit || 0) * amount,
-    fat: (food.fat_per_unit || 0) * amount,
-  };
-}
-
-function computeMealTotals(items = [], foodDb) {
-  return items.reduce((acc, it) => {
-    const n = itemNutrition(foodDb, it.food_id, it.amount);
-    return {
-      kcal: acc.kcal + n.kcal,
-      protein: acc.protein + n.protein,
-      carbs: acc.carbs + n.carbs,
-      fat: acc.fat + n.fat,
-    };
-  }, { kcal: 0, protein: 0, carbs: 0, fat: 0 });
-}
-
 export default function MacroDayEditor({
   dayIndex, todayIndex, config, foods, presets,
   onSavePreset, onDeletePreset, onCreateCustomFood, onDeleteCustomFood,
@@ -80,21 +45,10 @@ export default function MacroDayEditor({
     return () => { cancelled = true; };
   }, [dayIndex]);
 
-  const foodDb = useMemo(() => ({ ...BUILTIN_FOODS, ...(foods?.foods || {}) }), [foods]);
+  const foodDb = useMemo(() => buildFoodDb(foods?.foods), [foods]);
 
-  const totals = useMemo(() => {
-    const all = [...meals.meal1, ...meals.meal2, ...meals.meal3, ...meals.meal4];
-    return computeMealTotals(all, foodDb);
-  }, [meals, foodDb]);
-
-  const calTarget = config?.calorie_target || 2000;
-  const protTarget = config?.protein_g_target || 150;
-  const carbTarget = config?.carbs_g_target || 200;
-  const fatTarget = config?.fat_g_target || 65;
-
-  const caloriesRemaining = calTarget - totals.kcal;
-  const caloriePct = Math.min(100, (totals.kcal / calTarget) * 100);
-  const overBudget = totals.kcal > calTarget;
+  // Resolved server-side (shared/dayTargets.js): stored plan → derived → default.
+  const target = config?.day_targets?.flat ?? DEFAULT_DAY_TARGETS.flat;
 
   async function handleSave() {
     setSaving(true);
@@ -158,29 +112,13 @@ export default function MacroDayEditor({
         <p className="text-gray-500">{isToday ? t('macroEditor.subtitleToday', { num: dayIndex + 1 }) : t('macroEditor.subtitleReview')}</p>
       </div>
 
-      {/* Calorie summary card */}
-      <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-700 rounded-3xl shadow-2xl p-6 mb-5 text-white">
-        <div className="text-center">
-          <div className="text-xs font-bold uppercase tracking-widest text-white/80">{t('macroEditor.caloriesToday')}</div>
-          <div className="flex items-baseline justify-center gap-2 mt-1">
-            <span className="text-6xl font-extrabold">{Math.round(totals.kcal)}</span>
-            <span className="text-xl text-white/70">/ {calTarget}</span>
-          </div>
-          <div className="text-sm text-white/80 mt-1">
-            {overBudget ? t('macroEditor.kcalOver', { kcal: Math.abs(Math.round(caloriesRemaining)) }) : t('macroEditor.kcalRemaining', { kcal: Math.round(caloriesRemaining) })}
-          </div>
-          <div className="mt-4 w-full bg-white/20 rounded-full h-3 overflow-hidden">
-            <div className={`h-full rounded-full transition-all duration-500 ${overBudget ? 'bg-amber-300' : 'bg-white'}`} style={{ width: `${caloriePct}%` }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Macros */}
-      <div className="grid sm:grid-cols-3 gap-3 mb-5">
-        <MacroProgressCard consumed={totals.protein} target={protTarget} label={t('macro.protein')} color="red" />
-        <MacroProgressCard consumed={totals.carbs}   target={carbTarget} label={t('macro.carbs')}   color="amber" />
-        <MacroProgressCard consumed={totals.fat}     target={fatTarget}  label={t('macro.fat')}     color="blue" />
-      </div>
+      <TodaySummary
+        meals={meals}
+        target={target}
+        foodDb={foodDb}
+        showMeals={false}
+        title={isToday ? undefined : t('macroEditor.titleDay', { num: dayIndex + 1 })}
+      />
 
       {/* Meals */}
       <div className="bg-white rounded-3xl border-2 border-gray-100 shadow-lg p-4 sm:p-6 mb-5">

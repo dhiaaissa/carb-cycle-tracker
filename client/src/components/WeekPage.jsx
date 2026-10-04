@@ -33,9 +33,9 @@ const PHASE_META = {
   4: { color: 'from-purple-500 to-purple-700', lightBg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700', icon: '💪' },
 };
 
-const TYPE_EMOJI = { low: '🔴', med: '🟡', high: '🟢' };
+const TYPE_EMOJI = { low: '🔵', med: '🟡', high: '🟢' };
 const TYPE_COLOR = {
-  low: 'bg-red-100 text-red-700 border-red-300',
+  low: 'bg-sky-100 text-sky-700 border-sky-300',
   med: 'bg-yellow-100 text-yellow-700 border-yellow-300',
   high: 'bg-green-100 text-green-700 border-green-300',
 };
@@ -226,7 +226,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 ${
-                      sd.day_type === 'low' ? 'bg-red-100 text-red-700' :
+                      sd.day_type === 'low' ? 'bg-sky-100 text-sky-700' :
                       sd.day_type === 'med' ? 'bg-yellow-100 text-yellow-700' :
                       'bg-green-100 text-green-700'
                     }`}>
@@ -285,8 +285,8 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
           {['low', 'med', 'high'].filter(ty => weekDays.some(d => d.day_type === ty)).map(dayType => {
             const suggested = SUGGESTED_MEALS[dayType];
             const typeDays = weekDays.filter(d => d.day_type === dayType).map(d => d.day_index + 1);
-            const headerCls = dayType === 'low' ? 'bg-gradient-to-r from-red-500 to-red-600' : dayType === 'med' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : 'bg-gradient-to-r from-green-500 to-green-600';
-            const borderCls = dayType === 'low' ? 'border-red-200' : dayType === 'med' ? 'border-yellow-200' : 'border-green-200';
+            const headerCls = dayType === 'low' ? 'bg-gradient-to-r from-sky-500 to-blue-600' : dayType === 'med' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600' : 'bg-gradient-to-r from-green-500 to-green-600';
+            const borderCls = dayType === 'low' ? 'border-sky-200' : dayType === 'med' ? 'border-yellow-200' : 'border-green-200';
             const dayTotal = Math.round(Object.values(suggested).reduce((s, items) => s + sumMealNutrition(items).kcal, 0));
             return (
               <div key={dayType} className={`bg-white rounded-2xl border-2 ${borderCls} shadow-lg overflow-hidden`}>
@@ -328,7 +328,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                       );
                     })}
                   </div>
-                  <div className={`mt-3 p-3 rounded-xl text-xs font-semibold flex flex-wrap gap-3 ${dayType === 'low' ? 'bg-red-50 text-red-700' : dayType === 'med' ? 'bg-yellow-50 text-yellow-700' : 'bg-green-50 text-green-700'}`}>
+                  <div className={`mt-3 p-3 rounded-xl text-xs font-semibold flex flex-wrap gap-3 ${dayType === 'low' ? 'bg-sky-50 text-sky-700' : dayType === 'med' ? 'bg-yellow-50 text-yellow-700' : 'bg-green-50 text-green-700'}`}>
                     <span>{t('weekPage.waterGoal', { liters: WATER_GOALS[dayType] })}</span>
                     <span>{t('weekPage.targetKcal', { kcal: dayTargets[dayType]?.calories })}</span>
                     {dayType === 'med' && <span>{t('weekPage.medWorkoutBonus')}</span>}
@@ -380,7 +380,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                     !isFuture && !log ? 'bg-yellow-100 text-yellow-700' :
                     'bg-gray-100 text-gray-500'
                   }`}>
-                    {!isWorkoutDay ? (sd.day_type === 'high' ? '🟢' : '🔴') :
+                    {!isWorkoutDay ? (sd.day_type === 'high' ? '🟢' : '🔵') :
                      workoutDone ? '✅' : isFuture ? '⏳' : '⬜'}
                   </div>
                   <div className="flex-1">

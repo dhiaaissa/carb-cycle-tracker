@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { calcStreak } from '../../shared/streak.js';
 import { db } from '../db/index.js';
 import { dayLogs, appConfig } from '../db/schema.js';
 import { eq, asc, and } from 'drizzle-orm';
@@ -20,15 +21,7 @@ router.get('/', async (req, res, next) => {
 
     const logMap = new Map(allLogs.map(l => [l.day_index, l]));
 
-    let streak = 0;
-    for (let i = Math.min(todayIndex, 55); i >= 0; i--) {
-      const log = logMap.get(i);
-      if (log && log.score >= 3) {
-        streak++;
-      } else {
-        break;
-      }
-    }
+    const streak = calcStreak((i) => logMap.get(i)?.score, Math.min(todayIndex, 55));
 
     const total_completed = allLogs.length;
     const total_perfect = allLogs.filter(l => l.score === 5).length;

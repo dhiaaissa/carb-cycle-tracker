@@ -43,7 +43,7 @@ export default function InsightsPage() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <SummaryCard icon="🎯" label={t('insights.avgAdherence')} value={`${avgAdherence}%`}
-          color={avgAdherence >= 85 ? 'text-green-600' : avgAdherence >= 70 ? 'text-yellow-600' : 'text-red-500'} />
+          color={avgAdherence >= 85 ? 'text-green-600' : 'text-amber-600'} />
         <SummaryCard icon="🥩" label={t('insights.avgProtein')} value={`${macro_averages.protein_g}g`} color="text-red-500" />
         <SummaryCard icon="🌾" label={t('insights.avgCarbs')} value={`${macro_averages.carbs_g}g`} color="text-amber-500" />
         <SummaryCard icon="🧈" label={t('insights.avgFat')} value={`${macro_averages.fat_g}g`} color="text-blue-500" />
@@ -75,7 +75,7 @@ export default function InsightsPage() {
                 <div className="flex-1 bg-gray-100 rounded-full h-4 overflow-hidden">
                   <div
                     className={`h-4 rounded-full transition-all ${
-                      w.avg_adherence_pct >= 85 ? 'bg-green-400' : w.avg_adherence_pct >= 70 ? 'bg-yellow-400' : 'bg-red-400'
+                      w.avg_adherence_pct >= 85 ? 'bg-green-400' : 'bg-amber-400'
                     }`}
                     style={{ width: `${Math.min(100, w.avg_adherence_pct)}%` }}
                   />
@@ -138,12 +138,12 @@ export default function InsightsPage() {
           <div className="flex items-end gap-0.5 h-32">
             {calorie_adherence.map(d => {
               const h = Math.min(100, d.pct);
-              const color = d.pct >= 85 && d.pct <= 115 ? 'bg-green-400' : d.pct > 115 ? 'bg-red-400' : 'bg-yellow-400';
+              const color = d.pct >= 85 && d.pct <= 115 ? 'bg-green-400' : d.pct > 115 ? 'bg-amber-400' : 'bg-sky-400';
               return (
                 <div key={d.day_index} className="flex-1 flex flex-col items-center justify-end h-full group relative">
                   <div className={`w-full rounded-t-sm ${color} transition-all min-h-[2px]`}
                     style={{ height: `${h}%` }} />
-                  <div className="absolute -top-6 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                  <div className="theme-fixed absolute -top-6 bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
                     {t('day.short', { num: d.day_index + 1 })}: {d.pct}%
                   </div>
                 </div>
@@ -157,8 +157,8 @@ export default function InsightsPage() {
           </div>
           <div className="flex gap-3 mt-2 text-[10px]">
             <span className="flex items-center gap-1"><span className="w-2 h-2 bg-green-400 rounded-sm" /> {t('insights.legendOnTarget')}</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 bg-yellow-400 rounded-sm" /> {t('insights.legendUnder')}</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 bg-red-400 rounded-sm" /> {t('insights.legendOver')}</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 bg-sky-400 rounded-sm" /> {t('insights.legendUnder')}</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 bg-amber-400 rounded-sm" /> {t('insights.legendOver')}</span>
           </div>
         </div>
       )}

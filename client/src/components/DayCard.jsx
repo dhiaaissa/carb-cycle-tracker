@@ -3,7 +3,7 @@ import { FOODS } from '../lib/foods';
 import { formatDate } from '../lib/format';
 
 const TYPE_CONFIG = {
-  low:  { bg: 'bg-gradient-to-br from-red-50 to-red-100',    border: 'border-s-red-500',    badge: 'bg-red-100 text-red-700',    emoji: '🔴' },
+  low:  { bg: 'bg-gradient-to-br from-sky-50 to-sky-100',    border: 'border-s-sky-500',    badge: 'bg-sky-100 text-sky-700',    emoji: '🔵' },
   med:  { bg: 'bg-gradient-to-br from-yellow-50 to-yellow-100', border: 'border-s-yellow-500', badge: 'bg-yellow-100 text-yellow-700', emoji: '🟡' },
   high: { bg: 'bg-gradient-to-br from-green-50 to-green-100',  border: 'border-s-green-500',  badge: 'bg-green-100 text-green-700',  emoji: '🟢' },
 };

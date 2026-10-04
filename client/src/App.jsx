@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from './i18n';
 import { useAppData } from './hooks/useAppData';
@@ -6,9 +6,14 @@ import { useReminders } from './hooks/useReminders';
 import { useLanguageDirection } from './lib/i18nDirection';
 import { auth } from './lib/api';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import ThemeToggle from './components/ThemeToggle';
 import LogoutButton from './components/LogoutButton';
 import Sidebar from './components/Sidebar';
 import StatsBar from './components/StatsBar';
+import TodaySummary from './components/TodaySummary';
+import { buildFoodDb } from './lib/mealTotals';
+import { DAY_TYPE_STYLE } from './lib/dayTypeStyle';
+import { DEFAULT_DAY_TARGETS } from './lib/calories';
 import ProgressCard from './components/ProgressCard';
 import DayModal from './components/DayModal';
 import WeightChart from './components/WeightChart';
@@ -51,6 +56,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
   const [selectedWeek, setSelectedWeek] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const foodDb = useMemo(() => buildFoodDb(foods?.foods), [foods]);
 
   // Apply server-side language preference when config loads
   useEffect(() => {
@@ -62,7 +68,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+      <div className="theme-fixed flex items-center justify-center h-screen bg-gradient-to-br from-gray-900 to-gray-800">
         <div className="text-center">
           <div className="text-5xl mb-4">💪</div>
           <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
@@ -95,6 +101,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
 
   const todayIndex = config?.today_index ?? -1;
   const todayWeek = todayIndex >= 0 && todayIndex <= 55 ? Math.floor(todayIndex / 7) + 1 : null;
+  const todayType = config?.today_day_type;
 
   return (
     <div className="flex h-screen-safe bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
@@ -117,7 +124,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
           {/* Hamburger (mobile) */}
           <button
             onClick={() => setSidebarOpen(o => !o)}
-            aria-label="Open menu"
+            aria-label={t('nav.openMenu')}
             className="lg:hidden w-11 h-11 -ms-1.5 flex flex-col items-center justify-center rounded-xl hover:bg-gray-100 text-gray-600 transition-colors shrink-0"
           >
             <span className="block w-5 h-0.5 bg-current mb-1"></span>
@@ -182,15 +189,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
                 <span className="hidden sm:inline">{t('action.logToday')}</span>
               </button>
             )}
-            {todayWeek && selectedWeek !== todayWeek && (
-              <button
-                onClick={() => setSelectedWeek(todayWeek)}
-                title={t('action.goToToday')}
-                className="hidden sm:block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold transition-colors shadow-md shrink-0"
-              >
-                {t('action.goToToday')}
-              </button>
-            )}
+            <ThemeToggle />
             <LanguageSwitcher />
             <div className="hidden sm:flex items-center gap-2 ps-2 border-s border-gray-200">
               <span className="text-xs font-semibold text-gray-500">@{user.username}</span>
@@ -211,6 +210,19 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
                   <p className="text-sm sm:text-base text-gray-500">{t('overview.subheading')}</p>
                 </div>
 
+                {todayType && (
+                  <TodaySummary
+                    meals={days[todayIndex]?.meals_json}
+                    target={config?.day_targets?.[todayType] ?? DEFAULT_DAY_TARGETS[todayType]}
+                    foodDb={foodDb}
+                    onOpenMeal={() => setSelectedDay(todayIndex)}
+                    badge={
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${DAY_TYPE_STYLE[todayType].chip}`}>
+                        <span aria-hidden="true">{DAY_TYPE_STYLE[todayType].emoji}</span> {t(`dayType.${todayType}`)}
+                      </span>
+                    }
+                  />
+                )}
                 <StatsBar config={config} days={days} stats={stats} />
                 <ProgressCard days={days} config={config} />
                 <WeightChart weightEntries={stats?.weight_entries} />

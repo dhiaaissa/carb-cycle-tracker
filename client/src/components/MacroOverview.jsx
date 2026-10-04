@@ -31,15 +31,15 @@ export default function MacroOverview({ stats, config, onSelectView }) {
       <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">{t('macroOverview.dailyTargets')}</h2>
         <div className="grid grid-cols-4 gap-3">
-          <Stat label={t('macroOverview.calories')} value={config?.calorie_target} suffix={t('macroOverview.kcal')} color="indigo" />
-          <Stat label={t('macroOverview.protein')}  value={config?.protein_g_target} suffix={t('macroOverview.gramsSuffix')} color="red" />
-          <Stat label={t('macroOverview.carbs')}    value={config?.carbs_g_target}   suffix={t('macroOverview.gramsSuffix')} color="amber" />
-          <Stat label={t('macroOverview.fat')}      value={config?.fat_g_target}     suffix={t('macroOverview.gramsSuffix')} color="blue" />
+          <Stat label={t('macroOverview.calories')} value={config?.day_targets?.flat?.calories} suffix={t('macroOverview.kcal')} color="indigo" />
+          <Stat label={t('macroOverview.protein')}  value={config?.day_targets?.flat?.protein_g} suffix={t('macroOverview.gramsSuffix')} color="red" />
+          <Stat label={t('macroOverview.carbs')}    value={config?.day_targets?.flat?.carbs_g}   suffix={t('macroOverview.gramsSuffix')} color="amber" />
+          <Stat label={t('macroOverview.fat')}      value={config?.day_targets?.flat?.fat_g}     suffix={t('macroOverview.gramsSuffix')} color="blue" />
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3 text-center text-xs">
           <Mini label={t('macroOverview.bmr')}  value={`${config?.bmr ?? '—'} ${t('macroOverview.kcal')}`} />
           <Mini label={t('macroOverview.tdee')} value={`${config?.tdee ?? '—'} ${t('macroOverview.kcal')}`} />
-          <Mini label={t('macroOverview.adj')}  value={config?.calorie_target && config?.tdee ? `${config.calorie_target - Math.round(config.tdee) > 0 ? '+' : ''}${config.calorie_target - Math.round(config.tdee)}` : '—'} />
+          <Mini label={t('macroOverview.adj')}  value={config?.day_targets?.flat?.calories && config?.tdee ? `${config.day_targets.flat.calories - Math.round(config.tdee) > 0 ? '+' : ''}${config.day_targets.flat.calories - Math.round(config.tdee)}` : '—'} />
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api, auth } from '../lib/api';
 import { useLanguageDirection } from '../lib/i18nDirection';
 import LanguageSwitcher from './LanguageSwitcher';
+import ThemeToggle from './ThemeToggle';
 
 const FEATURES = [
   { icon: '🎯', titleKey: 'auth.feature.macros.title',     textKey: 'auth.feature.macros.text' },
@@ -44,7 +45,7 @@ export default function LoginPage({ onAuth }) {
   }
 
   return (
-    <div className="min-h-screen-safe flex flex-col lg:flex-row bg-slate-950">
+    <div className="theme-fixed min-h-screen-safe flex flex-col lg:flex-row bg-slate-950">
       {/* ===== Left / Hero ===== */}
       <div className="relative lg:w-3/5 overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-950 text-white flex flex-col order-1">
         {/* Decorative animated blobs */}
@@ -60,7 +61,10 @@ export default function LoginPage({ onAuth }) {
             <div className="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center text-2xl shadow-lg">💪</div>
             <span className="font-bold text-lg tracking-tight">{t('auth.brand')}</span>
           </div>
-          <LanguageSwitcher persist={false} variant="onDark" />
+          <div className="flex items-center gap-2">
+            <ThemeToggle variant="onDark" />
+            <LanguageSwitcher persist={false} variant="onDark" />
+          </div>
         </div>
 
         {/* Hero content */}
@@ -112,7 +116,7 @@ export default function LoginPage({ onAuth }) {
       </div>
 
       {/* ===== Right / Auth card ===== */}
-      <div className="lg:w-2/5 bg-slate-50 flex items-center justify-center p-5 sm:p-8 lg:p-10 pb-safe ps-safe pe-safe order-2 lg:order-none">
+      <div className="theme-auto lg:w-2/5 bg-slate-50 flex items-center justify-center p-5 sm:p-8 lg:p-10 pb-safe ps-safe pe-safe order-2 lg:order-none">
         <div ref={formRef} className="w-full max-w-md">
           <div className="bg-white rounded-3xl shadow-2xl shadow-indigo-900/10 border border-gray-100 p-7 sm:p-9">
             {/* Heading */}

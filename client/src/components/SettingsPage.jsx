@@ -12,7 +12,7 @@ const PROGRAMME_META = {
 };
 
 const DAY_TYPES = [
-  { key: 'low',  color: 'bg-rose-500',    icon: '🔴' },
+  { key: 'low',  color: 'bg-sky-500',     icon: '🔵' },
   { key: 'med',  color: 'bg-amber-500',   icon: '🟡' },
   { key: 'high', color: 'bg-emerald-500', icon: '🟢' },
 ];

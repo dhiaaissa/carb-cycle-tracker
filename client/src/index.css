@@ -28,6 +28,26 @@
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
   }
+
+  :root.dark body {
+    background-color: rgb(var(--c-page));
+  }
+
+  /* Visible keyboard focus everywhere (mouse clicks don't trigger it). */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-indigo-500));
+    outline-offset: 2px;
+  }
+}
+
+/* Respect "reduce motion" — this app is used daily; animations are decoration. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer utilities {
@@ -111,14 +131,14 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: rgb(var(--c-slate-100));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: rgb(var(--c-slate-300));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: rgb(var(--c-slate-400));
 }

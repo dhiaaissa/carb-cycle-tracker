@@ -20,7 +20,7 @@ export default function MacroWeekPage({ weekNum, todayIndex, config, onSelectDay
   if (loading) return <div className="text-gray-500">{t('macroWeek.loading')}</div>;
   if (!week) return <div className="text-gray-500">{t('macroWeek.noData')}</div>;
 
-  const calTarget = config?.calorie_target || 0;
+  const calTarget = config?.day_targets?.flat?.calories || 0;
 
   return (
     <div className="animate-fadeIn">

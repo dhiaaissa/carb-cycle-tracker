@@ -11,6 +11,8 @@ export function formatDate(d, opts) {
   return new Date(d).toLocaleDateString(getLocale(), opts);
 }
 
+// Numbers use Western digits in every language (as is usual in the Maghreb),
+// so kcal and gram values read consistently side by side.
 export function formatNumber(n, opts) {
-  return new Intl.NumberFormat(getLocale(), opts).format(n);
+  return new Intl.NumberFormat(`${getLocale()}-u-nu-latn`, opts).format(n);
 }

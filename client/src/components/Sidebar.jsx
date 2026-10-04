@@ -28,7 +28,7 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 start-0 h-full z-30 bg-gray-900 text-white flex flex-col
+        theme-fixed fixed top-0 start-0 h-full z-30 bg-gray-900 text-white flex flex-col
         transition-transform duration-300 ease-in-out
         w-72
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'}
@@ -45,7 +45,7 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
           </div>
           <button
             onClick={onToggle}
-            aria-label="Close menu"
+            aria-label={t('nav.closeMenu')}
             className="lg:hidden text-gray-400 hover:text-white text-2xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-gray-800 shrink-0"
           >
             ×

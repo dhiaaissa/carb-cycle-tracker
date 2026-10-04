@@ -5,8 +5,8 @@ export default function MacroInsights({ stats, config }) {
   const { t } = useTranslation();
   if (!stats) return <div className="text-gray-500">{t('macroInsights.loading')}</div>;
 
-  const target = config?.calorie_target || 0;
-  const protTarget = config?.protein_g_target || 0;
+  const target = config?.day_targets?.flat?.calories || 0;
+  const protTarget = config?.day_targets?.flat?.protein_g || 0;
 
   const weeklyAdherence = useMemo(() => {
     return (stats.weekly_summary || []).map(ws => {
@@ -78,7 +78,7 @@ export default function MacroInsights({ stats, config }) {
         <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">{t('macroInsights.tips')}</h2>
         <ul className="space-y-2 text-sm text-gray-700">
           {stats.avg_calories > target + 200 && (
-            <li className="flex gap-2"><span>⚠️</span> {t('macroInsights.tipOver', { kcal: stats.avg_calories - target })}</li>
+            <li className="flex gap-2"><span>💡</span> {t('macroInsights.tipOver', { kcal: stats.avg_calories - target })}</li>
           )}
           {stats.avg_calories > 0 && stats.avg_calories < target - 200 && (
             <li className="flex gap-2"><span>⚠️</span> {t('macroInsights.tipUnder', { kcal: target - stats.avg_calories })}</li>
@@ -104,7 +104,7 @@ function Headline({ t, title, value, unit, trend, subtitle, pct, better }) {
   let trendStr = '';
   if (trend != null) {
     if (better === 'lower') {
-      trendColor = trend > 100 ? 'text-red-600' : trend < -100 ? 'text-emerald-600' : 'text-gray-500';
+      trendColor = trend > 100 ? 'text-amber-600' : trend < -100 ? 'text-emerald-600' : 'text-gray-500';
     }
     trendStr = trend > 0 ? `+${trend}` : `${trend}`;
   }

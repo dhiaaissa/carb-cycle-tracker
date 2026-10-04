@@ -25,7 +25,7 @@ const SUGGESTED = {
 };
 
 const TYPES = [
-  { key: 'low',  labelKey: 'nutritionRef.lowCarbDay',  headerCls: 'bg-gradient-to-r from-red-500 to-red-600' },
+  { key: 'low',  labelKey: 'nutritionRef.lowCarbDay',  headerCls: 'bg-gradient-to-r from-sky-500 to-blue-600' },
   { key: 'med',  labelKey: 'nutritionRef.medCarbDay',  headerCls: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
   { key: 'high', labelKey: 'nutritionRef.highCarbDay', headerCls: 'bg-gradient-to-r from-green-500 to-green-600' },
 ];

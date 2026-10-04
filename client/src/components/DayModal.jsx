@@ -7,7 +7,7 @@ import MealSuggester from './MealSuggester';
 import WorkoutLogger from './WorkoutLogger';
 
 const TYPE_CONFIG = {
-  low:  { gradient: 'from-rose-500 to-red-600',      bg: 'bg-rose-50',  icon: '🔴' },
+  low:  { gradient: 'from-sky-500 to-blue-600',      bg: 'bg-sky-50',  icon: '🔵' },
   med:  { gradient: 'from-amber-400 to-orange-500',   bg: 'bg-amber-50', icon: '🟡' },
   high: { gradient: 'from-emerald-400 to-green-500',  bg: 'bg-green-50', icon: '🟢' },
 };
