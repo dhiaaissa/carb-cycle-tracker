@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import ProgressRing from './ui/ProgressRing';
 import { formatNumber } from '../lib/format';
-import { MEAL_KEYS, MEAL_ICONS, MEAL_NUM, computeMealTotals } from '../lib/mealTotals';
+import { MEAL_KEYS, MEAL_ICON_COMPONENTS, MEAL_NUM, computeMealTotals } from '../lib/mealTotals';
 
 const MACROS = [
   { key: 'protein', targetKey: 'protein_g', color: 'text-violet-500', labelKey: 'macro.protein' },
@@ -40,7 +40,7 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
   return (
     <section aria-labelledby="today-title" className="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-6 mb-6">
       <div className="flex items-center justify-between gap-3 mb-5">
-        <h2 id="today-title" className="text-lg font-bold text-gray-800">{title ?? t('today.title')}</h2>
+        <h2 id="today-title" className="font-display text-lg font-semibold text-ink-900">{title ?? t('today.title')}</h2>
         {badge}
       </div>
 
@@ -51,7 +51,7 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
             value={eaten} max={goal} size={176} stroke={14} colorClass="text-indigo-500"
             label={t('today.ringLabel', { eaten: formatNumber(eaten), goal: formatNumber(goal) })}
           >
-            <span className={`text-4xl font-extrabold tabular-nums ${over ? 'text-amber-600' : 'text-gray-800'}`}>
+            <span className={`font-display text-[40px] leading-none font-semibold tabular-nums ${over ? 'text-saffron-700' : 'text-ink-900'}`}>
               {formatNumber(Math.abs(left))}
             </span>
             <span className="text-xs font-semibold text-gray-500 mt-0.5">
@@ -93,6 +93,7 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
           const items = meals[k] || [];
           const kcal = Math.round(perMeal[k].kcal);
           const name = t(`meal.${MEAL_NUM[k]}`);
+          const Icon = MEAL_ICON_COMPONENTS[k];
           return (
             <li key={k}>
               <button
@@ -104,7 +105,7 @@ export default function TodaySummary({ meals = {}, target, foodDb, extraKcal = 0
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span aria-hidden="true" className="text-lg">{MEAL_ICONS[k]}</span>
+                  <Icon size={18} aria-hidden="true" className="text-ink-500" />
                   <span className="font-semibold text-sm text-gray-800 truncate">{name}</span>
                 </div>
                 <div className="text-xs mt-0.5 tabular-nums">

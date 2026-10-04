@@ -5,7 +5,9 @@
 import { FOODS as BUILTIN_FOODS } from './foods';
 
 export const MEAL_KEYS = ['meal1', 'meal2', 'meal3', 'meal4'];
-export const MEAL_ICONS = { meal1: '☀️', meal2: '🌤️', meal3: '🌙', meal4: '🍪' };
+// Phosphor icon components per meal slot (breakfast, lunch, dinner, snack).
+export { MEAL_ICON_COMPONENTS } from './mealIcons.jsx';
+export const MEAL_ICONS = { meal1: '☀️', meal2: '🌤️', meal3: '🌙', meal4: '🍪' }; // legacy, text-only contexts
 export const MEAL_NUM = { meal1: 1, meal2: 2, meal3: 3, meal4: 4 };
 
 const ZERO = { kcal: 0, protein: 0, carbs: 0, fat: 0 };

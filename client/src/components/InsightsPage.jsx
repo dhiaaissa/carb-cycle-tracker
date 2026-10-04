@@ -16,7 +16,7 @@ export default function InsightsPage() {
   if (!data || data.total_days_logged === 0) {
     return (
       <div className="text-center py-16">
-        <div className="text-5xl mb-4">📊</div>
+        
         <div className="text-lg font-bold text-gray-700">{t('insights.noDataTitle')}</div>
         <p className="text-sm text-gray-400 mt-1">{t('insights.noDataSub')}</p>
       </div>
@@ -34,7 +34,7 @@ export default function InsightsPage() {
   const fatPct = 100 - proteinPct - carbsPct;
 
   return (
-    <div className="animate-fadeIn space-y-6">
+    <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-800 mb-1">{t('insights.heading')}</h1>
         <p className="text-sm text-gray-400">{t('insights.daysLogged', { count: data.total_days_logged })}</p>
@@ -42,11 +42,11 @@ export default function InsightsPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <SummaryCard icon="🎯" label={t('insights.avgAdherence')} value={`${avgAdherence}%`}
+        <SummaryCard label={t('insights.avgAdherence')} value={`${avgAdherence}%`}
           color={avgAdherence >= 85 ? 'text-green-600' : 'text-amber-600'} />
-        <SummaryCard icon="🥩" label={t('insights.avgProtein')} value={`${macro_averages.protein_g}g`} color="text-red-500" />
-        <SummaryCard icon="🌾" label={t('insights.avgCarbs')} value={`${macro_averages.carbs_g}g`} color="text-amber-500" />
-        <SummaryCard icon="🧈" label={t('insights.avgFat')} value={`${macro_averages.fat_g}g`} color="text-blue-500" />
+        <SummaryCard label={t('insights.avgProtein')} value={`${macro_averages.protein_g}g`} color="text-red-500" />
+        <SummaryCard label={t('insights.avgCarbs')} value={`${macro_averages.carbs_g}g`} color="text-amber-500" />
+        <SummaryCard label={t('insights.avgFat')} value={`${macro_averages.fat_g}g`} color="text-blue-500" />
       </div>
 
       {/* Macro Split */}
@@ -105,7 +105,7 @@ export default function InsightsPage() {
                     <div className="bg-indigo-400 h-1.5 rounded-full" style={{ width: `${(tf.count / maxCount) * 100}%` }} />
                   </div>
                   <div className="text-[10px] text-gray-400 mt-1">{t('insights.timesEaten', { count: tf.count })}</div>
-                  {i === 0 && <div className="text-[10px] text-indigo-500 font-bold mt-0.5">🏆 #1</div>}
+                  {i === 0 && <div className="text-[10px] text-indigo-500 font-bold mt-0.5">#1</div>}
                 </div>
               );
             })}
@@ -166,10 +166,9 @@ export default function InsightsPage() {
   );
 }
 
-function SummaryCard({ icon, label, value, color }) {
+function SummaryCard({ label, value, color }) {
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
-      <div className="text-2xl mb-1">{icon}</div>
       <div className={`text-xl font-bold ${color}`}>{value}</div>
       <div className="text-[10px] text-gray-400 font-semibold mt-0.5">{label}</div>
     </div>

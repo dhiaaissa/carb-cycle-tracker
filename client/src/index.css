@@ -10,18 +10,41 @@
     @apply transition-colors duration-200;
   }
 
-  /* Stop iOS Safari from zooming the page when a text field is focused:
-     inputs must be >= 16px. We bump them on small screens only. */
-  @media (max-width: 640px) {
+  /* iOS zooms into inputs under 16px and never zooms back. Gate by input type, not width. */
+  @media (pointer: coarse) {
     input, select, textarea {
       font-size: 16px;
     }
   }
 
+  /* Controls behave like native controls: instant taps, no text selection on long-press. */
+  button, a, [role="button"], label:has(> input[type="radio"]), label:has(> input[type="checkbox"]) {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Press feedback on pointer-down (touch has no hover). */
+  button:not(:disabled):active, [role="button"]:active {
+    transform: scale(0.98);
+    transition-duration: 80ms;
+  }
+
+  /* Numbers line up in columns everywhere. */
+  body {
+    font-feature-settings: "tnum" 1;
+  }
+
   html {
-    /* Avoid the rubber-band white flash and lock horizontal overflow on phones */
     overflow-x: hidden;
     -webkit-text-size-adjust: 100%;
+    /* App, not document: no pull-to-refresh / page rubber-band behind our own scroll areas */
+    overscroll-behavior: none;
+  }
+
+  main, [data-scroll] {
+    overscroll-behavior: contain;
   }
 
   body {
@@ -29,13 +52,13 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  :root.dark body {
+  body {
     background-color: rgb(var(--c-page));
   }
 
   /* Visible keyboard focus everywhere (mouse clicks don't trigger it). */
   :focus-visible {
-    outline: 2px solid rgb(var(--c-indigo-500));
+    outline: 2px solid rgb(var(--c-door-500));
     outline-offset: 2px;
   }
 }
@@ -83,9 +106,7 @@
     animation: fadeInUp 0.25s ease-out;
   }
 
-  .glow-shadow {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-  }
+
 }
 
 @keyframes fadeInUp {

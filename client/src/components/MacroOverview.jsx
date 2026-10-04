@@ -19,7 +19,7 @@ export default function MacroOverview({ stats, config, onSelectView }) {
   const weightChangeLabel = weightChange == null ? '—' : `${weightChange > 0 ? '+' : ''}${weightChange} kg`;
 
   return (
-    <div className="animate-fadeIn">
+    <div className="">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('overview.heading')}</h1>
         <p className="text-gray-500">{t('macroOverview.subtitle', { programme: programmeName })}</p>
@@ -28,7 +28,7 @@ export default function MacroOverview({ stats, config, onSelectView }) {
       <MacroStatsBar stats={stats} config={config} />
 
       {/* Targets card */}
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">{t('macroOverview.dailyTargets')}</h2>
         <div className="grid grid-cols-4 gap-3">
           <Stat label={t('macroOverview.calories')} value={config?.day_targets?.flat?.calories} suffix={t('macroOverview.kcal')} color="indigo" />
@@ -44,7 +44,7 @@ export default function MacroOverview({ stats, config, onSelectView }) {
       </div>
 
       {/* Weight progress */}
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">{t('macroOverview.weightProgress')}</h2>
           <div className={`text-sm font-bold ${weightChange != null && weightChange < 0 ? 'text-emerald-600' : weightChange != null && weightChange > 0 ? 'text-amber-600' : 'text-gray-500'}`}>
@@ -60,7 +60,7 @@ export default function MacroOverview({ stats, config, onSelectView }) {
       </div>
 
       {/* Weeks grid */}
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">{t('macroOverview.jumpWeek')}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {(stats.weekly_summary || []).map(ws => {
@@ -70,10 +70,10 @@ export default function MacroOverview({ stats, config, onSelectView }) {
               <button
                 key={ws.week_number}
                 onClick={() => onSelectView(`week-${ws.week_number}`)}
-                className={`bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl p-4 text-start hover:scale-105 transition-all shadow-md hover:shadow-lg ${isToday ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}`}
+                className={` bg-indigo-500 text-white rounded-xl p-4 text-start transition-all ${isToday ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl">📅</span>
+                  
                   {isToday && <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold">{t('macroOverview.now2')}</span>}
                 </div>
                 <div className="font-bold text-lg">{t('nav.weekNum', { num: ws.week_number })}</div>
@@ -101,7 +101,7 @@ function Stat({ label, value, suffix, color }) {
   const c = colorMap[color] || colorMap.indigo;
   return (
     <div className={`rounded-xl border p-3 text-center ${c}`}>
-      <div className="text-[10px] font-bold uppercase tracking-wide">{label}</div>
+      <div className="text-[10px] font-bold">{label}</div>
       <div className="text-2xl font-extrabold text-gray-800 mt-1">{value ?? '—'}</div>
       <div className="text-[10px] text-gray-500">{suffix}</div>
     </div>
@@ -111,7 +111,7 @@ function Stat({ label, value, suffix, color }) {
 function Mini({ label, value }) {
   return (
     <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-      <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">{label}</div>
+      <div className="text-[10px] font-bold text-gray-500">{label}</div>
       <div className="text-sm font-bold text-gray-800 mt-1">{value}</div>
     </div>
   );

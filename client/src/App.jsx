@@ -9,12 +9,14 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import ThemeToggle from './components/ThemeToggle';
 import LogoutButton from './components/LogoutButton';
 import Sidebar from './components/Sidebar';
-import StatsBar from './components/StatsBar';
+import ProgrammeLog from './components/ProgrammeLog';
+import { BrandMark } from './components/ui/SideNav';
+import { List, BellRinging, BellSimpleSlash, PencilSimpleLine } from '@phosphor-icons/react';
+import { formatDate } from './lib/format';
 import TodaySummary from './components/TodaySummary';
 import { buildFoodDb } from './lib/mealTotals';
 import { DAY_TYPE_STYLE } from './lib/dayTypeStyle';
 import { DEFAULT_DAY_TARGETS } from './lib/calories';
-import ProgressCard from './components/ProgressCard';
 import DayModal from './components/DayModal';
 import WeightChart from './components/WeightChart';
 import NutritionReference from './components/NutritionReference';
@@ -68,13 +70,9 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
 
   if (loading) {
     return (
-      <div className="theme-fixed flex items-center justify-center h-screen bg-gradient-to-br from-gray-900 to-gray-800">
-        <div className="text-center">
-          <div className="text-5xl mb-4">💪</div>
-          <div className="w-8 h-8 border-4 border-indigo-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-white font-semibold text-lg">{t('app.loading')}</div>
-          <div className="text-gray-400 text-sm mt-1">{t('app.loadingSub')}</div>
-        </div>
+      <div className="flex flex-col items-center justify-center gap-3 h-screen-safe bg-page" role="status" aria-live="polite">
+        <div className="animate-spin [animation-duration:1.6s]"><BrandMark size={36} /></div>
+        <div className="text-sm text-ink-600">{t('app.loading')}</div>
       </div>
     );
   }
@@ -100,12 +98,18 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
   }
 
   const todayIndex = config?.today_index ?? -1;
-  const todayWeek = todayIndex >= 0 && todayIndex <= 55 ? Math.floor(todayIndex / 7) + 1 : null;
   const todayType = config?.today_day_type;
 
+  const inProgramme = todayIndex >= 0 && todayIndex <= 55;
+  const pageTitle = selectedWeek === null ? t('nav.overview')
+    : selectedWeek === 'insights' ? t('nav.insights')
+    : selectedWeek === 'profile' ? t('nav.profile')
+    : selectedWeek === 'settings' ? t('nav.settings')
+    : selectedWeek === 'grocery' ? t('nav.grocery')
+    : t('nav.weekNum', { num: selectedWeek });
+
   return (
-    <div className="flex h-screen-safe bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
-      {/* Sidebar */}
+    <div className="flex h-screen-safe bg-page overflow-hidden">
       <Sidebar
         schedule={schedule}
         days={days}
@@ -117,98 +121,61 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
         onToggle={() => setSidebarOpen(o => !o)}
       />
 
-      {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top navbar */}
-        <header className="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center gap-2 sm:gap-4 shrink-0 shadow-sm z-10 pt-safe ps-safe pe-safe">
-          {/* Hamburger (mobile) */}
+        <header className="h-16 bg-page/95 border-b border-ink-200 px-3 sm:px-6 flex items-center gap-2 sm:gap-3 shrink-0 z-10 pt-safe ps-safe pe-safe">
           <button
             onClick={() => setSidebarOpen(o => !o)}
             aria-label={t('nav.openMenu')}
-            className="lg:hidden w-11 h-11 -ms-1.5 flex flex-col items-center justify-center rounded-xl hover:bg-gray-100 text-gray-600 transition-colors shrink-0"
+            className="lg:hidden w-10 h-10 -ms-1 flex items-center justify-center rounded-lg text-ink-700 hover:bg-ink-100 shrink-0"
           >
-            <span className="block w-5 h-0.5 bg-current mb-1"></span>
-            <span className="block w-5 h-0.5 bg-current mb-1"></span>
-            <span className="block w-5 h-0.5 bg-current"></span>
+            <List size={22} />
           </button>
 
-          <div className="flex items-center gap-3 min-w-0">
-            {selectedWeek ? (
-              <div className="flex items-center gap-2 min-w-0">
-                <button
-                  onClick={() => setSelectedWeek(null)}
-                  className="text-gray-400 hover:text-gray-600 text-sm font-medium transition-colors shrink-0"
-                >
-                  {t('nav.overview')}
-                </button>
-                <span className="text-gray-300 shrink-0">/</span>
-                <span className="text-gray-800 font-bold truncate">{selectedWeek === 'insights' ? t('nav.insights') : selectedWeek === 'profile' ? t('nav.profile') : selectedWeek === 'settings' ? t('nav.settings') : selectedWeek === 'grocery' ? t('nav.grocery') : t('nav.weekNum', { num: selectedWeek })}</span>
-              </div>
-            ) : (
-              <span className="text-gray-800 font-bold text-base sm:text-lg truncate">{t('nav.overview')}</span>
-            )}
-          </div>
+          <h1 className="font-display text-lg sm:text-xl font-semibold text-ink-900 truncate">{pageTitle}</h1>
 
-          <div className="ms-auto flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {!reminderConfig?.running ? (
-              <button
-                onClick={startReminders}
-                className="hidden sm:flex items-center gap-1 bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
-                title={t('header.startRemindersTitle')}
-              >
-                📲 {t('header.startReminders')}
-              </button>
-            ) : (
-              <button
-                onClick={stopReminders}
-                className="hidden sm:flex items-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors"
-                title={t('header.stopRemindersTitle')}
-              >
-                🔕 {t('header.stopReminders')}
-              </button>
-            )}
+          <div className="ms-auto flex items-center gap-1 sm:gap-2 shrink-0">
             <button
-              onClick={() => setSelectedWeek('grocery')}
-              className="hidden sm:flex items-center gap-1 bg-green-50 hover:bg-green-100 text-green-700 px-3 py-1.5 rounded-xl text-sm font-bold transition-colors"
+              onClick={reminderConfig?.running ? stopReminders : startReminders}
+              aria-label={reminderConfig?.running ? t('header.stopReminders') : t('header.startReminders')}
+              title={reminderConfig?.running ? t('header.stopRemindersTitle') : t('header.startRemindersTitle')}
+              className="hidden sm:flex w-10 h-10 items-center justify-center rounded-lg text-ink-600 hover:bg-ink-100"
             >
-              🛒 {t('nav.groceryShort')}
+              {reminderConfig?.running ? <BellRinging size={20} weight="fill" className="text-door-600" /> : <BellSimpleSlash size={20} />}
             </button>
-            {todayIndex >= 0 && todayIndex <= 55 && (
-              <div className="hidden sm:flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-xl text-sm font-semibold">
-                <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
-                {t('header.dayOfTotal', { day: todayIndex + 1, total: 56 })}
-              </div>
-            )}
-            {todayIndex >= 0 && todayIndex <= 55 && (
-              <button
-                onClick={() => setSelectedDay(todayIndex)}
-                title={t('action.logToday')}
-                className="bg-green-500 hover:bg-green-600 text-white px-3 sm:px-4 py-2 sm:py-1.5 rounded-xl text-sm font-bold transition-colors shadow-md shrink-0"
-              >
-                <span className="sm:hidden text-base leading-none">✏️</span>
-                <span className="hidden sm:inline">{t('action.logToday')}</span>
-              </button>
-            )}
             <ThemeToggle />
             <LanguageSwitcher />
-            <div className="hidden sm:flex items-center gap-2 ps-2 border-s border-gray-200">
-              <span className="text-xs font-semibold text-gray-500">@{user.username}</span>
+            <div className="hidden sm:flex items-center gap-2 ps-2 ms-1 border-s border-ink-200">
+              <span className="text-xs text-ink-500">@{user.username}</span>
               <LogoutButton onLogout={onLogout} username={user.username} />
             </div>
             <LogoutButton onLogout={onLogout} username={user.username} compact />
+            {inProgramme && (
+              <button
+                onClick={() => setSelectedDay(todayIndex)}
+                className="ms-1 h-10 px-3 sm:px-4 rounded-lg bg-door-600 hover:bg-door-700 text-white text-sm font-semibold flex items-center gap-2 shrink-0"
+              >
+                <PencilSimpleLine size={18} weight="bold" />
+                <span className="hidden sm:inline">{t('action.logToday')}</span>
+                <span className="sr-only sm:hidden">{t('action.logToday')}</span>
+              </button>
+            )}
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 overflow-y-auto pb-safe ps-safe pe-safe">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
             {selectedWeek === null ? (
-              /* Overview page */
-              <div className="animate-fadeIn">
-                <div className="mb-6 sm:mb-8">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-1">{t('overview.heading')}</h1>
-                  <p className="text-sm sm:text-base text-gray-500">{t('overview.subheading')}</p>
-                </div>
+              <div>
+                {inProgramme && (
+                  <div className="mb-6">
+                    <p className="text-sm text-ink-500">
+                      {formatDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long' })}
+                    </p>
+                    <p className="font-display text-2xl sm:text-3xl font-semibold text-ink-900 mt-0.5">
+                      {t('overview.dayLine', { day: todayIndex + 1, phase: t(`phase.${config?.today_phase}`) })}
+                    </p>
+                  </div>
+                )}
 
                 {todayType && (
                   <TodaySummary
@@ -217,59 +184,23 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
                     foodDb={foodDb}
                     onOpenMeal={() => setSelectedDay(todayIndex)}
                     badge={
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${DAY_TYPE_STYLE[todayType].chip}`}>
-                        <span aria-hidden="true">{DAY_TYPE_STYLE[todayType].emoji}</span> {t(`dayType.${todayType}`)}
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-md border ${DAY_TYPE_STYLE[todayType].chip}`}>
+                        {t(`dayType.${todayType}`)}
                       </span>
                     }
                   />
                 )}
-                <StatsBar config={config} days={days} stats={stats} />
-                <ProgressCard days={days} config={config} />
+
+                <ProgrammeLog
+                  schedule={schedule}
+                  days={days}
+                  stats={stats}
+                  todayIndex={todayIndex}
+                  onSelectDay={setSelectedDay}
+                  onSelectWeek={setSelectedWeek}
+                />
                 <WeightChart weightEntries={stats?.weight_entries} />
                 <NutritionReference />
-
-                {/* Quick week navigation grid */}
-                <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <span>📅</span> {t('nav.jumpToWeek')}
-                  </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {[1,2,3,4,5,6,7,8].map(w => {
-                      const weekStart = (w - 1) * 7;
-                      const weekDays = schedule.slice(weekStart, weekStart + 7);
-                      if (weekDays.length === 0) return null;
-                      const phase = weekDays[0]?.phase;
-                      const ws = stats?.weekly_summary?.find(s => s.week_number === w);
-                      const completed = ws?.completed_days ?? 0;
-                      const isToday = w === todayWeek;
-                      const colorMap = {
-                        1: 'from-blue-500 to-blue-600',
-                        2: 'from-red-500 to-red-600',
-                        3: 'from-orange-500 to-orange-600',
-                        4: 'from-purple-500 to-purple-600',
-                      };
-                      const iconMap = { 1: '🚀', 2: '📉', 3: '🔥', 4: '💪' };
-                      return (
-                        <button
-                          key={w}
-                          onClick={() => setSelectedWeek(w)}
-                          className={`bg-gradient-to-br ${colorMap[phase]} text-white rounded-xl p-4 text-start hover:scale-105 transition-all shadow-md hover:shadow-lg ${isToday ? 'ring-4 ring-yellow-400 ring-offset-2' : ''}`}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-2xl">{iconMap[phase]}</span>
-                            {isToday && <span className="text-xs bg-yellow-400 text-yellow-900 px-1.5 py-0.5 rounded-full font-bold">{t('nav.now')}</span>}
-                          </div>
-                          <div className="font-bold text-lg">{t('nav.weekNum', { num: w })}</div>
-                          <div className="text-xs text-white/70">{t('nav.phaseNum', { num: phase })}</div>
-                          <div className="mt-2 w-full bg-white/20 rounded-full h-1.5">
-                            <div className="bg-white rounded-full h-1.5" style={{ width: `${Math.round((completed / 7) * 100)}%` }} />
-                          </div>
-                          <div className="text-xs text-white/70 mt-1">{t('nav.daysProgress', { done: completed, total: 7 })}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
             ) : selectedWeek === 'grocery' ? (
               /* Grocery list page */

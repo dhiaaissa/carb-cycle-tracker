@@ -6,7 +6,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
 const KEY = 'theme';
 const THEMES = ['system', 'light', 'dark'];
-const META_COLOR = { light: '#f8fafc', dark: '#030712' };
+const META_COLOR = { light: '#F3F1EA', dark: '#121210' }; // = page background (see DESIGN.md)
 
 const media = () => window.matchMedia('(prefers-color-scheme: dark)');
 
@@ -24,7 +24,8 @@ export function resolveTheme(pref) {
 export function applyTheme(pref = readPref()) {
   const resolved = resolveTheme(pref);
   document.documentElement.classList.toggle('dark', resolved === 'dark');
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', META_COLOR[resolved]);
+  // Manual override: both per-scheme tags must carry the chosen colour, or the OS scheme wins.
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute('content', META_COLOR[resolved]));
   return resolved;
 }
 

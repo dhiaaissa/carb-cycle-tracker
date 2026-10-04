@@ -9,10 +9,10 @@ import {
 } from '../../../shared/nutrition.js';
 
 const PROGRAMMES = [
-  { id: 'carb_cycle',  emoji: '🔄', color: 'from-indigo-500 to-purple-600' },
-  { id: 'weight_loss', emoji: '📉', color: 'from-sky-500 to-blue-600' },
-  { id: 'muscle_gain', emoji: '💪', color: 'from-violet-500 to-indigo-600' },
-  { id: 'recomp',      emoji: '⚖️', color: 'from-emerald-500 to-teal-600' },
+  { id: 'carb_cycle', color: 'bg-indigo-500' },
+  { id: 'weight_loss', color: 'bg-sky-500' },
+  { id: 'muscle_gain', color: 'bg-violet-500' },
+  { id: 'recomp', color: 'bg-emerald-500' },
 ];
 
 const PROGRAMME_NAME_KEY = {
@@ -23,7 +23,6 @@ const PROGRAMME_NAME_KEY = {
 };
 
 const STEPS = ['programme', 'about', 'activity', 'plan'];
-const STEP_ICON = { programme: '🎯', about: '📏', activity: '🏃', plan: '✨' };
 
 const num = (v) => (v === '' || v == null ? undefined : Number(v));
 const round1 = (v) => Math.round(v * 10) / 10;
@@ -38,8 +37,8 @@ function Choice({ legend, options, value, onChange, columns = 'grid-cols-2', hid
           const checked = value === o.value;
           return (
             <label key={o.value}
-              className={`relative cursor-pointer rounded-xl border-2 px-3 py-2.5 transition-colors focus-within:ring-2 focus-within:ring-indigo-400 ${
-                checked ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
+              className={`relative cursor-pointer rounded-xl border px-3 py-2.5 transition-colors focus-within:ring-2 focus-within:ring-indigo-400 ${
+ checked ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
               <input type="radio" className="sr-only" checked={checked} onChange={() => onChange(o.value)} />
               <span className={`block font-bold text-sm ${checked ? 'text-indigo-700' : 'text-gray-800'}`}>{o.label}</span>
               {o.detail && <span className="block text-xs text-gray-500 mt-0.5">{o.detail}</span>}
@@ -198,7 +197,7 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
     : t('setup.rate.kg', { rate: r }));
 
   return (
-    <div className="theme-fixed min-h-screen-safe bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="theme-fixed min-h-screen-safe bg-indigo-900 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
         {/* Progress */}
         <ol className="flex items-center justify-center gap-2 mb-5" aria-label={t('setup.progress')}>
@@ -211,12 +210,12 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
         </ol>
 
         <div className="text-center mb-6">
-          <div className="text-5xl mb-2" aria-hidden="true">{STEP_ICON[stepKey]}</div>
+          <div className="text-sm text-door-200 mb-2">{t('setup.stepOf', { n: step + 1, total: STEPS.length })}</div>
           <h1 className="text-2xl font-bold text-white mb-1">{t(`setup.${stepKey}.title`)}</h1>
           <p className="text-indigo-200 text-sm">{t(`setup.${stepKey}.subtitle`)}</p>
         </div>
 
-        <div className="theme-auto bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+        <div className="theme-auto bg-white rounded-2xl p-6 sm:p-8">
           {stepKey === 'programme' && (
             <fieldset>
               <legend className="sr-only">{t('setup.programme.title')}</legend>
@@ -225,9 +224,9 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                   const checked = programme === p.id;
                   return (
                     <label key={p.id}
-                      className={`cursor-pointer text-start p-4 rounded-xl border-2 transition-all focus-within:ring-2 focus-within:ring-indigo-400 ${checked ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
+                      className={`cursor-pointer text-start p-4 rounded-xl border transition-all focus-within:ring-2 focus-within:ring-indigo-400 ${checked ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}>
                       <input type="radio" name="programme" className="sr-only" checked={checked} onChange={() => setProgramme(p.id)} />
-                      <span aria-hidden="true" className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${p.color} text-2xl mb-2`}>{p.emoji}</span>
+                      <span aria-hidden="true" className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${p.color} text-2xl mb-2`}></span>
                       <span className="block font-bold text-gray-800">{t(PROGRAMME_NAME_KEY[p.id])}</span>
                       <span className="block text-xs text-gray-500 mt-1 leading-relaxed">{t(`setup.programme.${p.id}.desc`)}</span>
                     </label>
@@ -312,7 +311,7 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                     <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
                       {['low', 'med', 'high'].map((type) => (
                         <div key={type} className="text-center bg-white rounded-xl p-3 border border-indigo-100">
-                          <div className="text-[11px] font-bold text-indigo-600 uppercase tracking-wide">{t(`dayType.${type}Short`)}</div>
+                          <div className="text-[11px] font-bold text-indigo-600">{t(`dayType.${type}Short`)}</div>
                           <div className="text-xl sm:text-2xl font-extrabold text-gray-800 my-0.5 tabular-nums">{formatNumber(plan.dayTargets[type].calories)}</div>
                           <dl className="text-[11px] text-gray-600 tabular-nums leading-snug">
                             {[['protein', 'protein_g'], ['carbs', 'carbs_g'], ['fat', 'fat_g']].map(([m, k]) => (
@@ -326,7 +325,7 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                     </div>
                   ) : (
                     <div className="text-center mb-4">
-                      <div className="text-xs font-bold text-indigo-600 uppercase tracking-wide">{t('setup.dailyCalorieTarget')}</div>
+                      <div className="text-xs font-bold text-indigo-600">{t('setup.dailyCalorieTarget')}</div>
                       <div className="text-5xl font-extrabold text-gray-800 my-1 tabular-nums">{formatNumber(plan.calories)}</div>
                       <div className="text-sm text-gray-600">{t('setup.macroLine', { p: plan.protein_g, c: plan.carbs_g, f: plan.fat_g })}</div>
                     </div>
@@ -365,12 +364,12 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
               : <button type="button" onClick={() => setStep((s) => s - 1)} className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-bold hover:bg-gray-50">{t('setup.back')}</button>}
             {stepKey === 'plan' ? (
               <button type="button" onClick={handleSubmit} disabled={submitting || !plan?.ok}
-                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold shadow-lg shadow-indigo-500/30">
+                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold">
                 {submitting ? t('setup.savingDots') : t('setup.startTracking')}
               </button>
             ) : (
               <button type="button" onClick={next} disabled={!programme}
-                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold shadow-lg shadow-indigo-500/30">
+                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold">
                 {t('setup.continue')}
               </button>
             )}

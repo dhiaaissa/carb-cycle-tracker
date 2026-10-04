@@ -3,10 +3,10 @@ import DayCard from './DayCard';
 import { formatDate } from '../lib/format';
 
 const PHASE_META = {
-  1: { color: 'from-blue-500 to-blue-600', goalKey: 'phaseGoal.1', icon: '🚀' },
-  2: { color: 'from-red-500 to-red-600', goalKey: 'phaseGoal.2', icon: '📉' },
-  3: { color: 'from-orange-500 to-orange-600', goalKey: 'phaseGoal.3', icon: '🔥' },
-  4: { color: 'from-purple-500 to-purple-600', goalKey: 'phaseGoal.4', icon: '💪' },
+  1: { color: 'bg-blue-500', goalKey: 'phaseGoal.1' },
+  2: { color: 'bg-red-500', goalKey: 'phaseGoal.2' },
+  3: { color: 'bg-orange-500', goalKey: 'phaseGoal.3' },
+  4: { color: 'bg-purple-500', goalKey: 'phaseGoal.4' },
 };
 
 export default function WeekBlock({ weekNum, schedule, days, todayIndex, weekStats, onDayClick }) {
@@ -30,10 +30,10 @@ export default function WeekBlock({ weekNum, schedule, days, todayIndex, weekSta
   return (
     <div className="mb-8">
       {/* Week header */}
-      <div className={`bg-gradient-to-r ${meta.color} text-white rounded-2xl shadow-lg p-5 mb-4`}>
+      <div className={` ${meta.color} text-white rounded-2xl p-5 mb-4`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{meta.icon}</span>
+            <span className="text-3xl"></span>
             <div>
               <h3 className="font-bold text-lg">{t('nav.weekNum', { num: weekNum })}</h3>
               <p className="text-sm opacity-90">{t('week.phaseGoal', { phase, goal: t(meta.goalKey) })}</p>

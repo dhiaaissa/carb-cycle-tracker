@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
+import { CheckCircle, X, Lightbulb } from '@phosphor-icons/react';
+import { DAY_TYPE_STYLE } from '../lib/dayTypeStyle';
 import { useTranslation } from 'react-i18next';
 import { calculateDay, calculateScore, WATER_GOALS, DEFAULT_DAY_TARGETS } from '../lib/calories';
 import { formatDate } from '../lib/format';
@@ -7,9 +9,9 @@ import MealSuggester from './MealSuggester';
 import WorkoutLogger from './WorkoutLogger';
 
 const TYPE_CONFIG = {
-  low:  { gradient: 'from-sky-500 to-blue-600',      bg: 'bg-sky-50',  icon: '🔵' },
-  med:  { gradient: 'from-amber-400 to-orange-500',   bg: 'bg-amber-50', icon: '🟡' },
-  high: { gradient: 'from-emerald-400 to-green-500',  bg: 'bg-green-50', icon: '🟢' },
+  low:  { gradient: 'bg-sky-500',      bg: 'bg-sky-50' },
+  med:  { gradient: 'bg-amber-400',   bg: 'bg-amber-50' },
+  high: { gradient: 'bg-emerald-400',  bg: 'bg-green-50' },
 };
 
 const MOODS = ['great', 'good', 'ok', 'tired', 'bad'];
@@ -18,12 +20,12 @@ const CHEAT_KCAL = { kabab: 1550, pizza: 1800, burger: 1050, pasta: 950, baguett
 const EMPTY_MEALS = { meal1: [], meal2: [], meal3: [], meal4: [] };
 
 const CHEAT_OPTIONS = [
-  { id: 'kabab', emoji: '🥩' },
-  { id: 'pizza', emoji: '🍕' },
-  { id: 'burger', emoji: '🍔' },
-  { id: 'pasta', emoji: '🍝' },
-  { id: 'baguette', emoji: '🥖' },
-  { id: 'other', emoji: '🍽️' },
+  { id: 'kabab' },
+  { id: 'pizza' },
+  { id: 'burger' },
+  { id: 'pasta' },
+  { id: 'baguette' },
+  { id: 'other' },
 ];
 
 function localizedScoreLabel(t, score) {
@@ -163,53 +165,54 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
   })();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 sm:p-4" onClick={onClose}>
       <div
-        className="bg-gray-100 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-2xl h-[92dvh] sm:h-auto sm:max-h-[92vh] overflow-hidden flex flex-col"
+        role="dialog" aria-modal="true" aria-labelledby="day-modal-title"
+        className="bg-page rounded-t-2xl sm:rounded-xl w-full max-w-2xl h-[92dvh] sm:h-auto sm:max-h-[92vh] overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className={`bg-gradient-to-r ${cfg.gradient} text-white px-5 py-4 shrink-0`}>
-          <div className="flex items-center justify-between">
-            <div>
+        {/* Header — sheet handle, title, today's numbers */}
+        <div className="bg-white border-b border-ink-200 px-5 pt-2 pb-4 shrink-0">
+          <div className="sm:hidden mx-auto mb-2 h-1 w-10 rounded-full bg-ink-300" aria-hidden="true" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold">{t('modal.dayNum', { num: dayIndex + 1 })}</span>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-semibold">{t(`dayType.${day_type}`)}</span>
+                <h2 id="day-modal-title" className="font-display text-2xl font-semibold text-ink-900">{t('modal.dayNum', { num: dayIndex + 1 })}</h2>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-md border ${DAY_TYPE_STYLE[day_type]?.chip ?? ''}`}>{t(`dayType.${day_type}`)}</span>
               </div>
-              <p className="text-xs text-white/70 mt-0.5">{t('modal.dateAndPhase', { date: formatted, phase, goal: t(`phaseGoal.${phase}`) })}</p>
+              <p className="text-xs text-ink-500 mt-0.5">{t('modal.dateAndPhase', { date: formatted, phase, goal: t(`phaseGoal.${phase}`) })}</p>
             </div>
-            <button onClick={onClose} className="text-white/60 hover:text-white text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-all">×</button>
+            <button onClick={onClose} aria-label={t('common.close')} className="w-10 h-10 -me-2 flex items-center justify-center rounded-lg text-ink-500 hover:text-ink-900 hover:bg-ink-100">
+              <X size={20} />
+            </button>
           </div>
 
-          {/* Inline calorie + macro bar */}
-          <div className="mt-3 bg-white/10 rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold">{cal.calories_consumed}</span>
-                <span className="text-xs text-white/60">/ {cal.calories_target} {t('macro.kcal')}</span>
+          <div className="mt-3">
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-display text-2xl font-semibold text-ink-900 tabular-nums">{cal.calories_consumed}</span>
+                <span className="text-xs text-ink-500">/ {cal.calories_target} {t('macro.kcal')}</span>
               </div>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                calPct >= 100 ? 'bg-green-400/30 text-green-100' : 'bg-white/15 text-white/80'
-              }`}>
+              <span className={`text-sm font-semibold tabular-nums ${cal.calories_remaining >= 0 ? 'text-door-700' : 'text-saffron-700'}`}>
                 {cal.calories_remaining > 0 ? t('modal.kcalLeft', { kcal: cal.calories_remaining }) : t('modal.targetHit')}
               </span>
             </div>
-            <div className="w-full bg-white/20 rounded-full h-1.5 mb-2">
-              <div className={`rounded-full h-1.5 transition-all duration-500 ${calPct >= 100 ? 'bg-green-300' : 'bg-white/70'}`} style={{ width: `${calPct}%` }} />
+            <div className="mt-1.5 h-1.5 rounded-full bg-ink-100">
+              <div className={`h-1.5 rounded-full transition-[width] duration-500 ${calPct > 100 ? 'bg-saffron-500' : 'bg-door-600'}`} style={{ width: `${Math.min(100, calPct)}%` }} />
             </div>
-            <div className="flex gap-3">
+            <div className="mt-3 grid grid-cols-3 gap-3">
               {[
-                { labelKey: 'macro.protein_short', val: cal.protein_g, target: mt.protein_g, color: 'bg-red-300' },
-                { labelKey: 'macro.carbs_short',   val: cal.carbs_g,   target: mt.carbs_g,   color: 'bg-amber-300' },
-                { labelKey: 'macro.fat_short',     val: cal.fat_g,     target: mt.fat_g,     color: 'bg-blue-300' },
+                { labelKey: 'macro.protein', val: cal.protein_g, target: mt.protein_g, color: 'bg-door-600' },
+                { labelKey: 'macro.carbs',   val: cal.carbs_g,   target: mt.carbs_g,   color: 'bg-saffron-500' },
+                { labelKey: 'macro.fat',     val: cal.fat_g,     target: mt.fat_g,     color: 'bg-olive-500' },
               ].map(m => (
-                <div key={m.labelKey} className="flex-1">
-                  <div className="flex justify-between text-[10px] text-white/70 mb-0.5">
-                    <span className="font-bold">{t(m.labelKey)}</span>
-                    <span>{m.val}/{m.target}g</span>
+                <div key={m.labelKey}>
+                  <div className="flex justify-between text-[11px] mb-1">
+                    <span className="text-ink-600">{t(m.labelKey)}</span>
+                    <span className="text-ink-900 font-medium tabular-nums">{m.val}/{m.target}g</span>
                   </div>
-                  <div className="w-full bg-white/20 rounded-full h-1">
-                    <div className={`${m.color} h-1 rounded-full transition-all duration-300`} style={{ width: `${Math.min(100, Math.round((m.val / m.target) * 100))}%` }} />
+                  <div className="h-1 rounded-full bg-ink-100">
+                    <div className={`${m.color} h-1 rounded-full transition-[width] duration-300`} style={{ width: `${Math.min(100, Math.round((m.val / m.target) * 100))}%` }} />
                   </div>
                 </div>
               ))}
@@ -218,8 +221,9 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
         </div>
 
         {/* Smart tip */}
-        <div className="px-5 py-2 bg-indigo-50 text-indigo-600 text-xs font-medium shrink-0">
-          💡 {tip}
+        <div className="px-5 py-2.5 bg-door-50 text-door-800 text-xs flex items-start gap-2 shrink-0">
+          <Lightbulb size={16} className="shrink-0 mt-px" aria-hidden="true" />
+          <span>{tip}</span>
         </div>
 
         {/* Scrollable Body */}
@@ -281,7 +285,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
               <div className="flex items-center gap-1.5">
                 <span className={`text-lg font-bold ${water >= waterGoal ? 'text-cyan-500' : 'text-gray-700'}`}>{water.toFixed(1)}L</span>
                 <span className="text-xs text-gray-400">/ {waterGoal}L</span>
-                {water >= waterGoal && <span className="text-green-500 text-sm font-bold">✓</span>}
+                {water >= waterGoal && <CheckCircle size={18} weight="fill" className="text-water-500" aria-label={t('day.waterGoalMet')} />}
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -305,9 +309,9 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
               <button
                 onClick={() => !isFuture && setWorkout(w => !w)}
                 disabled={isFuture}
-                className={`text-xs font-bold px-3 py-1 rounded-full transition-all border-2 ${
-                  workout ? 'bg-purple-50 border-purple-300 text-purple-700' : 'border-gray-200 text-gray-400 hover:border-purple-200'
-                } disabled:opacity-40`}
+                className={`text-xs font-bold px-3 py-1 rounded-full transition-all border ${
+ workout ? 'bg-purple-50 border-purple-300 text-purple-700' : 'border-gray-200 text-gray-400 hover:border-purple-200'
+ } disabled:opacity-40`}
               >
                 {workout ? t('modal.trainedToday') : t('modal.restDay')}
               </button>
@@ -326,11 +330,11 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
             <button
               onClick={() => !isFuture && !cheatLockedByOther && setCheat(c => !c)}
               disabled={isFuture || (cheatLockedByOther && !cheat)}
-              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all border-2 ${
-                cheat ? 'bg-orange-50 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200 hover:text-orange-400'
-              } disabled:opacity-40`}
+              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all border ${
+ cheat ? 'bg-orange-50 border-orange-300 text-orange-600' : 'border-gray-200 text-gray-400 hover:border-orange-200 hover:text-orange-400'
+ } disabled:opacity-40`}
             >
-              <span className="text-xl">🍕</span>
+              
               {cheat ? t('modal.cheatMealOn') : cheatLockedByOther ? t('modal.cheatUsedThisWeek') : t('modal.cheatPrompt')}
             </button>
 
@@ -343,11 +347,11 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
                       key={m.id}
                       onClick={() => !isFuture && setCheatMealChoice(prev => prev === m.id ? null : m.id)}
                       disabled={isFuture}
-                      className={`text-start p-2.5 rounded-xl border-2 transition-all ${
-                        cheatMealChoice === m.id
-                          ? 'border-orange-400 bg-orange-50'
-                          : 'border-gray-100 bg-gray-50 hover:border-orange-200'
-                      } disabled:opacity-40`}
+                      className={`text-start p-2.5 rounded-xl border transition-all ${
+ cheatMealChoice === m.id
+ ? 'border-orange-400 bg-orange-50'
+ : 'border-gray-100 bg-gray-50 hover:border-orange-200'
+ } disabled:opacity-40`}
                     >
                       <div className="flex items-center gap-1.5 mb-0.5">
                         <span className="text-base">{m.emoji}</span>
@@ -374,11 +378,11 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
                 <button key={m}
                   onClick={() => !isFuture && setMood(mood === m ? null : m)}
                   disabled={isFuture}
-                  className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all border-2 ${
-                    mood === m
-                      ? 'bg-indigo-50 border-indigo-400 shadow-sm'
-                      : 'border-gray-100 hover:border-gray-300 bg-gray-50'
-                  } disabled:opacity-40`}>
+                  className={`flex-1 flex flex-col items-center py-3 rounded-xl transition-all border ${
+ mood === m
+ ? 'bg-indigo-50 border-indigo-400 shadow-sm'
+ : 'border-gray-100 hover:border-gray-300 bg-gray-50'
+ } disabled:opacity-40`}>
                   <span className="text-2xl">{MOOD_EMOJI[m]}</span>
                   <span className="text-[10px] font-semibold text-gray-500 mt-1">{t(`modal.mood.${m}`)}</span>
                 </button>
@@ -412,7 +416,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
               <input type="number" step="0.1" value={weight}
                 onChange={e => !isFuture && setWeight(e.target.value)}
                 disabled={isFuture} placeholder={t('modal.weightPlaceholder')}
-                className="w-full border-2 border-gray-200 rounded-xl px-4 py-2.5 text-base font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-base font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
 
               {/* Body Measurements */}
               <div className="mt-4 pt-4 border-t border-gray-100">
@@ -423,28 +427,28 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
                     <input type="number" step="0.1" value={waist}
                       onChange={e => !isFuture && setWaist(e.target.value)}
                       disabled={isFuture} placeholder={t('modal.cmPlaceholder')}
-                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
                   </div>
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">{t('modal.chest')}</label>
                     <input type="number" step="0.1" value={chest}
                       onChange={e => !isFuture && setChest(e.target.value)}
                       disabled={isFuture} placeholder={t('modal.cmPlaceholder')}
-                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
                   </div>
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">{t('modal.arm')}</label>
                     <input type="number" step="0.1" value={arm}
                       onChange={e => !isFuture && setArm(e.target.value)}
                       disabled={isFuture} placeholder={t('modal.cmPlaceholder')}
-                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
                   </div>
                   <div>
                     <label className="text-xs font-medium text-gray-500 mb-1 block">{t('modal.thigh')}</label>
                     <input type="number" step="0.1" value={thigh}
                       onChange={e => !isFuture && setThigh(e.target.value)}
                       disabled={isFuture} placeholder={t('modal.cmPlaceholder')}
-                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:border-indigo-400 focus:outline-none disabled:opacity-40" />
                   </div>
                 </div>
               </div>
@@ -456,7 +460,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
             <span className="text-sm font-bold text-gray-700 mb-2 block">{t('modal.notes')}</span>
             <textarea value={notes} onChange={e => !isFuture && setNotes(e.target.value)}
               disabled={isFuture} rows={3}
-              className="w-full border-2 border-gray-100 rounded-xl px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none disabled:opacity-40 bg-gray-50 placeholder-gray-400 resize-none"
+              className="w-full border border-gray-100 rounded-xl px-3 py-2.5 text-sm focus:border-indigo-300 focus:outline-none disabled:opacity-40 bg-gray-50 placeholder-gray-400 resize-none"
               placeholder={t('modal.notesPlaceholder')} />
           </div>
 
@@ -471,17 +475,17 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
               </div>
             </div>
             <div className="text-end">
-              <div className="text-4xl font-bold text-purple-600">{score}<span className="text-lg text-gray-300">{t('modal.scoreOfMax')}</span></div>
-              <div className="text-xs font-bold text-purple-400 mt-0.5">{localizedScoreLabel(t, score)}</div>
+              <div className="font-display text-4xl font-semibold text-ink-900">{score}<span className="text-lg text-gray-300">{t('modal.scoreOfMax')}</span></div>
+              <div className="text-xs font-medium text-ink-500 mt-0.5">{localizedScoreLabel(t, score)}</div>
             </div>
           </div>
         </div>
 
         {/* Save Footer */}
         {!isFuture && (
-          <div className="px-4 py-3 pb-safe bg-gray-100 shrink-0 border-t border-gray-200">
+          <div className="px-4 py-3 pb-safe bg-white shrink-0 border-t border-ink-200">
             <button onClick={handleSave} disabled={saving || !!toast}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-3.5 rounded-2xl text-base transition-all disabled:opacity-50 shadow-lg hover:shadow-xl active:scale-[0.98]">
+              className="w-full h-12 bg-door-600 hover:bg-door-700 text-white font-semibold rounded-lg disabled:opacity-50">
               {saving ? t('modal.saving') : t('modal.saveDay')}
             </button>
           </div>
@@ -489,11 +493,11 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
 
         {/* Toast overlay */}
         {toast && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-3xl z-10 animate-fadeIn">
-            <div className={`px-8 py-6 rounded-2xl shadow-2xl text-center ${
-              score === 5 ? 'bg-gradient-to-br from-yellow-400 to-orange-500' : 'bg-gradient-to-br from-green-400 to-emerald-500'
-            }`}>
-              <div className="text-4xl mb-2">{score === 5 ? '🎉' : '✅'}</div>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-3xl z-10">
+            <div className={`px-8 py-6 rounded-2xl text-center ${
+ score === 5 ? ' bg-yellow-400 ' : ' bg-green-400 '
+ }`}>
+              <CheckCircle size={40} weight="fill" className="mx-auto mb-2 text-white" aria-hidden="true" />
               <div className="text-white text-lg font-bold">{toast}</div>
               <div className="text-white/70 text-sm mt-1">{t('modal.toastScore', { score })}</div>
             </div>

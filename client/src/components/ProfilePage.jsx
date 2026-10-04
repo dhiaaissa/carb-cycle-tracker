@@ -3,9 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { formatDate } from '../lib/format';
 
-const PROGRAMME_EMOJI = {
-  carb_cycle: '🔄', weight_loss: '📉', muscle_gain: '💪', recomp: '⚖️',
-};
 
 export default function ProfilePage({ onEditProgramme }) {
   const { t } = useTranslation();
@@ -63,18 +60,18 @@ export default function ProfilePage({ onEditProgramme }) {
   const fmtVal = (val, fmtKey, params) => (val == null || val === '') ? t('profile.notSet') : t(fmtKey, params);
 
   return (
-    <div className="animate-fadeIn max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       {/* Header card */}
-      <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-purple-700 rounded-3xl shadow-xl p-6 mb-6 text-white">
+      <div className="bg-indigo-500 rounded-3xl p-6 mb-6 text-white">
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 rounded-3xl bg-white/15 backdrop-blur-sm flex items-center justify-center text-4xl font-extrabold shadow-lg shrink-0">
+          <div className="w-20 h-20 rounded-3xl bg-white/15 flex items-center justify-center text-4xl font-extrabold shrink-0">
             {initial}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-2xl font-extrabold truncate">@{profile.username}</h1>
               {profile.is_owner && (
-                <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-bold">⭐ {t('profile.ownerBadge')}</span>
+                <span className="text-xs bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full font-bold">{t('profile.ownerBadge')}</span>
               )}
             </div>
             {memberSince && <p className="text-indigo-100/80 text-sm mt-0.5">{t('profile.memberSince', { date: memberSince })}</p>}
@@ -83,15 +80,15 @@ export default function ProfilePage({ onEditProgramme }) {
       </div>
 
       {/* Account */}
-      <Section title={t('profile.section.account')} icon="👤">
+      <Section title={t('profile.section.account')}>
         <Row label={t('profile.field.username')} value={`@${profile.username}`} />
-        <Row label={t('profile.field.programme')} value={`${PROGRAMME_EMOJI[profile.programme] || ''} ${t('programme.' + (profile.programme === 'recomp' ? 'body_recomp' : profile.programme))}`} />
+        <Row label={t('profile.field.programme')} value={`${t('programme.' + (profile.programme === 'recomp' ? 'body_recomp' : profile.programme))}`} />
         {profile.start_date && <Row label={t('profile.field.startDate')} value={formatDate(profile.start_date + 'T12:00:00', { year: 'numeric', month: 'short', day: 'numeric' })} />}
         <Row label={t('profile.field.daysLogged')} value={String(profile.days_logged)} last />
       </Section>
 
       {/* Body & programme */}
-      <Section title={t('profile.section.body')} icon="🏋️">
+      <Section title={t('profile.section.body')}>
         <Row label={t('profile.field.sex')} value={profile.sex ? t('profile.sex.' + profile.sex) : t('profile.notSet')} />
         <Row label={t('profile.field.age')} value={fmtVal(profile.age, 'profile.years', { age: profile.age })} />
         <Row label={t('profile.field.height')} value={fmtVal(profile.height_cm, 'profile.cm', { value: profile.height_cm })} />
@@ -110,7 +107,7 @@ export default function ProfilePage({ onEditProgramme }) {
 
       {/* Targets (only for calculator programmes) */}
       {!isCarb && profile.calorie_target != null && (
-        <Section title={t('profile.section.targets')} icon="🎯">
+        <Section title={t('profile.section.targets')}>
           <Row label={t('macro.calories')} value={t('profile.kcal', { value: profile.calorie_target })} />
           <Row label={t('macro.protein')} value={t('profile.grams', { value: profile.protein_g_target })} />
           <Row label={t('macro.carbs')} value={t('profile.grams', { value: profile.carbs_g_target })} />
@@ -119,7 +116,7 @@ export default function ProfilePage({ onEditProgramme }) {
       )}
 
       {/* Change password */}
-      <Section title={t('profile.section.password')} icon="🔒">
+      <Section title={t('profile.section.password')}>
         <form onSubmit={handleChangePassword} className="space-y-4">
           <PwField
             label={t('profile.password.current')}
@@ -147,19 +144,19 @@ export default function ProfilePage({ onEditProgramme }) {
 
           {pwError && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl p-3 flex items-start gap-2">
-              <span>⚠️</span><span>{pwError}</span>
+              <span>{pwError}</span>
             </div>
           )}
           {pwSuccess && (
             <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl p-3 flex items-start gap-2">
-              <span>✅</span><span>{pwSuccess}</span>
+              <span>{pwSuccess}</span>
             </div>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-60 text-white font-bold py-3 rounded-2xl transition-all shadow-lg shadow-indigo-500/30 active:scale-[0.98]"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold py-3 rounded-2xl transition-all active:scale-[0.98]"
           >
             {submitting ? t('profile.password.saving') : t('profile.password.submit')}
           </button>
@@ -169,12 +166,10 @@ export default function ProfilePage({ onEditProgramme }) {
   );
 }
 
-function Section({ title, icon, children }) {
+function Section({ title, children }) {
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
-      <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <span>{icon}</span> {title}
-      </h2>
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+      <h2 className="font-display text-lg font-semibold text-ink-900 mb-4">{title}</h2>
       {children}
     </div>
   );

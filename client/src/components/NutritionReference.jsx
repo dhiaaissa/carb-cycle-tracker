@@ -25,9 +25,9 @@ const SUGGESTED = {
 };
 
 const TYPES = [
-  { key: 'low',  labelKey: 'nutritionRef.lowCarbDay',  headerCls: 'bg-gradient-to-r from-sky-500 to-blue-600' },
-  { key: 'med',  labelKey: 'nutritionRef.medCarbDay',  headerCls: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
-  { key: 'high', labelKey: 'nutritionRef.highCarbDay', headerCls: 'bg-gradient-to-r from-green-500 to-green-600' },
+  { key: 'low',  labelKey: 'nutritionRef.lowCarbDay',  headerCls: 'bg-sky-500' },
+  { key: 'med',  labelKey: 'nutritionRef.medCarbDay',  headerCls: 'bg-yellow-500' },
+  { key: 'high', labelKey: 'nutritionRef.highCarbDay', headerCls: 'bg-green-500' },
 ];
 
 export default function NutritionReference() {
@@ -35,13 +35,13 @@ export default function NutritionReference() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-100 mb-8 shadow-lg overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-100 mb-8 overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
         className="w-full p-5 text-start font-bold text-gray-700 flex items-center justify-between hover:bg-gray-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🍽️</span>
+          
           <div>
             <span className="text-lg font-bold">{t('nutritionRef.title')}</span>
             <p className="text-xs text-gray-400 font-normal">{t('nutritionRef.subtitle')}</p>
@@ -54,7 +54,7 @@ export default function NutritionReference() {
         <div className="border-t-2 border-gray-100">
           {/* Food database table */}
           <div className="p-5 pb-3">
-            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">{t('nutritionRef.ingredientRef')}</h3>
+            <h3 className="font-bold text-gray-700 mb-3 text-sm">{t('nutritionRef.ingredientRef')}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
               {FOOD_CATEGORIES.map(cat =>
                 Object.values(FOODS).filter(f => f.category === cat.key).map(food => {
@@ -77,7 +77,7 @@ export default function NutritionReference() {
 
           {/* Suggested meal templates */}
           <div className="px-5 pb-5">
-            <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wider">{t('nutritionRef.suggestedTemplates')}</h3>
+            <h3 className="font-bold text-gray-700 mb-3 text-sm">{t('nutritionRef.suggestedTemplates')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {TYPES.map(ty => {
                 const suggested = SUGGESTED[ty.key];

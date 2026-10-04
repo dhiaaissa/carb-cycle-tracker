@@ -1,6 +1,9 @@
 import { useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { themeColor } from '../lib/theme';
 
 export default function WeightChart({ weightEntries }) {
+  const { t } = useTranslation();
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -32,7 +35,7 @@ export default function WeightChart({ weightEntries }) {
     ctx.clearRect(0, 0, W, H);
 
     // Grid lines
-    ctx.strokeStyle = '#e5e7eb';
+    ctx.strokeStyle = themeColor('ink', 200);
     ctx.lineWidth = 1;
     const steps = 5;
     for (let i = 0; i <= steps; i++) {
@@ -43,14 +46,14 @@ export default function WeightChart({ weightEntries }) {
       ctx.lineTo(W - PAD.right, y);
       ctx.stroke();
 
-      ctx.fillStyle = '#9ca3af';
+      ctx.fillStyle = themeColor('ink', 500);
       ctx.font = '11px sans-serif';
       ctx.textAlign = 'right';
       ctx.fillText(`${w.toFixed(1)}`, PAD.left - 5, y + 4);
     }
 
     // Line
-    ctx.strokeStyle = '#6366f1';
+    ctx.strokeStyle = themeColor('door', 600);
     ctx.lineWidth = 3;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -93,17 +96,17 @@ export default function WeightChart({ weightEntries }) {
       // Main dot
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = '#6366f1';
+      ctx.fillStyle = themeColor('door', 600);
       ctx.fill();
 
       // Border
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = `rgb(${getComputedStyle(document.documentElement).getPropertyValue('--c-surface')})`;
       ctx.lineWidth = 2;
       ctx.stroke();
     });
 
     // X-axis labels (show a few)
-    ctx.fillStyle = '#9ca3af';
+    ctx.fillStyle = themeColor('ink', 500);
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'center';
     const labelStep = Math.max(1, Math.floor(weightEntries.length / 8));
@@ -118,19 +121,19 @@ export default function WeightChart({ weightEntries }) {
 
   if (!weightEntries || weightEntries.length < 2) {
     return (
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-8 shadow-lg">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-          <span>📈</span> Weight Trend
+          {t('weight.title')}
         </h2>
-        <p className="text-sm text-gray-500">Log weight on at least 2 days to see the chart.</p>
+        <p className="text-sm text-gray-500">{t('weight.needTwo')}</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 mb-8 shadow-lg">
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <span>📈</span> Weight Trend
+        {t('weight.title')}
       </h2>
       <canvas ref={canvasRef} className="w-full" style={{ height: 250 }} />
     </div>

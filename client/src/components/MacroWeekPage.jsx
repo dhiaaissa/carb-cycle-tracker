@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Barbell, Star } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
 import { formatDate } from '../lib/format';
@@ -23,7 +24,7 @@ export default function MacroWeekPage({ weekNum, todayIndex, config, onSelectDay
   const calTarget = config?.day_targets?.flat?.calories || 0;
 
   return (
-    <div className="animate-fadeIn">
+    <div className="">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('macroWeek.heading', { num: weekNum })}</h1>
         <p className="text-gray-500">{t('macroWeek.subtitle')}</p>
@@ -51,13 +52,13 @@ export default function MacroWeekPage({ weekNum, todayIndex, config, onSelectDay
               key={d.day_index}
               onClick={() => !isFuture && onSelectDay(d.day_index)}
               disabled={isFuture}
-              className={`w-full text-start bg-white rounded-2xl border-2 p-4 transition-all ${isFuture ? 'opacity-50 cursor-not-allowed border-gray-100' : 'border-gray-100 hover:border-indigo-300 hover:shadow-md'} ${isToday ? 'ring-2 ring-yellow-400' : ''}`}
+              className={`w-full text-start bg-white rounded-2xl border p-4 transition-all ${isFuture ? 'opacity-50 cursor-not-allowed border-gray-100' : 'border-gray-100 hover:border-indigo-300 '} ${isToday ? 'ring-2 ring-yellow-400' : ''}`}
             >
               <div className="flex items-center gap-4">
                 <div className="text-center shrink-0">
-                  <div className="text-xs font-bold text-gray-500 uppercase">{dow}</div>
+                  <div className="text-xs font-bold text-gray-500">{dow}</div>
                   <div className="text-2xl font-extrabold text-gray-800">{day}</div>
-                  <div className="text-[10px] text-gray-400 uppercase">{month}</div>
+                  <div className="text-[10px] text-gray-400">{month}</div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -84,8 +85,8 @@ export default function MacroWeekPage({ weekNum, todayIndex, config, onSelectDay
                     <div className="text-xs text-gray-400">{isFuture ? t('macroWeek.notYet') : t('macroWeek.noLog')}</div>
                   )}
                 </div>
-                {log?.workout_done && <span className="text-2xl">💪</span>}
-                {log?.score === 5 && <span className="text-2xl">⭐</span>}
+                {log?.workout_done && <Barbell size={20} weight="bold" className="text-door-600" aria-label={t('day.workoutDone')} />}
+                {log?.score === 5 && <Star size={20} weight="fill" className="text-saffron-500" aria-label={t('day.perfect')} />}
               </div>
             </button>
           );

@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
+import { Barbell } from '@phosphor-icons/react';
 import { FOODS } from '../lib/foods';
 import { formatDate } from '../lib/format';
 
 const TYPE_CONFIG = {
-  low:  { bg: 'bg-gradient-to-br from-sky-50 to-sky-100',    border: 'border-s-sky-500',    badge: 'bg-sky-100 text-sky-700',    emoji: '🔵' },
-  med:  { bg: 'bg-gradient-to-br from-yellow-50 to-yellow-100', border: 'border-s-yellow-500', badge: 'bg-yellow-100 text-yellow-700', emoji: '🟡' },
-  high: { bg: 'bg-gradient-to-br from-green-50 to-green-100',  border: 'border-s-green-500',  badge: 'bg-green-100 text-green-700',  emoji: '🟢' },
+  low:  { bg: 'bg-sky-50',    border: 'border-s-sky-500',    badge: 'bg-sky-100 text-sky-700' },
+  med:  { bg: 'bg-yellow-50', border: 'border-s-yellow-500', badge: 'bg-yellow-100 text-yellow-700' },
+  high: { bg: 'bg-green-50',  border: 'border-s-green-500',  badge: 'bg-green-100 text-green-700' },
 };
 
 export default function DayCard({ scheduleDay, dayLog, isToday, onClick }) {
@@ -32,10 +33,10 @@ export default function DayCard({ scheduleDay, dayLog, isToday, onClick }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full text-start ${config.bg} rounded-xl border-2 border-s-4 ${config.border} border-gray-100 p-3
-        hover:shadow-lg hover:scale-105 transition-all duration-200
-        ${isToday ? 'ring-2 ring-indigo-500 ring-offset-2 shadow-lg scale-105' : ''}
-        ${isFuture ? 'opacity-50' : ''}`}
+      className={`w-full text-start ${config.bg} rounded-xl border border-s-4 ${config.border} border-gray-100 p-3
+ transition-all duration-200
+ ${isToday ? 'ring-2 ring-indigo-500 ring-offset-2 scale-105' : ''}
+ ${isFuture ? 'opacity-50' : ''}`}
     >
       {/* Top row */}
       <div className="flex items-center justify-between mb-1.5">
@@ -63,7 +64,7 @@ export default function DayCard({ scheduleDay, dayLog, isToday, onClick }) {
             {t('day.score', { score })}
           </span>
         )}
-        {workout && <span className="text-purple-600">💪</span>}
+        {workout && <Barbell size={16} weight="bold" className="text-door-600" aria-label={t('day.workoutDone')} />}
         {water > 0 && <span className="text-cyan-600">{t('day.waterLiters', { liters: water })}</span>}
         {weight && <span className="text-orange-600">{t('day.weight', { weight })}</span>}
       </div>

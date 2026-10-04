@@ -60,7 +60,7 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
   })();
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-purple-50 overflow-hidden">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       <MacroSidebar
         stats={stats}
         programme={config?.programme}
@@ -98,7 +98,7 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
             {view !== 'today' && selectedDay == null && (
               <button
                 onClick={() => setView('today')}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold shadow-md"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-1.5 rounded-xl text-sm font-bold"
               >
                 {t('action.logToday')}
               </button>
@@ -108,7 +108,7 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
               aria-label={t('macroView.programme')}
               className="text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 w-10 h-10 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 rounded-xl flex items-center justify-center"
             >
-              <span aria-hidden="true" className="sm:hidden text-base">🎯</span>
+              
               <span className="hidden sm:inline">{t('macroView.programme')}</span>
             </button>
             <ThemeToggle />

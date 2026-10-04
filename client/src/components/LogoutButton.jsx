@@ -18,22 +18,22 @@ export default function LogoutButton({ onLogout, username, compact = false }) {
         onClick={() => setConfirming(true)}
         title={t('header.logoutTitle')}
         className={compact
-          ? 'sm:hidden text-gray-400 hover:text-red-600 px-2 py-1 rounded text-xs font-bold transition-colors'
-          : 'text-gray-400 hover:text-red-600 px-2 py-1 rounded text-xs font-bold transition-colors'}
+          ? 'sm:hidden h-10 px-2 rounded-lg text-ink-500 hover:text-ink-900 hover:bg-ink-100 text-xs font-medium'
+          : 'h-8 px-2 rounded-lg text-ink-500 hover:text-ink-900 hover:bg-ink-100 text-xs font-medium'}
       >
         {t('header.logout')}
       </button>
 
       {confirming && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
           onClick={() => setConfirming(false)}
         >
           <div
-            className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 sm:p-7 text-center"
+            className="bg-white rounded-3xl w-full max-w-sm p-6 sm:p-7 text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-14 h-14 mx-auto rounded-2xl bg-red-50 flex items-center justify-center text-3xl mb-4">👋</div>
+            
             <h3 className="text-xl font-extrabold text-gray-900 mb-1">{t('logout.confirmTitle')}</h3>
             {username && <p className="text-sm font-semibold text-indigo-600 mb-1">@{username}</p>}
             <p className="text-sm text-gray-500 mb-6">{t('logout.confirmText')}</p>
@@ -46,7 +46,7 @@ export default function LogoutButton({ onLogout, username, compact = false }) {
               </button>
               <button
                 onClick={onLogout}
-                className="flex-1 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shadow-red-500/30 transition-colors"
+                className="flex-1 py-3 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold transition-colors"
               >
                 {t('logout.confirm')}
               </button>

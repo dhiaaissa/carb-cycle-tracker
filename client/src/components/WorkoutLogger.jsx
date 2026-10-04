@@ -133,17 +133,17 @@ export default function WorkoutLogger({ exercises = [], onChange, disabled }) {
               <>
                 <div className="flex items-center gap-2">
                   <div className="flex-1">
-                    <label className="text-[10px] text-gray-400 font-bold uppercase">{t('workout.setsUpper')}</label>
+                    <label className="text-[10px] text-gray-400 font-bold">{t('workout.setsUpper')}</label>
                     <input type="number" value={newSets} onChange={e => setNewSets(e.target.value)}
                       className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 text-center focus:outline-none focus:border-purple-400" min="0" />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[10px] text-gray-400 font-bold uppercase">{t('workout.repsUpper')}</label>
+                    <label className="text-[10px] text-gray-400 font-bold">{t('workout.repsUpper')}</label>
                     <input type="number" value={newReps} onChange={e => setNewReps(e.target.value)}
                       className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 text-center focus:outline-none focus:border-purple-400" min="0" />
                   </div>
                   <div className="flex-1">
-                    <label className="text-[10px] text-gray-400 font-bold uppercase">{t('workout.weightKg')}</label>
+                    <label className="text-[10px] text-gray-400 font-bold">{t('workout.weightKg')}</label>
                     <input type="number" value={newWeight} onChange={e => setNewWeight(e.target.value)}
                       placeholder="—" step="0.5"
                       className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1 text-center focus:outline-none focus:border-purple-400" />

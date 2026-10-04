@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { X, ArrowsClockwise } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { FOODS, getNutrition } from '../lib/foods';
 
@@ -112,17 +113,17 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
       {!showSuggester ? (
         <button
           onClick={handleSuggest}
-          className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white font-bold rounded-xl text-sm hover:from-amber-500 hover:to-orange-600 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          className="w-full py-2.5 px-4 bg-amber-400 text-white font-bold rounded-xl text-sm hover:bg-amber-500 transition-all flex items-center justify-center gap-2"
         >
-          <span>🤖</span> {t('suggester.button')}
+          {t('suggester.button')}
         </button>
       ) : (
-        <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-bold text-amber-800 flex items-center gap-1">
               {t('suggester.suggestedCombo')}
             </span>
-            <button onClick={() => setShowSuggester(false)} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
+            <button onClick={() => setShowSuggester(false)} className="text-xs text-gray-400 hover:text-gray-600" aria-label={t('common.close')}><X size={16} aria-hidden="true" /></button>
           </div>
 
           {suggestions && suggestions.length > 0 ? (
@@ -175,7 +176,7 @@ export default function MealSuggester({ remainingProtein, remainingCarbs, remain
                   onClick={handleSuggest}
                   className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-lg text-sm transition-colors"
                 >
-                  🔄
+                  <ArrowsClockwise size={18} aria-hidden="true" />
                 </button>
               </div>
             </>

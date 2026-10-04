@@ -25,7 +25,7 @@ export default function MacroInsights({ stats, config }) {
     : 0;
 
   return (
-    <div className="animate-fadeIn">
+    <div className="">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-1">{t('macroInsights.heading')}</h1>
         <p className="text-gray-500">{t('macroInsights.subtitle')}</p>
@@ -39,7 +39,7 @@ export default function MacroInsights({ stats, config }) {
       </div>
 
       {/* Weekly breakdown */}
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-6 shadow-lg mb-6">
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">{t('macroInsights.weeklyBreakdown')}</h2>
         {weeklyAdherence.length === 0 ? (
           <p className="text-sm text-gray-500">{t('macroInsights.logSomeFirst')}</p>
@@ -74,25 +74,25 @@ export default function MacroInsights({ stats, config }) {
       </div>
 
       {/* Tips */}
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border-2 border-indigo-100 p-6">
+      <div className="bg-indigo-50 rounded-2xl border border-indigo-100 p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">{t('macroInsights.tips')}</h2>
         <ul className="space-y-2 text-sm text-gray-700">
           {stats.avg_calories > target + 200 && (
-            <li className="flex gap-2"><span>💡</span> {t('macroInsights.tipOver', { kcal: stats.avg_calories - target })}</li>
+            <li className="flex gap-2">{t('macroInsights.tipOver', { kcal: stats.avg_calories - target })}</li>
           )}
           {stats.avg_calories > 0 && stats.avg_calories < target - 200 && (
-            <li className="flex gap-2"><span>⚠️</span> {t('macroInsights.tipUnder', { kcal: target - stats.avg_calories })}</li>
+            <li className="flex gap-2">{t('macroInsights.tipUnder', { kcal: target - stats.avg_calories })}</li>
           )}
           {stats.avg_protein > 0 && proteinHit < 80 && (
-            <li className="flex gap-2"><span>🍗</span> {t('macroInsights.tipProtein', { pct: proteinHit })}</li>
+            <li className="flex gap-2">{t('macroInsights.tipProtein', { pct: proteinHit })}</li>
           )}
           {stats.streak >= 7 && (
-            <li className="flex gap-2"><span>🔥</span> {t('macroInsights.tipStreak', { streak: stats.streak })}</li>
+            <li className="flex gap-2">{t('macroInsights.tipStreak', { streak: stats.streak })}</li>
           )}
           {stats.total_completed < 7 && (
-            <li className="flex gap-2"><span>📈</span> {t('macroInsights.tipLogMore')}</li>
+            <li className="flex gap-2">{t('macroInsights.tipLogMore')}</li>
           )}
-          <li className="flex gap-2"><span>📅</span> {t('macroInsights.tipReassess')}</li>
+          <li className="flex gap-2">{t('macroInsights.tipReassess')}</li>
         </ul>
       </div>
     </div>
@@ -109,8 +109,8 @@ function Headline({ t, title, value, unit, trend, subtitle, pct, better }) {
     trendStr = trend > 0 ? `+${trend}` : `${trend}`;
   }
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-100 p-5 shadow-md">
-      <div className="text-xs font-bold uppercase tracking-wide text-gray-500">{title}</div>
+    <div className="bg-white rounded-2xl border border-gray-100 p-5">
+      <div className="text-xs font-bold text-gray-500">{title}</div>
       <div className="text-3xl font-extrabold text-gray-800 mt-1">{value}</div>
       <div className="text-xs text-gray-400">{unit}</div>
       {trendStr && <div className={`text-xs font-bold mt-2 ${trendColor}`}>{trendStr} {t('macroInsights.vsTargetShort')}</div>}

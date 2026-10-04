@@ -183,7 +183,7 @@ export default function GroceryPage({ config, allFoods }) {
   }
 
   return (
-    <div className="animate-fadeIn">
+    <div className="">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-1 flex items-center gap-3">
           <span>🛒</span> {t('grocery.title')}
@@ -192,7 +192,7 @@ export default function GroceryPage({ config, allFoods }) {
       </div>
 
       {/* Quick actions */}
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-4 mb-6 shadow-lg flex flex-wrap items-center gap-3">
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-6 flex flex-wrap items-center gap-3">
         {suggestion?.grocery_list?.length > 0 && (
           <button
             onClick={loadSuggestion}
@@ -220,7 +220,7 @@ export default function GroceryPage({ config, allFoods }) {
       </div>
 
       {/* Food Picker */}
-      <div className="bg-white rounded-2xl border-2 border-gray-100 p-5 mb-6 shadow-lg">
+      <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
         <h2 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
           <span>➕</span> {t('grocery.addItems')}
         </h2>
@@ -229,7 +229,7 @@ export default function GroceryPage({ config, allFoods }) {
             const catInfo = CATEGORY_INFO[cat] || CATEGORY_INFO.other;
             return (
               <div key={cat}>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                <div className="text-xs font-bold text-gray-500 mb-2">
                   {catInfo.emoji} {t(catInfo.labelKey)}
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -264,7 +264,7 @@ export default function GroceryPage({ config, allFoods }) {
       {/* Cart */}
       {cartItems.length > 0 && (
         <>
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 mb-6 text-white shadow-lg">
+          <div className="bg-green-500 rounded-2xl p-4 mb-6 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-2xl font-bold">{cartItems.length}</span>
@@ -289,14 +289,14 @@ export default function GroceryPage({ config, allFoods }) {
             {cartItems.map(({ foodId, food, amount, checked, price }) => (
               <div
                 key={foodId}
-                className={`bg-white rounded-xl border-2 ${checked ? 'border-green-200 opacity-60' : 'border-gray-100'} p-4 shadow-sm transition-all`}
+                className={`bg-white rounded-xl border ${checked ? 'border-green-200 opacity-60' : 'border-gray-100'} p-4 shadow-sm transition-all`}
               >
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={checked}
                     onChange={() => toggleChecked(foodId)}
-                    className="w-5 h-5 rounded-md border-2 border-gray-300 text-green-500 focus:ring-green-400 shrink-0"
+                    className="w-5 h-5 rounded-md border border-gray-300 text-green-500 focus:ring-green-400 shrink-0"
                   />
                   <span className="text-2xl">{food.emoji}</span>
                   <div className={`flex-1 min-w-0 ${checked ? 'line-through text-gray-400' : ''}`}>
@@ -342,7 +342,7 @@ export default function GroceryPage({ config, allFoods }) {
             ))}
           </div>
 
-          <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-5 shadow-lg text-white">
+          <div className="bg-amber-500 rounded-2xl p-5 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-amber-100">{t('grocery.estimatedTotal')}</div>
@@ -358,7 +358,7 @@ export default function GroceryPage({ config, allFoods }) {
       )}
 
       {cartItems.length === 0 && (
-        <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-8 text-center">
+        <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center">
           <div className="text-4xl mb-3">👆</div>
           <p className="text-gray-500 font-medium">{t('grocery.empty')}</p>
           {suggestion?.grocery_list?.length > 0 && (
