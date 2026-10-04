@@ -2,8 +2,8 @@
  * Server adapter over the shared nutrition engine (shared/nutrition.js).
  * Keeps the snake_case API the routes already use.
  */
-import { ACTIVITY_LEVELS, validateProfile } from '../../shared/nutrition.js';
-import { planForProgramme, toProfile } from '../../shared/dayTargets.js';
+import { ACTIVITY_LEVELS, GOALS, GOAL_RATES, MACRO_PRESETS, validateProfile } from '../../shared/nutrition.js';
+import { planForProgramme, goalSettingsFor, toProfile } from '../../shared/dayTargets.js';
 
 export const ACTIVITY_FACTORS = Object.fromEntries(
   Object.entries(ACTIVITY_LEVELS).map(([k, v]) => [k, v.factor]),
@@ -49,13 +49,29 @@ export function validateStats(stats) {
   return validateProfile(toProfile(stats)).map((code) => ERROR_MESSAGES[code] ?? code);
 }
 
+/** Validates optional goal settings; null/undefined means "programme default". */
+export function validateGoalSettings({ goal, goal_rate_kg_week, macro_preset, units }) {
+  const errors = [];
+  if (goal != null && !GOALS.includes(goal)) errors.push(`goal must be one of ${GOALS.join(', ')}`);
+  if (goal_rate_kg_week != null && goal !== 'maintain') { // rate is ignored for maintain
+    const max = Math.max(...GOAL_RATES[goal ?? 'lose']);
+    if (typeof goal_rate_kg_week !== 'number' || goal_rate_kg_week < 0 || goal_rate_kg_week > max) {
+      errors.push(`goal_rate_kg_week must be between 0 and ${max}`);
+    }
+  }
+  if (macro_preset != null && !MACRO_PRESETS[macro_preset]) errors.push('macro_preset invalid');
+  if (units != null && !['metric', 'imperial'].includes(units)) errors.push('units must be metric or imperial');
+  return errors;
+}
+
 /**
  * @returns {{ bmr, tdee, calorie_target, protein_g_target, carbs_g_target, fat_g_target, warnings } | null}
  * For carb_cycle, the single-target fields are null (per-day targets are resolved at read time).
  */
-export function calcTargets({ programme, ...stats }) {
+export function calcTargets({ programme, goal, goal_rate_kg_week, macro_preset, ...stats }) {
   if (!PROGRAMMES[programme]) return null;
-  const plan = planForProgramme(programme, toProfile(stats));
+  const goalSettings = goalSettingsFor(programme, { goal, goal_rate_kg_week, macro_preset });
+  const plan = planForProgramme(programme, toProfile(stats), goalSettings);
   if (!plan.ok) return null;
 
   const single = programme !== 'carb_cycle';

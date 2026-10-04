@@ -45,6 +45,11 @@ export const api = {
   updateConfig: (data) => request('/config', { method: 'PUT', body: JSON.stringify(data) }),
   getSchedule: () => request('/schedule'),
   getDays:     () => request('/days'),
+  // Date-keyed (canonical). Dates are the user's local YYYY-MM-DD — see shared/dates.js localIsoDate().
+  getDaysRange:    (from, to) => request(`/days?${new URLSearchParams({ ...(from && { from }), ...(to && { to }) })}`),
+  getDayByDate:    (date) => request(`/days/date/${date}`),
+  updateDayByDate: (date, data) => request(`/days/date/${date}`, { method: 'PUT', body: JSON.stringify(data) }),
+  getProgress:     (today, days = 90) => request(`/progress?${new URLSearchParams({ today, days })}`),
   getDay:      (idx) => request(`/days/${idx}`),
   updateDay:   (idx, data) => request(`/days/${idx}`, { method: 'PUT', body: JSON.stringify(data) }),
   getStats:    () => request('/stats'),

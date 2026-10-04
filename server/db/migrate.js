@@ -3,9 +3,10 @@
  * Idempotent — safe to run on every deploy.
  */
 import 'dotenv/config';
+import { pathToFileURL } from 'url';
 import { client } from './index.js';
 
-async function run() {
+export async function migrate({ log = console.log } = {}) {
   await client.execute(`PRAGMA foreign_keys = ON`);
 
   await client.execute(`
@@ -90,7 +91,7 @@ async function run() {
     const has = cols.rows.some(r => r.name === name);
     if (!has) {
       await client.execute(`ALTER TABLE ${table} ADD COLUMN ${name} ${type}`);
-      console.log(`[${table}] added ${name}`);
+      log(`[${table}] added ${name}`);
     }
   };
 
@@ -133,7 +134,7 @@ async function run() {
     const idx = await client.execute(`PRAGMA index_list(${table})`);
     const hasLegacy = idx.rows.some(r => r.name === legacyAutoindex);
     if (!hasLegacy) return;
-    console.log(`[${table}] dropping legacy UNIQUE via table rebuild`);
+    log(`[${table}] dropping legacy UNIQUE via table rebuild`);
     await client.execute(`ALTER TABLE ${table} RENAME TO ${table}_old`);
     await client.execute(newDef);
     await client.execute(`INSERT INTO ${table} (${copyCols}) SELECT ${copyCols} FROM ${table}_old`);
@@ -205,20 +206,43 @@ async function run() {
     `id, user_id, food_id, name, emoji, category, unit, kcal_per_100g, protein_per_100g, carbs_per_100g, fat_per_100g, kcal_per_unit, protein_per_unit, carbs_per_unit, fat_per_unit, default_amount, step, created_at`
   );
 
-  // Composite uniqueness on (user_id, day_index) — created if not exists
+  // ── Phase 2: calendar dates are the identity of a day log ──────────
+  // day_index stays as a cached "days since start_date" for the carb-cycle
+  // views; it is re-synced whenever start_date changes (routes/config.js).
+  // Must run after the legacy table rebuild above, which only copies known columns.
+  await addColumn('day_logs', 'date', 'TEXT');
   await client.execute(`
-    CREATE UNIQUE INDEX IF NOT EXISTS day_logs_user_day_unique
-    ON day_logs(user_id, day_index)
+    UPDATE day_logs
+    SET date = (
+      SELECT date(c.start_date, '+' || day_logs.day_index || ' days')
+      FROM app_config c WHERE c.user_id = day_logs.user_id
+    )
+    WHERE date IS NULL
   `);
+  await client.execute(`DROP INDEX IF EXISTS day_logs_user_day_unique`);
+  await client.execute(`CREATE INDEX IF NOT EXISTS day_logs_user_day ON day_logs(user_id, day_index)`);
+  await client.execute(`
+    CREATE UNIQUE INDEX IF NOT EXISTS day_logs_user_date_unique
+    ON day_logs(user_id, date)
+  `);
+
+  // Goal & profile settings (null = use programme defaults)
+  await addColumn('users', 'body_fat_pct', 'REAL');
+  await addColumn('app_config', 'goal', 'TEXT');
+  await addColumn('app_config', 'goal_rate_kg_week', 'REAL');
+  await addColumn('app_config', 'macro_preset', 'TEXT');
+  await addColumn('app_config', 'units', `TEXT NOT NULL DEFAULT 'metric'`);
 
   await client.execute(`
     CREATE UNIQUE INDEX IF NOT EXISTS custom_foods_user_food_unique
     ON custom_foods(user_id, food_id)
   `);
 
-  console.log('Migration complete.');
+  log('Migration complete.');
 }
 
-run()
-  .then(() => process.exit(0))
-  .catch(err => { console.error(err); process.exit(1); });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  migrate()
+    .then(() => process.exit(0))
+    .catch(err => { console.error(err); process.exit(1); });
+}

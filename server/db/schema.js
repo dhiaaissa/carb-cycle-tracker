@@ -9,6 +9,7 @@ export const users = sqliteTable('users', {
   age: integer('age'),
   height_cm: real('height_cm'),
   activity_level: text('activity_level'),
+  body_fat_pct: real('body_fat_pct'),
 });
 
 export const appConfig = sqliteTable('app_config', {
@@ -25,12 +26,17 @@ export const appConfig = sqliteTable('app_config', {
   protein_g_target: real('protein_g_target'),
   carbs_g_target: real('carbs_g_target'),
   fat_g_target: real('fat_g_target'),
+  goal: text('goal'),
+  goal_rate_kg_week: real('goal_rate_kg_week'),
+  macro_preset: text('macro_preset'),
+  units: text('units').notNull().default('metric'),
 });
 
 export const dayLogs = sqliteTable('day_logs', {
   id: integer('id').primaryKey(),
   user_id: integer('user_id').notNull(),
   day_index: integer('day_index').notNull(),
+  date: text('date'),
   day_type: text('day_type').notNull(),
   phase: integer('phase').notNull(),
   meal1_done: integer('meal1_done', { mode: 'boolean' }).notNull().default(false),

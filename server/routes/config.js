@@ -2,24 +2,13 @@ import { Router } from 'express';
 import { db } from '../db/index.js';
 import { appConfig, users } from '../db/schema.js';
 import { dayTargetsFor } from '../lib/targets.js';
+import { getOrCreateConfig } from '../lib/userConfig.js';
+import { resyncDayIndexes } from '../lib/dayLogs.js';
+import { isIsoDate } from '../../shared/dates.js';
 import { eq, and } from 'drizzle-orm';
 import { getDayType, getPhase, getTodayIndex, getPhaseGoal } from '../lib/schedule.js';
 
 const router = Router();
-
-async function getOrCreateConfig(userId) {
-  let cfg = await db.select().from(appConfig).where(eq(appConfig.user_id, userId)).get();
-  if (!cfg) {
-    const today = new Date().toISOString().split('T')[0];
-    await db.insert(appConfig).values({
-      user_id: userId,
-      start_date: today,
-      settings_json: '{}',
-    }).run();
-    cfg = await db.select().from(appConfig).where(eq(appConfig.user_id, userId)).get();
-  }
-  return cfg;
-}
 
 const getUser = (id) => db.select().from(users).where(eq(users.id, id)).get();
 
@@ -54,6 +43,10 @@ router.get('/', async (req, res, next) => {
       protein_g_target: config.protein_g_target,
       carbs_g_target: config.carbs_g_target,
       fat_g_target: config.fat_g_target,
+      goal: config.goal,
+      goal_rate_kg_week: config.goal_rate_kg_week,
+      macro_preset: config.macro_preset,
+      units: config.units || 'metric',
     });
   } catch (err) { next(err); }
 });
@@ -64,11 +57,18 @@ router.put('/', async (req, res, next) => {
     const config = await getOrCreateConfig(req.user.id);
 
     const updates = {};
-    if (start_date) updates.start_date = start_date;
+    if (start_date) { // Settings always sends it; empty means "unchanged"
+      if (!isIsoDate(start_date)) return res.status(400).json({ error: 'start_date must be YYYY-MM-DD' });
+      updates.start_date = start_date;
+    }
     if (settings !== undefined) updates.settings_json = JSON.stringify(settings);
 
     if (Object.keys(updates).length > 0) {
       await db.update(appConfig).set(updates).where(eq(appConfig.user_id, req.user.id)).run();
+    }
+    // Logs stay on their calendar dates; only their position in the programme moves.
+    if (updates.start_date && updates.start_date !== config.start_date) {
+      await resyncDayIndexes(req.user.id, updates.start_date);
     }
 
     const updated = await db.select().from(appConfig).where(eq(appConfig.user_id, req.user.id)).get();

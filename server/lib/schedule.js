@@ -1,3 +1,5 @@
+import { diffDays } from '../../shared/dates.js';
+
 /**
  * Day type and phase computation for 56-day carb cycling programme.
  * All day indices are 0-based (0–55).
@@ -117,4 +119,19 @@ export function getTodayIndex(startDate) {
   const now = new Date();
   const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.floor((today - start) / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * What a calendar date means for this user's programme.
+ * Carb cycle days inside the 56-day schedule get their low/med/high type;
+ * everything else (macro programmes, days outside the schedule) is 'flat'.
+ * @param {{ programme?: string, start_date: string }} cfg
+ * @param {string} date  YYYY-MM-DD
+ */
+export function dayContext(cfg, date) {
+  const day_index = diffDays(cfg.start_date, date);
+  if ((cfg.programme ?? 'carb_cycle') === 'carb_cycle' && day_index >= 0 && day_index <= 55) {
+    return { day_index, day_type: getDayType(day_index), phase: getPhase(day_index) };
+  }
+  return { day_index, day_type: 'flat', phase: 0 };
 }
