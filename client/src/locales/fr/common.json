@@ -351,6 +351,13 @@
   "setup.carbsUpper": "GLUCIDES",
   "setup.fatUpper": "LIPIDES",
   "setup.estimateDisclaimer": "Ce sont des estimations (±10-15 %). Suivez pendant 2-4 semaines et ajustez selon les résultats réels.",
+  "setup.macroLine": "P {{p}}g · G {{c}}g · L {{f}}g",
+  "setup.error.outOfRange": "Vérifiez vos informations — âge 13–100, taille 100–250 cm, poids 30–300 kg.",
+  "setup.warning.rate_capped_bodyweight": "Pour préserver vos muscles, votre rythme est fixé à {{applied}} kg/semaine (environ 1 % de votre poids). La régularité paie.",
+  "setup.warning.gain_rate_capped": "Votre rythme est fixé à {{applied}} kg/semaine — une prise plus rapide est surtout du gras, pas du muscle.",
+  "setup.warning.deficit_capped": "Votre déficit est limité à {{maxPct}} % sous la maintenance pour garder de l'énergie pour l'entraînement et la récupération.",
+  "setup.warning.below_minimum": "Votre objectif reste à {{floor}} kcal minimum pour couvrir vos besoins en nutriments. Les progrès seront un peu plus lents, et plus durables.",
+  "setup.warning.protein_reduced": "Votre objectif calorique est bas, les protéines sont donc légèrement réduites. Envisagez un rythme plus doux.",
   "setup.startTracking": "Commencer le suivi",
   "setup.savingDots": "Enregistrement…",
 

@@ -277,6 +277,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
             ) : (
               /* Week page */
               <WeekPage
+                dayTargets={config?.day_targets}
                 weekNum={selectedWeek}
                 schedule={schedule}
                 days={days}
@@ -293,6 +294,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
       {/* Day modal */}
       {selectedDay !== null && schedule[selectedDay] && (
         <DayModal
+          dayTargets={config?.day_targets}
           dayIndex={selectedDay}
           scheduleDay={schedule[selectedDay]}
           dayLog={days[selectedDay]}

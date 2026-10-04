@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { calculateDay, calculateScore, WATER_GOALS, MACRO_TARGETS } from '../lib/calories';
+import { calculateDay, calculateScore, WATER_GOALS, DEFAULT_DAY_TARGETS } from '../lib/calories';
 import { formatDate } from '../lib/format';
 import MealComposer from './MealComposer';
 import MealSuggester from './MealSuggester';
@@ -32,7 +32,7 @@ function localizedScoreLabel(t, score) {
   return t('score.weak');
 }
 
-export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, onClose, todayIndex, presets = [], onSavePreset, onDeletePreset, allFoods, onCreateCustomFood, onDeleteCustomFood }) {
+export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, onClose, todayIndex, presets = [], onSavePreset, onDeletePreset, allFoods, onCreateCustomFood, onDeleteCustomFood, dayTargets = DEFAULT_DAY_TARGETS }) {
   const { t } = useTranslation();
   const isFuture = dayIndex > todayIndex;
   const { day_type, phase, date } = scheduleDay;
@@ -92,7 +92,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
   }, [onClose]);
 
   const cheatKcal = cheat && cheatMealChoice ? (CHEAT_KCAL[cheatMealChoice] || 0) : 0;
-  const baseCal = useMemo(() => calculateDay(day_type, meals, workout), [day_type, meals, workout]);
+  const baseCal = useMemo(() => calculateDay(day_type, meals, workout, dayTargets), [day_type, meals, workout, dayTargets]);
   const cal = useMemo(() => ({
     ...baseCal,
     calories_consumed: baseCal.calories_consumed + cheatKcal,
@@ -122,7 +122,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
   }, [days, weekStart, dayIndex]);
 
   const calPct = cal.calories_target > 0 ? Math.min(100, Math.round((cal.calories_consumed / cal.calories_target) * 100)) : 0;
-  const mt = MACRO_TARGETS[day_type];
+  const mt = dayTargets[day_type] ?? DEFAULT_DAY_TARGETS[day_type];
 
   async function handleSave() {
     setSaving(true);

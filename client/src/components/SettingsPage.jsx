@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
-import { CALORIE_TARGETS, MACRO_TARGETS } from '../lib/calories';
+import { DEFAULT_DAY_TARGETS } from '../lib/calories';
 import ProgrammeSetup from './ProgrammeSetup';
 
 const PROGRAMME_META = {
@@ -46,8 +46,8 @@ export default function SettingsPage({ config, onConfigUpdate }) {
   }
 
   function getDefault(dayType, field) {
-    if (field === 'calories') return CALORIE_TARGETS[dayType];
-    return MACRO_TARGETS[dayType]?.[field] ?? 0;
+    const suggested = config?.day_targets_suggested ?? DEFAULT_DAY_TARGETS;
+    return suggested[dayType]?.[field] ?? 0;
   }
 
   function setTarget(dayType, field, value) {

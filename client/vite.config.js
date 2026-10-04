@@ -5,6 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    // Allow importing the shared nutrition engine from ../shared
+    fs: { allow: ['..'] },
     proxy: {
       '/api': 'http://127.0.0.1:3001',
     },

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DayCard from './DayCard';
-import { CALORIE_TARGETS, WATER_GOALS } from '../lib/calories';
+import { DEFAULT_DAY_TARGETS, WATER_GOALS } from '../lib/calories';
 import { FOODS, sumMealNutrition } from '../lib/foods';
 import { formatDate } from '../lib/format';
 
@@ -46,7 +46,7 @@ function localizedScoreLabel(t, score) {
   return t('score.weak');
 }
 
-export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, onDayClick, onSelectWeek }) {
+export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, onDayClick, onSelectWeek, dayTargets = DEFAULT_DAY_TARGETS }) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('days');
 
@@ -294,7 +294,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div>
                       <h3 className="text-xl font-bold">{t('weekPage.dayTypeHeader', { emoji: TYPE_EMOJI[dayType], type: t(`dayType.${dayType}Short`) })}</h3>
-                      <p className="text-white/80 text-sm">{t('weekPage.daysAndTarget', { days: typeDays.join(', '), kcal: CALORIE_TARGETS[dayType] })}</p>
+                      <p className="text-white/80 text-sm">{t('weekPage.daysAndTarget', { days: typeDays.join(', '), kcal: dayTargets[dayType]?.calories })}</p>
                     </div>
                     <div className="bg-white/20 rounded-xl px-4 py-2 text-center">
                       <div className="text-2xl font-bold">~{dayTotal}</div>
@@ -330,7 +330,7 @@ export default function WeekPage({ weekNum, schedule, days, stats, todayIndex, o
                   </div>
                   <div className={`mt-3 p-3 rounded-xl text-xs font-semibold flex flex-wrap gap-3 ${dayType === 'low' ? 'bg-red-50 text-red-700' : dayType === 'med' ? 'bg-yellow-50 text-yellow-700' : 'bg-green-50 text-green-700'}`}>
                     <span>{t('weekPage.waterGoal', { liters: WATER_GOALS[dayType] })}</span>
-                    <span>{t('weekPage.targetKcal', { kcal: CALORIE_TARGETS[dayType] })}</span>
+                    <span>{t('weekPage.targetKcal', { kcal: dayTargets[dayType]?.calories })}</span>
                     {dayType === 'med' && <span>{t('weekPage.medWorkoutBonus')}</span>}
                   </div>
                 </div>

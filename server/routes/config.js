@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { db } from '../db/index.js';
-import { appConfig } from '../db/schema.js';
+import { appConfig, users } from '../db/schema.js';
+import { dayTargetsFor } from '../lib/targets.js';
 import { eq, and } from 'drizzle-orm';
 import { getDayType, getPhase, getTodayIndex, getPhaseGoal } from '../lib/schedule.js';
 
@@ -20,6 +21,13 @@ async function getOrCreateConfig(userId) {
   return cfg;
 }
 
+const getUser = (id) => db.select().from(users).where(eq(users.id, id)).get();
+
+const targetsPayload = (cfg, user) => ({
+  day_targets: dayTargetsFor(cfg, user),
+  day_targets_suggested: dayTargetsFor(cfg, user, { withOverrides: false }),
+});
+
 router.get('/', async (req, res, next) => {
   try {
     const config = await getOrCreateConfig(req.user.id);
@@ -36,6 +44,7 @@ router.get('/', async (req, res, next) => {
       today_phase: todayIndex >= 0 && todayIndex <= 55 ? getPhase(clamped) : null,
       today_phase_goal: todayIndex >= 0 && todayIndex <= 55 ? getPhaseGoal(getPhase(clamped)) : null,
       settings,
+      ...targetsPayload(config, await getUser(req.user.id)),
       programme: config.programme || 'carb_cycle',
       goal_weight_kg: config.goal_weight_kg,
       current_weight_kg: config.current_weight_kg,
@@ -76,6 +85,7 @@ router.put('/', async (req, res, next) => {
       today_phase: todayIndex >= 0 && todayIndex <= 55 ? getPhase(clamped) : null,
       today_phase_goal: todayIndex >= 0 && todayIndex <= 55 ? getPhaseGoal(getPhase(clamped)) : null,
       settings: parsedSettings,
+      ...targetsPayload(updated, await getUser(req.user.id)),
     });
   } catch (err) { next(err); }
 });

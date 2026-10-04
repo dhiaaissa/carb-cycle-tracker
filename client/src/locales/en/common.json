@@ -351,6 +351,13 @@
   "setup.carbsUpper": "CARBS",
   "setup.fatUpper": "FAT",
   "setup.estimateDisclaimer": "These are estimates (±10–15%). Track for 2–4 weeks and adjust based on real-world results.",
+  "setup.macroLine": "P {{p}}g · C {{c}}g · F {{f}}g",
+  "setup.error.outOfRange": "Please check your details — age 13–100, height 100–250 cm, weight 30–300 kg.",
+  "setup.warning.rate_capped_bodyweight": "To protect muscle, we've set your pace to {{applied}} kg/week (about 1% of your body weight). Slow and steady tends to stick.",
+  "setup.warning.gain_rate_capped": "We've set your pace to {{applied}} kg/week — faster gain is mostly fat, not muscle.",
+  "setup.warning.deficit_capped": "We've kept your deficit to {{maxPct}}% below maintenance so you have energy to train and recover.",
+  "setup.warning.below_minimum": "Your target stays at {{floor}} kcal or more so you can meet your nutrient needs. Progress will be a little slower, and more sustainable.",
+  "setup.warning.protein_reduced": "Your calorie target is quite low, so protein is slightly reduced to fit. Consider a gentler pace.",
   "setup.startTracking": "Start tracking",
   "setup.savingDots": "Saving…",
 

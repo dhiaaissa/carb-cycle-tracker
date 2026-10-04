@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
+import { planForProgramme } from '../../../shared/dayTargets.js';
 
 const PROGRAMMES = [
   { id: 'carb_cycle',  emoji: '🔄', color: 'from-indigo-500 to-purple-600' },
@@ -33,56 +34,30 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
   const [submitting, setSubmitting] = useState(false);
   const [preview, setPreview] = useState(null);
 
-  const needsCalc = programme && programme !== 'carb_cycle';
-
   function computePreview() {
-    const w = parseFloat(weight), h = parseFloat(height), a = parseInt(age, 10);
-    if (!w || !h || !a) return null;
-    const factors = { sedentary: 1.2, light: 1.375, moderate: 1.55, very: 1.725, extreme: 1.9 };
-    const base = (10 * w) + (6.25 * h) - (5 * a);
-    const bmr = sex === 'male' ? base + 5 : base - 161;
-    const tdee = bmr * factors[activity];
-    const adjMap = { weight_loss: -500, muscle_gain: 300, recomp: -200 };
-    const macroMap = {
-      weight_loss: { p: 0.32, f: 0.28, c: 0.40, ppk: 2.0 },
-      muscle_gain: { p: 0.28, f: 0.22, c: 0.50, ppk: 1.8 },
-      recomp:      { p: 0.32, f: 0.28, c: 0.40, ppk: 2.0 },
-    };
-    const adj = adjMap[programme] ?? 0;
-    const macros = macroMap[programme];
-    let cals = tdee + adj;
-    if (cals < bmr) cals = bmr;
-    const proteinG = Math.max(macros.ppk * w, (cals * macros.p) / 4);
-    const remCals = cals - proteinG * 4;
-    const fatRatio = macros.f / (macros.f + macros.c);
-    const fatG = (remCals * fatRatio) / 9;
-    const carbsG = (remCals * (1 - fatRatio)) / 4;
-    return {
-      bmr: Math.round(bmr),
-      tdee: Math.round(tdee),
-      calories: Math.round(cals),
-      protein: Math.round(proteinG),
-      fat: Math.round(fatG),
-      carbs: Math.round(carbsG),
-    };
+    const plan = planForProgramme(programme, {
+      sex,
+      age: parseInt(age, 10),
+      heightCm: parseFloat(height),
+      weightKg: parseFloat(weight),
+      activity,
+    });
+    return plan.ok ? plan : null;
   }
 
   async function handleSubmit() {
     setError('');
     setSubmitting(true);
     try {
-      const payload = { programme };
-      if (needsCalc) {
-        Object.assign(payload, {
-          sex,
-          age: parseInt(age, 10),
-          height_cm: parseFloat(height),
-          weight_kg: parseFloat(weight),
-          activity_level: activity,
-          goal_weight_kg: goalWeight ? parseFloat(goalWeight) : null,
-        });
-      }
-      await api.setupProgramme(payload);
+      await api.setupProgramme({
+        programme,
+        sex,
+        age: parseInt(age, 10),
+        height_cm: parseFloat(height),
+        weight_kg: parseFloat(weight),
+        activity_level: activity,
+        goal_weight_kg: goalWeight ? parseFloat(goalWeight) : null,
+      });
       onDone();
     } catch (err) {
       setError(err.message || t('setup.error.saveFailed'));
@@ -96,8 +71,13 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
       setError(t('setup.error.fillStats'));
       return;
     }
+    const plan = computePreview();
+    if (!plan) {
+      setError(t('setup.error.outOfRange'));
+      return;
+    }
     setError('');
-    setPreview(computePreview());
+    setPreview(plan);
     setStep(3);
   }
 
@@ -144,13 +124,10 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
                 )}
                 <button
                   disabled={!programme}
-                  onClick={() => {
-                    if (programme === 'carb_cycle') handleSubmit();
-                    else setStep(2);
-                  }}
+                  onClick={() => setStep(2)}
                   className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-bold transition shadow-lg shadow-indigo-500/30"
                 >
-                  {programme === 'carb_cycle' ? t('setup.useCarbCycle') : t('setup.continue')}
+                  {t('setup.continue')}
                 </button>
               </div>
             </>
@@ -223,27 +200,55 @@ export default function ProgrammeSetup({ onDone, onSkip, initialProgramme = null
           {step === 3 && preview && (
             <>
               <div className="space-y-4">
-                <div className="text-center bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border-2 border-indigo-100">
-                  <div className="text-xs font-bold text-indigo-600 uppercase tracking-wide">{t('setup.dailyCalorieTarget')}</div>
-                  <div className="text-5xl font-extrabold text-gray-800 my-2">{preview.calories}</div>
-                  <div className="text-sm text-gray-500">{t('setup.kcalPerDay')}</div>
-                  <div className="text-xs text-gray-400 mt-3">{t('setup.bmrTdee', { bmr: preview.bmr, tdee: preview.tdee })}</div>
-                </div>
+                {preview.dayTargets ? (
+                  <>
+                    <div className="grid grid-cols-3 gap-3">
+                      {['low', 'med', 'high'].map(type => (
+                        <div key={type} className="text-center bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-indigo-100">
+                          <div className="text-xs font-bold text-indigo-600 uppercase tracking-wide">{t(`dayType.${type}`)}</div>
+                          <div className="text-3xl font-extrabold text-gray-800 my-1">{preview.dayTargets[type].calories}</div>
+                          <div className="text-xs text-gray-500">{t('setup.kcalPerDay')}</div>
+                          <div className="text-xs text-gray-600 mt-2">
+                            {t('setup.macroLine', { p: preview.dayTargets[type].protein_g, c: preview.dayTargets[type].carbs_g, f: preview.dayTargets[type].fat_g })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-xs text-gray-400 text-center">{t('setup.bmrTdee', { bmr: preview.bmr, tdee: preview.tdee })}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-center bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border-2 border-indigo-100">
+                      <div className="text-xs font-bold text-indigo-600 uppercase tracking-wide">{t('setup.dailyCalorieTarget')}</div>
+                      <div className="text-5xl font-extrabold text-gray-800 my-2">{preview.calories}</div>
+                      <div className="text-sm text-gray-500">{t('setup.kcalPerDay')}</div>
+                      <div className="text-xs text-gray-400 mt-3">{t('setup.bmrTdee', { bmr: preview.bmr, tdee: preview.tdee })}</div>
+                    </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-red-50 rounded-xl p-4 text-center border border-red-100">
-                    <div className="text-xs font-bold text-red-600">{t('setup.proteinUpper')}</div>
-                    <div className="text-2xl font-bold text-gray-800 mt-1">{preview.protein}<span className="text-sm text-gray-500">g</span></div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-red-50 rounded-xl p-4 text-center border border-red-100">
+                        <div className="text-xs font-bold text-red-600">{t('setup.proteinUpper')}</div>
+                        <div className="text-2xl font-bold text-gray-800 mt-1">{preview.protein_g}<span className="text-sm text-gray-500">g</span></div>
+                      </div>
+                      <div className="bg-amber-50 rounded-xl p-4 text-center border border-amber-100">
+                        <div className="text-xs font-bold text-amber-600">{t('setup.carbsUpper')}</div>
+                        <div className="text-2xl font-bold text-gray-800 mt-1">{preview.carbs_g}<span className="text-sm text-gray-500">g</span></div>
+                      </div>
+                      <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-100">
+                        <div className="text-xs font-bold text-blue-600">{t('setup.fatUpper')}</div>
+                        <div className="text-2xl font-bold text-gray-800 mt-1">{preview.fat_g}<span className="text-sm text-gray-500">g</span></div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {preview.warnings.length > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl p-3 space-y-1" role="status">
+                    {preview.warnings.map(w => (
+                      <p key={w.code}>{t(`setup.warning.${w.code}`, w)}</p>
+                    ))}
                   </div>
-                  <div className="bg-amber-50 rounded-xl p-4 text-center border border-amber-100">
-                    <div className="text-xs font-bold text-amber-600">{t('setup.carbsUpper')}</div>
-                    <div className="text-2xl font-bold text-gray-800 mt-1">{preview.carbs}<span className="text-sm text-gray-500">g</span></div>
-                  </div>
-                  <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-100">
-                    <div className="text-xs font-bold text-blue-600">{t('setup.fatUpper')}</div>
-                    <div className="text-2xl font-bold text-gray-800 mt-1">{preview.fat}<span className="text-sm text-gray-500">g</span></div>
-                  </div>
-                </div>
+                )}
 
                 <p className="text-xs text-gray-500 text-center leading-relaxed">
                   {t('setup.estimateDisclaimer')}

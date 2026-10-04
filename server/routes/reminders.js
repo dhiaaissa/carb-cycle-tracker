@@ -3,7 +3,8 @@ import { db } from '../db/index.js';
 import { users, dayLogs, appConfig } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getTodayIndex, getDayType, getPhase, getPhaseGoal } from '../lib/schedule.js';
-import { CALORIE_TARGETS, MACRO_TARGETS, WATER_GOALS } from '../lib/calories.js';
+import { WATER_GOALS } from '../lib/calories.js';
+import { loadDayTargets } from '../lib/targets.js';
 import { sendWhatsApp, isWhatsAppEnabled } from '../lib/whatsapp.js';
 
 async function resolveOwnerId() {
@@ -161,6 +162,7 @@ async function getTodayContext() {
 
   const dayType = getDayType(todayIndex);
   const phase = getPhase(todayIndex);
+  const dayTargets = await loadDayTargets(ownerId);
   const row = await db.select().from(dayLogs)
     .where(and(eq(dayLogs.user_id, ownerId), eq(dayLogs.day_index, todayIndex)))
     .get();
@@ -176,8 +178,8 @@ async function getTodayContext() {
     dayType,
     phase,
     phaseGoal: getPhaseGoal(phase),
-    calorieTarget: CALORIE_TARGETS[dayType] || 1400,
-    macros: MACRO_TARGETS[dayType] || MACRO_TARGETS.low,
+    calorieTarget: dayTargets[dayType]?.calories ?? dayTargets.low.calories,
+    macros: dayTargets[dayType] ?? dayTargets.low,
     waterGoal: WATER_GOALS[dayType] || 2.5,
     isWorkoutDay: dayType === 'med',
     consumed: row?.calories_consumed || 0,

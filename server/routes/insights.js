@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { db } from '../db/index.js';
 import { dayLogs } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { CALORIE_TARGETS } from '../lib/calories.js';
+import { DEFAULT_DAY_TARGETS } from '../../shared/dayTargets.js';
 
 const router = Router();
 
@@ -43,7 +43,7 @@ router.get('/', async (req, res, next) => {
 
   // Calorie adherence per day
   const calorieAdherence = rows.map(r => {
-    const target = r.calories_target || CALORIE_TARGETS[r.day_type] || 1400;
+    const target = r.calories_target || DEFAULT_DAY_TARGETS[r.day_type]?.calories || 1400;
     const pct = target > 0 ? Math.round((r.calories_consumed / target) * 100) : 0;
     return { day_index: r.day_index, day_type: r.day_type, pct, consumed: r.calories_consumed, target };
   });
@@ -54,7 +54,7 @@ router.get('/', async (req, res, next) => {
     const weekRows = rows.filter(r => Math.floor(r.day_index / 7) + 1 === w);
     if (weekRows.length === 0) continue;
     const avgPct = Math.round(weekRows.reduce((sum, r) => {
-      const target = r.calories_target || CALORIE_TARGETS[r.day_type] || 1400;
+      const target = r.calories_target || DEFAULT_DAY_TARGETS[r.day_type]?.calories || 1400;
       return sum + (target > 0 ? (r.calories_consumed / target) * 100 : 0);
     }, 0) / weekRows.length);
     const avgScore = +(weekRows.reduce((s, r) => s + r.score, 0) / weekRows.length).toFixed(1);

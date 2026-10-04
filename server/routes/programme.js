@@ -21,13 +21,18 @@ router.post('/setup', async (req, res, next) => {
     const prog = PROGRAMMES[programme];
 
     const updates = { programme };
+    let warnings = [];
 
-    if (prog.usesCalculator) {
+    // Carb cycle works without stats (falls back to the fixed plan), but uses them when given.
+    const hasStats = weight_kg != null || height_cm != null || age != null;
+    if (prog.usesCalculator || hasStats) {
       const errors = validateStats({ sex, weight_kg, height_cm, age, activity_level });
       if (errors.length) return res.status(400).json({ error: errors.join(', ') });
 
-      const targets = calcTargets({ programme, sex, weight_kg, height_cm, age, activity_level });
-      if (!targets) return res.status(400).json({ error: 'Could not compute targets' });
+      const computed = calcTargets({ programme, sex, weight_kg, height_cm, age, activity_level });
+      if (!computed) return res.status(400).json({ error: 'Could not compute targets' });
+      const { warnings: w, ...targets } = computed;
+      warnings = w;
 
       await db.update(users).set({
         sex, age, height_cm, activity_level,
@@ -53,7 +58,7 @@ router.post('/setup', async (req, res, next) => {
     }
 
     const cfg = await db.select().from(appConfig).where(eq(appConfig.user_id, req.user.id)).get();
-    res.json({ ok: true, config: cfg });
+    res.json({ ok: true, config: cfg, warnings });
   } catch (err) { next(err); }
 });
 

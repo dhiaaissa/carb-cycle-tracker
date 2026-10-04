@@ -4,6 +4,7 @@ import { dayLogs } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { getDayType, getPhase } from '../lib/schedule.js';
 import { calculateDay, calculateScore } from '../lib/calories.js';
+import { loadDayTargets } from '../lib/targets.js';
 
 const router = Router();
 
@@ -68,7 +69,7 @@ router.put('/:dayIndex', async (req, res, next) => {
     const arm        = body.arm_cm         !== undefined ? body.arm_cm         : base.arm_cm ?? null;
     const thigh      = body.thigh_cm       !== undefined ? body.thigh_cm       : base.thigh_cm ?? null;
 
-    const cal = calculateDay(dayType, mealsObj, workout);
+    const cal = calculateDay(dayType, mealsObj, workout, await loadDayTargets(req.user.id));
     const cheatKcal = body.cheat_kcal || 0;
     cal.calories_consumed += cheatKcal;
     cal.calories_remaining -= cheatKcal;
