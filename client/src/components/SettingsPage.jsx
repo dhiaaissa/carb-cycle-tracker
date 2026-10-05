@@ -5,6 +5,7 @@ import { DEFAULT_DAY_TARGETS } from '../lib/calories';
 import ProgrammeSetup from './ProgrammeSetup';
 import { DownloadSimple } from '@phosphor-icons/react';
 import { PageHeader, Panel, DayTypeChip } from './ui/primitives';
+import InstallApp from './InstallApp';
 
 const PROGRAMME_META = {
   carb_cycle:  { nameKey: 'programme.carb_cycle' },
@@ -180,6 +181,8 @@ export default function SettingsPage({ config, onConfigUpdate }) {
           {toast && <span role="status" className="text-sm text-olive-700">{toast}</span>}
         </div>
       </Panel>
+
+      <InstallApp />
 
       <Panel title={t('settings.exportBackup')} className="mb-6">
         <p className="text-sm text-ink-500 -mt-1 mb-4">{t('settings.exportHint')}</p>

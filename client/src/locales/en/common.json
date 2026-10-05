@@ -1045,5 +1045,27 @@
   "adaptive.doneTitle": "Targets updated",
   "adaptive.doneTarget": "Your energy use is now {{tdee}} kcal a day, and your new daily target is {{target}} kcal.",
   "adaptive.doneCycle": "Your energy use is now {{tdee}} kcal a day; your low, medium and high days have been resized to match.",
-  "adaptive.seeTargets": "See my new targets"
+  "adaptive.seeTargets": "See my new targets",
+
+  "offline.offline": "You're offline. You can keep logging — changes are saved on this device and sync when you're back.",
+  "offline.offlinePending_one": "You're offline. {{count}} change is saved on this device and will sync when you're back.",
+  "offline.offlinePending_other": "You're offline. {{count}} changes are saved on this device and will sync when you're back.",
+  "offline.offlinePending": "You're offline. {{count}} changes are saved on this device and will sync when you're back.",
+  "offline.syncing": "Syncing your changes…",
+  "offline.waiting_one": "{{count}} change is waiting to sync.",
+  "offline.waiting_other": "{{count}} changes are waiting to sync.",
+  "offline.waiting": "{{count}} changes are waiting to sync.",
+  "offline.syncNow": "Sync now",
+  "offline.updateReady": "A new version of the app is ready.",
+  "offline.reload": "Update",
+  "offline.savedOnDevice": "Saved on this device — it will sync when you're online.",
+  "offline.saveFailed": "Couldn't save. Please try again.",
+  "install.title": "Install the app",
+  "install.why": "Open it from your home screen like any other app — full screen, faster to start, and it works without a connection.",
+  "install.button": "Install",
+  "install.installed": "You're using the installed app.",
+  "install.step1": "On iPhone or iPad, open this page in Safari and tap Share",
+  "install.step2": "Choose “Add to Home Screen”.",
+  "install.shareIcon": "Share icon",
+  "install.otherBrowsers": "On Android, use the browser menu → “Install app” or “Add to Home screen”."
 }

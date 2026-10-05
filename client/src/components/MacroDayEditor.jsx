@@ -69,15 +69,15 @@ export default function MacroDayEditor({
     setSaving(true);
     setToast('');
     try {
-      await api.updateDay(dayIndex, {
+      const result = await api.updateDay(dayIndex, {
         meals,
         water_liters: water,
         weight_kg: weight ? parseFloat(weight) : null,
         notes,
         workout_done: workoutDone,
       });
-      invalidateFoodHistory();
-      setToast(t('macroEditor.saved'));
+      if (!result.queued) invalidateFoodHistory();
+      setToast(result.queued ? t('offline.savedOnDevice') : t('macroEditor.saved'));
       setTimeout(() => setToast(''), 2000);
       if (onSaved) onSaved();
     } catch (err) {
@@ -227,7 +227,7 @@ export default function MacroDayEditor({
       {/* Save bar */}
       <div className="fixed bottom-0 inset-x-0 lg:start-72 bg-white border-t-2 border-ink-100 px-4 py-3 z-20">
         <div className="max-w-3xl mx-auto flex items-center gap-3">
-          {toast && <div className={`text-sm font-semibold ${toast === t('macroEditor.saved') ? 'text-olive-600' : 'text-clay-600'}`}>{toast}</div>}
+          {toast && <div className={`text-sm font-semibold ${[t('macroEditor.saved'), t('offline.savedOnDevice')].includes(toast) ? 'text-olive-600' : 'text-clay-600'}`}>{toast}</div>}
           <button onClick={handleSave} disabled={saving}
             className="ms-auto px-6 py-3 rounded-xl bg-door-500 text-white font-bold disabled:opacity-50">
             {saving ? t('macroEditor.saving') : t('macroEditor.saveDay')}

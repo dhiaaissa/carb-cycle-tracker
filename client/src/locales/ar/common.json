@@ -1045,5 +1045,27 @@
   "adaptive.doneTitle": "تم تحديث الأهداف",
   "adaptive.doneTarget": "استهلاكك الآن {{tdee}} سعرة يوميًا، وهدفك اليومي الجديد {{target}} سعرة.",
   "adaptive.doneCycle": "استهلاكك الآن {{tdee}} سعرة يوميًا؛ تم تعديل أيامك المنخفضة والمتوسطة والعالية لتتناسب معه.",
-  "adaptive.seeTargets": "عرض أهدافي الجديدة"
+  "adaptive.seeTargets": "عرض أهدافي الجديدة",
+
+  "offline.offline": "أنت غير متصل. يمكنك مواصلة التسجيل — تُحفظ التغييرات على هذا الجهاز وتُزامن عند عودة الاتصال.",
+  "offline.offlinePending_one": "أنت غير متصل. تغيير واحد محفوظ على هذا الجهاز وسيُزامن عند عودة الاتصال.",
+  "offline.offlinePending_other": "أنت غير متصل. {{count}} تغييرات محفوظة على هذا الجهاز وستُزامن عند عودة الاتصال.",
+  "offline.offlinePending": "أنت غير متصل. {{count}} تغييرات محفوظة على هذا الجهاز وستُزامن عند عودة الاتصال.",
+  "offline.syncing": "جارٍ مزامنة تغييراتك…",
+  "offline.waiting_one": "تغيير واحد بانتظار المزامنة.",
+  "offline.waiting_other": "{{count}} تغييرات بانتظار المزامنة.",
+  "offline.waiting": "{{count}} تغييرات بانتظار المزامنة.",
+  "offline.syncNow": "زامن الآن",
+  "offline.updateReady": "نسخة جديدة من التطبيق جاهزة.",
+  "offline.reload": "تحديث",
+  "offline.savedOnDevice": "حُفظ على هذا الجهاز — ستتم المزامنة عند الاتصال.",
+  "offline.saveFailed": "تعذّر الحفظ. حاول مرة أخرى.",
+  "install.title": "ثبّت التطبيق",
+  "install.why": "افتحه من الشاشة الرئيسية كأي تطبيق — بملء الشاشة، أسرع في الفتح، ويعمل بدون اتصال.",
+  "install.button": "تثبيت",
+  "install.installed": "أنت تستخدم التطبيق المثبّت.",
+  "install.step1": "على iPhone أو iPad، افتح هذه الصفحة في Safari واضغط مشاركة",
+  "install.step2": "اختر «إضافة إلى الشاشة الرئيسية».",
+  "install.shareIcon": "أيقونة المشاركة",
+  "install.otherBrowsers": "على Android، من قائمة المتصفح ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية»."
 }

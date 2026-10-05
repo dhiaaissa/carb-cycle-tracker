@@ -1,3 +1,5 @@
+import { enqueue, isNetworkError, flushOutbox, startOffline, clearUserCaches } from './offline';
+
 const BASE = '/api';
 const TOKEN_KEY = 'carb_cycle_token';
 const USER_KEY = 'carb_cycle_user';
@@ -10,10 +12,13 @@ export const auth = {
     try { return JSON.parse(raw); } catch { return null; }
   },
   setSession: (token, user) => {
+    // A different account on this device must never see the previous one's cached data.
+    if (auth.getUser()?.id !== user?.id) clearUserCaches();
     localStorage.setItem(TOKEN_KEY, token);
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   },
   clearSession: () => {
+    clearUserCaches();
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   },
@@ -45,6 +50,22 @@ async function request(path, options = {}) {
   return res.json();
 }
 
+/** Raw sender used by the outbox when replaying queued writes. */
+const send = (method, path, body) => request(path, { method, body: body ? JSON.stringify(body) : undefined });
+
+async function saveOrQueue(key, path, data) {
+  try {
+    return await send('PUT', path, data);
+  } catch (err) {
+    if (!isNetworkError(err)) throw err;
+    enqueue({ key, method: 'PUT', path, body: data });
+    return { ...data, meals_json: data.meals, queued: true };
+  }
+}
+
+export const syncOutbox = () => flushOutbox(send);
+export const initOffline = () => startOffline(send);
+
 export const api = {
   login: (username, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
   register: (username, password) => request('/auth/register', { method: 'POST', body: JSON.stringify({ username, password }) }),
@@ -55,13 +76,15 @@ export const api = {
   // Date-keyed (canonical). Dates are the user's local YYYY-MM-DD — see shared/dates.js localIsoDate().
   getDaysRange:    (from, to) => request(`/days?${new URLSearchParams({ ...(from && { from }), ...(to && { to }) })}`),
   getDayByDate:    (date) => request(`/days/date/${date}`),
-  updateDayByDate: (date, data) => request(`/days/date/${date}`, { method: 'PUT', body: JSON.stringify(data) }),
+  updateDayByDate: (date, data) => saveOrQueue(`date:${date}`, `/days/date/${date}`, data),
   getProgress:     (today, days = 90) => request(`/progress?${new URLSearchParams({ today, days })}`),
   getWeekly:       (today) => request(`/progress/weekly?${new URLSearchParams({ today })}`),
   acceptAdaptive:  (today) => request('/progress/adaptive/accept', { method: 'POST', body: JSON.stringify({ today }) }),
   dismissAdaptive: () => request('/progress/adaptive/dismiss', { method: 'POST' }),
   getDay:      (idx) => request(`/days/${idx}`),
-  updateDay:   (idx, data) => request(`/days/${idx}`, { method: 'PUT', body: JSON.stringify(data) }),
+  // Day saves work offline: if the server can't be reached, the save is kept on this
+  // device and replayed later. The returned row is then marked { queued: true }.
+  updateDay:   (idx, data) => saveOrQueue(`day:${idx}`, `/days/${idx}`, data),
   getStats:    () => request('/stats'),
   getFoods:    () => request('/foods'),
   getFoodHistory: () => request('/foods/history'),

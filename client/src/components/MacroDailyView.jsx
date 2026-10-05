@@ -13,6 +13,7 @@ import MacroWeekPage from './MacroWeekPage';
 import MacroDayEditor from './MacroDayEditor';
 import SettingsPage from './SettingsPage';
 import AdminPage from './AdminPage';
+import AppStatus from './AppStatus';
 import ProgrammeSetup from './ProgrammeSetup';
 import ProfilePage from './ProfilePage';
 
@@ -123,6 +124,7 @@ export default function MacroDailyView({ config, foods, presets, onSavePreset, o
           </div>
         </header>
 
+        <AppStatus />
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6">
             {selectedDay != null ? (

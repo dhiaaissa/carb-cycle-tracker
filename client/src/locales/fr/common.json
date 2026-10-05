@@ -1045,5 +1045,27 @@
   "adaptive.doneTitle": "Objectifs mis à jour",
   "adaptive.doneTarget": "Votre dépense est maintenant de {{tdee}} kcal par jour et votre nouvel objectif quotidien est de {{target}} kcal.",
   "adaptive.doneCycle": "Votre dépense est maintenant de {{tdee}} kcal par jour ; vos jours bas, moyens et hauts ont été ajustés.",
-  "adaptive.seeTargets": "Voir mes nouveaux objectifs"
+  "adaptive.seeTargets": "Voir mes nouveaux objectifs",
+
+  "offline.offline": "Vous êtes hors ligne. Vous pouvez continuer — les modifications sont gardées sur cet appareil et synchronisées au retour de la connexion.",
+  "offline.offlinePending_one": "Vous êtes hors ligne. {{count}} modification est gardée sur cet appareil et sera synchronisée au retour de la connexion.",
+  "offline.offlinePending_other": "Vous êtes hors ligne. {{count}} modifications sont gardées sur cet appareil et seront synchronisées au retour de la connexion.",
+  "offline.offlinePending": "Vous êtes hors ligne. {{count}} modifications sont gardées sur cet appareil et seront synchronisées au retour de la connexion.",
+  "offline.syncing": "Synchronisation de vos modifications…",
+  "offline.waiting_one": "{{count}} modification attend d'être synchronisée.",
+  "offline.waiting_other": "{{count}} modifications attendent d'être synchronisées.",
+  "offline.waiting": "{{count}} modifications attendent d'être synchronisées.",
+  "offline.syncNow": "Synchroniser",
+  "offline.updateReady": "Une nouvelle version de l'application est prête.",
+  "offline.reload": "Mettre à jour",
+  "offline.savedOnDevice": "Enregistré sur cet appareil — synchronisé dès le retour en ligne.",
+  "offline.saveFailed": "Échec de l'enregistrement. Veuillez réessayer.",
+  "install.title": "Installer l'application",
+  "install.why": "Ouvrez-la depuis l'écran d'accueil comme une vraie application — plein écran, plus rapide, et elle fonctionne sans connexion.",
+  "install.button": "Installer",
+  "install.installed": "Vous utilisez l'application installée.",
+  "install.step1": "Sur iPhone ou iPad, ouvrez cette page dans Safari et touchez Partager",
+  "install.step2": "Choisissez « Sur l'écran d'accueil ».",
+  "install.shareIcon": "Icône Partager",
+  "install.otherBrowsers": "Sur Android, menu du navigateur → « Installer l'application » ou « Ajouter à l'écran d'accueil »."
 }

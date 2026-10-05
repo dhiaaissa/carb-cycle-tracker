@@ -4,7 +4,8 @@ import i18n from './i18n';
 import { useAppData } from './hooks/useAppData';
 import { useReminders } from './hooks/useReminders';
 import { useLanguageDirection } from './lib/i18nDirection';
-import { auth, api } from './lib/api';
+import { auth, api, initOffline } from './lib/api';
+import AppStatus from './components/AppStatus';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import ThemeToggle from './components/ThemeToggle';
 import LogoutButton from './components/LogoutButton';
@@ -35,6 +36,9 @@ import MacroDailyView from './components/MacroDailyView';
 export default function App() {
   const [user, setUser] = useState(() => auth.getUser());
   const [justRegistered, setJustRegistered] = useState(false);
+
+  // Offline outbox: replay saves made without a connection.
+  useEffect(() => { if (user) initOffline(); }, [user?.id]);
 
   useEffect(() => {
     if (!user) return;
@@ -177,6 +181,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
           </div>
         </header>
 
+        <AppStatus />
         <main className="flex-1 overflow-y-auto pb-safe ps-safe pe-safe">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-8">
             {selectedWeek === null ? (

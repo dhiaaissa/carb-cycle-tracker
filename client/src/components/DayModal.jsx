@@ -56,6 +56,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
   const [cheatMealChoice, setCheatMealChoice] = useState(null);
   const [notes, setNotes]     = useState('');
   const [saving, setSaving]   = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [toast, setToast]     = useState(null);
 
   useEffect(() => {
@@ -129,8 +130,9 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
 
   async function handleSave() {
     setSaving(true);
+    setSaveError('');
     try {
-      await onSave(dayIndex, {
+      const result = await onSave(dayIndex, {
         meals, water_liters: water, workout_done: workout, workout_json: workoutExercises,
         mood, energy_level: energy, weight_kg: weight ? parseFloat(weight) : null,
         waist_cm: waist ? parseFloat(waist) : null, chest_cm: chest ? parseFloat(chest) : null,
@@ -140,10 +142,14 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
           ? `[cheat:${cheatMealChoice}]${notes ? '\n' + notes : ''}`
           : notes || null,
       });
-      const msg = score === 5 ? t('modal.toastPerfect') : score >= 3 ? t('modal.toastGood') : t('modal.toastSaved');
+      const msg = result?.queued ? t('offline.savedOnDevice')
+        : score === 5 ? t('modal.toastPerfect') : score >= 3 ? t('modal.toastGood') : t('modal.toastSaved');
       setToast(msg);
       setTimeout(() => onClose(), 1200);
-    } catch (err) { console.error('Save failed:', err); }
+    } catch (err) {
+      console.error('Save failed:', err);
+      setSaveError(err.message || t('offline.saveFailed'));
+    }
     finally { setSaving(false); }
   }
 
@@ -486,6 +492,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
         {/* Save Footer */}
         {!isFuture && (
           <div className="px-4 py-3 pb-safe bg-white shrink-0 border-t border-ink-200">
+            {saveError && <p role="alert" className="text-sm text-clay-700 mb-2">{saveError}</p>}
             <button onClick={handleSave} disabled={saving || !!toast}
               className="w-full h-12 bg-door-600 hover:bg-door-700 text-white font-semibold rounded-lg disabled:opacity-50">
               {saving ? t('modal.saving') : t('modal.saveDay')}

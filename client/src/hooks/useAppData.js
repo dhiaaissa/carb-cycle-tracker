@@ -52,8 +52,20 @@ export function useAppData() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // When saves made offline reach the server, reload so totals/stats are the server's.
+  useEffect(() => {
+    const onSynced = () => fetchAll();
+    window.addEventListener('outbox:synced', onSynced);
+    return () => window.removeEventListener('outbox:synced', onSynced);
+  }, [fetchAll]);
+
   const updateDay = useCallback(async (dayIndex, data) => {
     const updated = await api.updateDay(dayIndex, data);
+    if (updated.queued) {
+      // Saved on this device only: show it now, the server copy arrives after sync.
+      setDays(prev => ({ ...prev, [dayIndex]: { ...prev[dayIndex], ...updated, day_index: dayIndex } }));
+      return updated;
+    }
     setDays(prev => ({ ...prev, [dayIndex]: updated }));
     invalidateFoodHistory();
     const st = await api.getStats();
