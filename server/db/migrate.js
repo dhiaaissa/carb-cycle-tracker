@@ -238,6 +238,45 @@ export async function migrate({ log = console.log } = {}) {
     ON custom_foods(user_id, food_id)
   `);
 
+  // ── Admin & moderation ─────────────────────────────────────────────
+  await addColumn('users', 'role', `TEXT NOT NULL DEFAULT 'user'`);          // user | moderator | superadmin
+  await addColumn('users', 'status', `TEXT NOT NULL DEFAULT 'active'`);      // active | suspended
+  await addColumn('users', 'suspended_reason', 'TEXT');
+  await addColumn('users', 'last_login_at', 'TEXT');
+  await addColumn('users', 'last_seen_at', 'TEXT');
+  // Bumped to revoke every existing session (suspend, password reset, sign-out-everywhere).
+  await addColumn('users', 'token_version', 'INTEGER NOT NULL DEFAULT 0');
+
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS audit_log (
+      id INTEGER PRIMARY KEY,
+      created_at TEXT NOT NULL,
+      actor_id INTEGER,
+      actor_username TEXT,
+      action TEXT NOT NULL,
+      target_type TEXT,
+      target_id INTEGER,
+      target_label TEXT,
+      details_json TEXT NOT NULL DEFAULT '{}',
+      ip TEXT,
+      user_agent TEXT
+    )
+  `);
+  await client.execute(`CREATE INDEX IF NOT EXISTS audit_log_created ON audit_log(created_at)`);
+  await client.execute(`CREATE INDEX IF NOT EXISTS audit_log_actor ON audit_log(actor_id)`);
+  await client.execute(`CREATE INDEX IF NOT EXISTS audit_log_target ON audit_log(target_type, target_id)`);
+  await client.execute(`CREATE INDEX IF NOT EXISTS audit_log_action ON audit_log(action)`);
+
+  // Bootstrap: the existing owner account becomes super admin if there is none yet.
+  const owner = (process.env.OWNER_USERNAME || process.env.SUPER_ADMIN_USERNAME || '').toLowerCase();
+  if (owner) {
+    const { rows } = await client.execute(`SELECT COUNT(*) AS n FROM users WHERE role = 'superadmin'`);
+    if (Number(rows[0].n) === 0) {
+      const res = await client.execute({ sql: `UPDATE users SET role = 'superadmin' WHERE username = ?`, args: [owner] });
+      if (res.rowsAffected) log(`[users] ${owner} promoted to superadmin`);
+    }
+  }
+
   log('Migration complete.');
 }
 

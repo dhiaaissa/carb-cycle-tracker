@@ -65,6 +65,9 @@ export default function LoginPage({ onAuth }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [notice] = useState(() => {
+    try { const n = sessionStorage.getItem('auth_notice'); sessionStorage.removeItem('auth_notice'); return n; } catch { return null; }
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -139,6 +142,12 @@ export default function LoginPage({ onAuth }) {
             {mode === 'login' ? t('auth.card.welcomeSub') : t('auth.card.createSub')}
           </p>
 
+          {notice === 'suspended' && (
+            <div role="alert" className="mb-4 flex items-start gap-2 text-sm text-clay-700 bg-clay-50 border border-clay-200 rounded-lg p-3">
+              <WarningCircle size={18} className="shrink-0 mt-px" aria-hidden="true" />
+              <span>{t('auth.suspendedNotice')}</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-ink-700 mb-1.5">{t('auth.field.username')}</label>

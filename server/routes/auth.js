@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { db, client } from '../db/index.js';
 import { users, appConfig } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { hashPassword, verifyPassword, signToken, requireAuth } from '../lib/auth.js';
+import { hashPassword, verifyPassword, signToken, requireAuth, publicUser } from '../lib/auth.js';
+import { logEvent } from '../lib/audit.js';
 
 const router = Router();
 
@@ -47,6 +48,11 @@ router.post('/register', async (req, res, next) => {
         args: [newId],
       });
       console.log(`[auth] Owner ${normalized} claimed orphaned rows.`);
+      // First owner account becomes the super admin.
+      await client.execute({
+        sql: `UPDATE users SET role = 'superadmin' WHERE id = ? AND NOT EXISTS (SELECT 1 FROM users WHERE role = 'superadmin')`,
+        args: [newId],
+      });
     }
 
     // Ensure they have an app_config row (today as default start)
@@ -60,8 +66,9 @@ router.post('/register', async (req, res, next) => {
       }).run();
     }
 
-    const token = signToken({ id: newId, username: normalized });
-    res.json({ token, user: { id: newId, username: normalized } });
+    const created = await db.select().from(users).where(eq(users.id, newId)).get();
+    await logEvent(req, { action: 'auth.register', actor: created, target: { type: 'user', id: newId, label: normalized } });
+    res.json({ token: signToken(created), user: publicUser(created) });
   } catch (err) { next(err); }
 });
 
@@ -73,24 +80,23 @@ router.post('/login', async (req, res, next) => {
     const normalized = username.toLowerCase();
     const user = await db.select().from(users).where(eq(users.username, normalized)).get();
     if (!user || !verifyPassword(password, user.password_hash)) {
+      await logEvent(req, { action: 'auth.login_failed', actor: null, target: user ? { type: 'user', id: user.id, label: user.username } : null, details: { username: normalized.slice(0, 40) } });
       return res.status(401).json({ error: 'Invalid username or password' });
     }
+    if (user.status === 'suspended') {
+      await logEvent(req, { action: 'auth.login_blocked', actor: user, target: { type: 'user', id: user.id, label: user.username } });
+      return res.status(403).json({ error: 'This account is suspended. Contact the app administrator.', code: 'suspended' });
+    }
 
-    const token = signToken({ id: user.id, username: user.username });
-    res.json({ token, user: { id: user.id, username: user.username } });
+    const now = new Date().toISOString();
+    await db.update(users).set({ last_login_at: now, last_seen_at: now }).where(eq(users.id, user.id)).run();
+    await logEvent(req, { action: 'auth.login', actor: user, target: { type: 'user', id: user.id, label: user.username } });
+    res.json({ token: signToken(user), user: publicUser(user) });
   } catch (err) { next(err); }
 });
 
-router.get('/me', async (req, res, next) => {
-  try {
-    const header = req.headers.authorization || '';
-    const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-    if (!token) return res.status(401).json({ error: 'Missing token' });
-    const { verifyToken } = await import('../lib/auth.js');
-    const payload = verifyToken(token);
-    if (!payload) return res.status(401).json({ error: 'Invalid token' });
-    res.json({ user: { id: payload.id, username: payload.username } });
-  } catch (err) { next(err); }
+router.get('/me', requireAuth, (req, res) => {
+  res.json({ user: publicUser(req.user) });
 });
 
 // Full profile: account info + linked programme stats. Requires auth.
@@ -107,13 +113,12 @@ router.get('/profile', requireAuth, async (req, res, next) => {
       args: [req.user.id],
     });
 
-    const owner = (process.env.OWNER_USERNAME || '').toLowerCase();
-
     res.json({
       id: user.id,
       username: user.username,
       created_at: user.created_at,
-      is_owner: owner && user.username === owner,
+      role: user.role || 'user',
+      is_owner: user.role === 'superadmin',
       sex: user.sex,
       age: user.age,
       height_cm: user.height_cm,
@@ -152,12 +157,15 @@ router.post('/change-password', requireAuth, async (req, res, next) => {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
 
+    // New password signs out every other device; this one gets a fresh token.
+    const token_version = (user.token_version ?? 0) + 1;
     await db.update(users)
-      .set({ password_hash: hashPassword(new_password) })
+      .set({ password_hash: hashPassword(new_password), token_version })
       .where(eq(users.id, req.user.id))
       .run();
+    await logEvent(req, { action: 'auth.password_change', target: { type: 'user', id: user.id, label: user.username } });
 
-    res.json({ ok: true });
+    res.json({ ok: true, token: signToken({ ...user, token_version }) });
   } catch (err) { next(err); }
 });
 

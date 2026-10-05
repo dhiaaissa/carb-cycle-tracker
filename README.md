@@ -56,3 +56,26 @@ Workouts are **only on Medium carb days**. When a workout is logged, +200 kcal i
 - **Backend**: Node.js + Express
 - **Database**: SQLite via better-sqlite3
 - **ORM**: Drizzle ORM
+
+## Admin & moderation
+
+Roles: **user**, **moderator** (sees everything, can suspend users and sign them out) and
+**super admin** (also resets passwords, changes roles and deletes accounts). Staff see an
+**Admin** item in the sidebar with an overview, a user list with moderation actions, and an
+activity log (logins, failed logins, sign-ups, password and programme changes, and every
+admin action — exportable as CSV).
+
+Create the super admin:
+
+```bash
+# Promote an existing account
+node server/create-admin.js <username>
+
+# Or create a new one (password ≥ 10 characters)
+node server/create-admin.js <username> <password>
+```
+
+The account named in `OWNER_USERNAME` is promoted automatically on the next deploy if no
+super admin exists yet. Nobody can suspend, demote or delete themselves, and the last super
+admin can't be removed. Suspending, resetting a password or "sign out everywhere" ends that
+user's sessions immediately.

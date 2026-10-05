@@ -3,6 +3,7 @@ import { db } from '../db/index.js';
 import { appConfig, users } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { calcTargets, validateStats, validateGoalSettings, PROGRAMMES } from '../lib/nutrition.js';
+import { logEvent } from '../lib/audit.js';
 
 const router = Router();
 
@@ -69,6 +70,7 @@ router.post('/setup', async (req, res, next) => {
     }
 
     const cfg = await db.select().from(appConfig).where(eq(appConfig.user_id, req.user.id)).get();
+    await logEvent(req, { action: 'programme.setup', target: { type: 'user', id: req.user.id, label: req.user.username }, details: { programme, goal, goal_rate_kg_week, macro_preset } });
     res.json({ ok: true, config: cfg, warnings });
   } catch (err) { next(err); }
 });

@@ -4,7 +4,7 @@ import i18n from './i18n';
 import { useAppData } from './hooks/useAppData';
 import { useReminders } from './hooks/useReminders';
 import { useLanguageDirection } from './lib/i18nDirection';
-import { auth } from './lib/api';
+import { auth, api } from './lib/api';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import ThemeToggle from './components/ThemeToggle';
 import LogoutButton from './components/LogoutButton';
@@ -24,6 +24,7 @@ import WeekPage from './components/WeekPage';
 import InsightsPage from './components/InsightsPage';
 import SettingsPage from './components/SettingsPage';
 import ProfilePage from './components/ProfilePage';
+import AdminPage from './components/AdminPage';
 import GroceryPage from './components/GroceryPage';
 import LoginPage from './components/LoginPage';
 import ProgrammeSetup from './components/ProgrammeSetup';
@@ -32,6 +33,17 @@ import MacroDailyView from './components/MacroDailyView';
 export default function App() {
   const [user, setUser] = useState(() => auth.getUser());
   const [justRegistered, setJustRegistered] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    api.me().then(({ user: fresh }) => {
+      if (fresh && (fresh.role !== user.role || fresh.username !== user.username)) {
+        auth.setSession(auth.getToken(), fresh);
+        setUser(fresh);
+      }
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   // Pre-login: force English regardless of last setting
   useEffect(() => {
@@ -105,6 +117,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
     : selectedWeek === 'insights' ? t('nav.insights')
     : selectedWeek === 'profile' ? t('nav.profile')
     : selectedWeek === 'settings' ? t('nav.settings')
+    : selectedWeek === 'admin' ? t('nav.admin')
     : selectedWeek === 'grocery' ? t('nav.grocery')
     : t('nav.weekNum', { num: selectedWeek });
 
@@ -211,6 +224,8 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
             ) : selectedWeek === 'profile' ? (
               /* Profile page */
               <ProfilePage onEditProgramme={() => setSelectedWeek('settings')} />
+            ) : selectedWeek === 'admin' ? (
+              <AdminPage />
             ) : selectedWeek === 'settings' ? (
               /* Settings page */
               <SettingsPage config={config} onConfigUpdate={(newConfig) => {

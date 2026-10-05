@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { requireAuth } from './lib/auth.js';
+import { requireAuth, requireRole, STAFF_ROLES } from './lib/auth.js';
 import authRouter from './routes/auth.js';
 import configRouter from './routes/config.js';
 import scheduleRouter from './routes/schedule.js';
@@ -17,11 +17,14 @@ import remindersRouter from './routes/reminders.js';
 import programmeRouter from './routes/programme.js';
 import macroStatsRouter from './routes/macroStats.js';
 import progressRouter from './routes/progress.js';
+import adminRouter from './routes/admin.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Behind Render's proxy: lets the activity log record the client IP, not the proxy's.
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 
@@ -41,6 +44,7 @@ app.use('/api/reminders', requireAuth, remindersRouter);
 app.use('/api/programme', requireAuth, programmeRouter);
 app.use('/api/macro-stats', requireAuth, macroStatsRouter);
 app.use('/api/progress', requireAuth, progressRouter);
+app.use('/api/admin', requireAuth, requireRole(...STAFF_ROLES), adminRouter);
 
 if (process.env.NODE_ENV === 'production') {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');

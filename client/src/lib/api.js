@@ -25,8 +25,15 @@ async function request(path, options = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${BASE}${path}`, { ...options, headers });
-  if (res.status === 401) {
+  // Only a request that *sent* a session can have it expire/revoked (a wrong
+  // password at login is also a 401 and must show its message, not reload).
+  if (res.status === 401 && token) {
+    let code = null;
+    try { code = (await res.clone().json()).code; } catch {}
     auth.clearSession();
+    if (code === 'suspended') {
+      try { sessionStorage.setItem('auth_notice', 'suspended'); } catch {}
+    }
     window.location.reload();
     throw new Error('Unauthorized');
   }
@@ -73,6 +80,30 @@ export const api = {
   getMacroStats: () => request('/macro-stats'),
   getMacroWeek: (week) => request(`/macro-stats/week/${week}`),
   getProfile: () => request('/auth/profile'),
-  changePassword: (current_password, new_password) =>
-    request('/auth/change-password', { method: 'POST', body: JSON.stringify({ current_password, new_password }) }),
+  changePassword: async (current_password, new_password) => {
+    const r = await request('/auth/change-password', { method: 'POST', body: JSON.stringify({ current_password, new_password }) });
+    // Other devices are signed out; keep this one signed in with the fresh token.
+    if (r.token) auth.setSession(r.token, auth.getUser());
+    return r;
+  },
+  me: () => request('/auth/me'),
+  admin: {
+    overview: () => request('/admin/overview'),
+    users: (params = {}) => request(`/admin/users?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== '' && v != null))}`),
+    user: (id) => request(`/admin/users/${id}`),
+    suspend: (id, reason) => request(`/admin/users/${id}/suspend`, { method: 'POST', body: JSON.stringify({ reason }) }),
+    unsuspend: (id) => request(`/admin/users/${id}/unsuspend`, { method: 'POST' }),
+    signOut: (id) => request(`/admin/users/${id}/sign-out`, { method: 'POST' }),
+    resetPassword: (id) => request(`/admin/users/${id}/reset-password`, { method: 'POST' }),
+    setRole: (id, role) => request(`/admin/users/${id}/role`, { method: 'POST', body: JSON.stringify({ role }) }),
+    remove: (id, confirm) => request(`/admin/users/${id}`, { method: 'DELETE', body: JSON.stringify({ confirm }) }),
+    audit: (params = {}) => request(`/admin/audit?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== '' && v != null))}`),
+    auditCsv: async (params = {}) => {
+      const res = await fetch(`${BASE}/admin/audit.csv?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== '' && v != null))}`, {
+        headers: { Authorization: `Bearer ${auth.getToken()}` },
+      });
+      if (!res.ok) throw new Error(`API error: ${res.status}`);
+      return res.blob();
+    },
+  },
 };

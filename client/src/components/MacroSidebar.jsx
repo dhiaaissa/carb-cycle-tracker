@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { ForkKnife, SquaresFour, Lightbulb, User, GearSix } from '@phosphor-icons/react';
+import { ForkKnife, SquaresFour, Lightbulb, User, GearSix, ShieldCheck } from '@phosphor-icons/react';
+import { auth } from '../lib/api';
 import { formatDate } from '../lib/format';
 import { SidebarShell, SidebarHeader, NavItem, SectionLabel } from './ui/SideNav';
 
@@ -34,6 +35,9 @@ export default function MacroSidebar({ stats, programme, currentView, onSelectVi
         <NavItem icon={Lightbulb} label={t('nav.insights')} active={currentView === 'insights'} onClick={() => go('insights')} />
         <NavItem icon={User} label={t('nav.profile')} active={currentView === 'profile'} onClick={() => go('profile')} />
         <NavItem icon={GearSix} label={t('nav.settings')} active={currentView === 'settings'} onClick={() => go('settings')} />
+        {['moderator', 'superadmin'].includes(auth.getUser()?.role) && (
+          <NavItem icon={ShieldCheck} label={t('nav.admin')} active={currentView === 'admin'} onClick={() => go('admin')} />
+        )}
       </nav>
 
       {weeks.length > 0 && (

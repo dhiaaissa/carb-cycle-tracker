@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { SquaresFour, Lightbulb, Basket, User, GearSix } from '@phosphor-icons/react';
+import { SquaresFour, Lightbulb, Basket, User, GearSix, ShieldCheck } from '@phosphor-icons/react';
+import { auth } from '../lib/api';
 import { formatDate } from '../lib/format';
 import { SidebarShell, SidebarHeader, NavItem, SectionLabel } from './ui/SideNav';
 
@@ -41,6 +42,9 @@ export default function Sidebar({ schedule, days, stats, todayIndex, selectedWee
         <NavItem icon={Basket} label={t('nav.grocery')} active={selectedWeek === 'grocery'} onClick={() => go('grocery')} />
         <NavItem icon={User} label={t('nav.profile')} active={selectedWeek === 'profile'} onClick={() => go('profile')} />
         <NavItem icon={GearSix} label={t('nav.settings')} active={selectedWeek === 'settings'} onClick={() => go('settings')} />
+        {['moderator', 'superadmin'].includes(auth.getUser()?.role) && (
+          <NavItem icon={ShieldCheck} label={t('nav.admin')} active={selectedWeek === 'admin'} onClick={() => go('admin')} />
+        )}
       </nav>
 
       <nav className="px-3 pb-4" aria-label={t('sidebar.weeks')}>

@@ -10,6 +10,26 @@ export const users = sqliteTable('users', {
   height_cm: real('height_cm'),
   activity_level: text('activity_level'),
   body_fat_pct: real('body_fat_pct'),
+  role: text('role').notNull().default('user'),
+  status: text('status').notNull().default('active'),
+  suspended_reason: text('suspended_reason'),
+  last_login_at: text('last_login_at'),
+  last_seen_at: text('last_seen_at'),
+  token_version: integer('token_version').notNull().default(0),
+});
+
+export const auditLog = sqliteTable('audit_log', {
+  id: integer('id').primaryKey(),
+  created_at: text('created_at').notNull(),
+  actor_id: integer('actor_id'),
+  actor_username: text('actor_username'),
+  action: text('action').notNull(),
+  target_type: text('target_type'),
+  target_id: integer('target_id'),
+  target_label: text('target_label'),
+  details_json: text('details_json').notNull().default('{}'),
+  ip: text('ip'),
+  user_agent: text('user_agent'),
 });
 
 export const appConfig = sqliteTable('app_config', {

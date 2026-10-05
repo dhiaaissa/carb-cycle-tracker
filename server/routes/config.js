@@ -5,6 +5,7 @@ import { dayTargetsFor } from '../lib/targets.js';
 import { getOrCreateConfig } from '../lib/userConfig.js';
 import { resyncDayIndexes } from '../lib/dayLogs.js';
 import { isIsoDate } from '../../shared/dates.js';
+import { logEvent } from '../lib/audit.js';
 import { eq, and } from 'drizzle-orm';
 import { getDayType, getPhase, getTodayIndex, getPhaseGoal } from '../lib/schedule.js';
 
@@ -69,6 +70,7 @@ router.put('/', async (req, res, next) => {
     // Logs stay on their calendar dates; only their position in the programme moves.
     if (updates.start_date && updates.start_date !== config.start_date) {
       await resyncDayIndexes(req.user.id, updates.start_date);
+      await logEvent(req, { action: 'config.start_date', target: { type: 'user', id: req.user.id, label: req.user.username }, details: { from: config.start_date, to: updates.start_date } });
     }
 
     const updated = await db.select().from(appConfig).where(eq(appConfig.user_id, req.user.id)).get();
