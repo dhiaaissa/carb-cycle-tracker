@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Star, Lightning, ArrowCounterClockwise, ClockCounterClockwise } from '@phosphor-icons/react';
+import { itemNutrition, sumItems, makeQuickItem, isQuick } from '../../../shared/mealItems.js';
+import { useFoodHistory, toggleFavorite } from '../lib/foodHistory';
 import { FOODS as BUILTIN_FOODS, FOOD_CATEGORIES, getNutrition as builtinGetNutrition, sumMealNutrition as builtinSumMealNutrition } from '../lib/foods';
 
 const UNIT_LABEL = { g: 'g', piece: 'pcs', pot: 'pot', slice: 'slices' };
@@ -8,35 +11,10 @@ import { MEAL_ICON_COMPONENTS } from '../lib/mealIcons.jsx';
 const MEAL_ICON_LIST = Object.values(MEAL_ICON_COMPONENTS);
 const EMOJI_OPTIONS = ['🍽️','🥗','🧀','🫒','🥜','🍳','🥙','🌶️','🫘','🥦','🍕','🌽','🥥','🫓','🍖','🥤','🧈','🍯','🥣','🍲'];
 
-/** Get nutrition using merged food db (handles both built-in and custom) */
-function getFoodNutrition(foodDb, foodId, amount) {
-  const food = foodDb[foodId];
-  if (!food || !amount || amount <= 0) return { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 };
-  if (food.unit === 'g') {
-    const r = amount / 100;
-    return {
-      kcal: (food.kcal_per_100g || 0) * r,
-      protein_g: (food.protein_per_100g || 0) * r,
-      carbs_g: (food.carbs_per_100g || 0) * r,
-      fat_g: (food.fat_per_100g || 0) * r,
-    };
-  }
-  return {
-    kcal: (food.kcal_per_unit || 0) * amount,
-    protein_g: (food.protein_per_unit || 0) * amount,
-    carbs_g: (food.carbs_per_unit || 0) * amount,
-    fat_g: (food.fat_per_unit || 0) * amount,
-  };
-}
+const getFoodNutrition = (foodDb, foodId, amount) => itemNutrition({ food_id: foodId, amount }, foodDb);
+const sumNutrition = (foodDb, items = []) => sumItems(items, foodDb);
 
-function sumNutrition(foodDb, items = []) {
-  return items.reduce((acc, item) => {
-    const n = getFoodNutrition(foodDb, item.food_id, item.amount);
-    return { kcal: acc.kcal + n.kcal, protein_g: acc.protein_g + n.protein_g, carbs_g: acc.carbs_g + n.carbs_g, fat_g: acc.fat_g + n.fat_g };
-  }, { kcal: 0, protein_g: 0, carbs_g: 0, fat_g: 0 });
-}
-
-export default function MealComposer({ mealNum, items = [], onChange, disabled, presets = [], onSavePreset, onDeletePreset, allFoods, onCreateCustomFood, onDeleteCustomFood }) {
+export default function MealComposer({ mealNum, items = [], onChange, disabled, presets = [], onSavePreset, onDeletePreset, allFoods, onCreateCustomFood, onDeleteCustomFood, yesterdayItems }) {
   const { t } = useTranslation();
   const [pickerOpen, setPickerOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -46,6 +24,9 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
   const [search, setSearch] = useState('');
   const [showCustomForm, setShowCustomForm] = useState(false);
   const searchRef = useRef(null);
+  const history = useFoodHistory();
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quick, setQuick] = useState({ label: '', kcal: '', protein_g: '', carbs_g: '', fat_g: '' });
 
   const foodDb = allFoods && Object.keys(allFoods).length > 0 ? allFoods : BUILTIN_FOODS;
 
@@ -79,9 +60,32 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
     }
   }
 
+  /** Re-log a food with the amount you used last time. */
+  function addWithAmount(foodId, amount) {
+    if (disabled || !foodDb[foodId]) return;
+    if (items.some((it) => it.food_id === foodId)) return quickAdd(foodId);
+    onChange([...items, { food_id: foodId, amount }]);
+  }
+
+  function addQuick(e) {
+    e.preventDefault();
+    const item = makeQuickItem(quick);
+    if (!item.kcal) return;
+    onChange([...items, item]);
+    setQuick({ label: '', kcal: '', protein_g: '', carbs_g: '', fat_g: '' });
+    setQuickOpen(false);
+  }
+
+  const yesterdayKcal = yesterdayItems?.length ? Math.round(sumNutrition(foodDb, yesterdayItems).kcal) : 0;
+  const favorites = history.favorites.filter((id) => foodDb[id]);
+  const lastAmount = (id) => history.recent.find((r) => r.food_id === id)?.amount ?? foodDb[id]?.default_amount;
+  const recent = history.recent.filter((r) => foodDb[r.food_id] && !history.favorites.includes(r.food_id)).slice(0, 8);
+  const amountLabel = (f, amount) => `${amount}${UNIT_LABEL[f.unit] || f.unit}`;
+
   function removeItem(index) { onChange(items.filter((_, i) => i !== index)); }
 
   function nudge(index, delta) {
+    if (isQuick(items[index])) return;
     const food = foodDb[items[index].food_id];
     if (!food) return;
     const newAmt = items[index].amount + (delta * food.step);
@@ -174,6 +178,19 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
           )}
 
           {items.map((item, i) => {
+            if (isQuick(item)) {
+              return (
+                <div key={i} className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 bg-ink-50">
+                  <Lightning size={16} weight="fill" className="text-saffron-500 shrink-0" aria-hidden="true" />
+                  <span className="flex-1 text-xs font-medium text-ink-700 truncate min-w-0">{item.label || t('composer.quickItem')}</span>
+                  <span className="text-[10px] text-ink-500 shrink-0 tabular-nums">{item.kcal}kcal</span>
+                  {!disabled && (
+                    <button onClick={() => removeItem(i)} aria-label={t('composer.remove')}
+                      className="w-7 h-7 rounded-lg bg-white border border-ink-200 hover:bg-ink-100 text-ink-500 hover:text-ink-900 text-xs font-bold flex items-center justify-center ms-0.5">×</button>
+                  )}
+                </div>
+              );
+            }
             const f = foodDb[item.food_id];
             if (!f) return null;
             const n = getFoodNutrition(foodDb, item.food_id, item.amount);
@@ -223,6 +240,60 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
             placeholder={t('composer.searchFood')}
             className="w-full text-sm border border-ink-200 rounded-xl px-3 py-2 focus:outline-none focus:border-door-400 bg-white placeholder-ink-400" />
 
+          {!search && (
+            <div className="space-y-2.5">
+              {/* Quick add calories: restaurant meals, anything not in the list */}
+              {quickOpen ? (
+                <form onSubmit={addQuick} className="rounded-xl border border-ink-200 bg-white p-2.5 space-y-2">
+                  <div className="flex gap-2">
+                    <input value={quick.label} onChange={(e) => setQuick((q) => ({ ...q, label: e.target.value }))} maxLength={40}
+                      placeholder={t('composer.quickLabel')} aria-label={t('composer.quickLabel')}
+                      className="flex-1 min-w-0 h-9 px-2.5 text-sm rounded-lg border border-ink-300 bg-white outline-none focus:border-door-600" />
+                    <input type="number" inputMode="numeric" required min="1" max="5000" value={quick.kcal} onChange={(e) => setQuick((q) => ({ ...q, kcal: e.target.value }))}
+                      placeholder="kcal" aria-label="kcal"
+                      className="w-20 h-9 px-2 text-sm text-end rounded-lg border border-ink-300 bg-white outline-none focus:border-door-600 tabular-nums" />
+                  </div>
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {[['protein_g', 'macro.protein_short'], ['carbs_g', 'macro.carbs_short'], ['fat_g', 'macro.fat_short']].map(([k, label]) => (
+                      <label key={k} className="flex items-center gap-1 text-xs text-ink-500">
+                        {t(label)}
+                        <input type="number" inputMode="numeric" min="0" value={quick[k]} onChange={(e) => setQuick((q) => ({ ...q, [k]: e.target.value }))}
+                          placeholder="g" aria-label={`${t(label)} (g)`}
+                          className="w-14 h-8 px-1.5 text-sm text-end rounded-md border border-ink-300 bg-white outline-none focus:border-door-600 tabular-nums" />
+                      </label>
+                    ))}
+                    <span className="ms-auto flex gap-2">
+                      <button type="button" onClick={() => setQuickOpen(false)} className="text-xs text-ink-500 hover:text-ink-800 px-1">{t('action.cancel')}</button>
+                      <button type="submit" className="h-8 px-3 rounded-lg bg-door-600 hover:bg-door-700 text-white text-xs font-semibold">{t('composer.add')}</button>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-ink-500">{t('composer.quickHint')}</p>
+                </form>
+              ) : (
+                <button type="button" onClick={() => setQuickOpen(true)}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-ink-200 bg-white text-xs font-semibold text-ink-800 hover:bg-ink-100">
+                  <Lightning size={14} weight="fill" className="text-saffron-500" aria-hidden="true" />{t('composer.quickAdd')}
+                </button>
+              )}
+
+              {favorites.length > 0 && (
+                <ChipRow icon={Star} label={t('composer.favorites')}>
+                  {favorites.map((id) => (
+                    <Chip key={id} food={foodDb[id]} sub={amountLabel(foodDb[id], lastAmount(id))} onTap={() => addWithAmount(id, lastAmount(id))} />
+                  ))}
+                </ChipRow>
+              )}
+
+              {recent.length > 0 && (
+                <ChipRow icon={ClockCounterClockwise} label={t('composer.recent')}>
+                  {recent.map((r) => (
+                    <Chip key={r.food_id} food={foodDb[r.food_id]} sub={amountLabel(foodDb[r.food_id], r.amount)} onTap={() => addWithAmount(r.food_id, r.amount)} />
+                  ))}
+                </ChipRow>
+              )}
+            </div>
+          )}
+
           {/* Presets */}
           {presets.length > 0 && !search && (
             <div>
@@ -252,7 +323,7 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
               ) : (
                 <div className="grid grid-cols-2 gap-1.5">
                   {filteredFoods.map(f => (
-                    <FoodButton key={f.id} food={f} foodDb={foodDb} items={items} onTap={quickAdd} onDelete={f.custom ? onDeleteCustomFood : null} />
+                    <FoodButton key={f.id} food={f} foodDb={foodDb} items={items} onTap={quickAdd} onDelete={f.custom ? onDeleteCustomFood : null} favorite={history.favorites.includes(f.id)} />
                   ))}
                 </div>
               )}
@@ -270,7 +341,7 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
                 </div>
                 <div className="grid grid-cols-2 gap-1.5">
                   {catFoods.map(f => (
-                    <FoodButton key={f.id} food={f} foodDb={foodDb} items={items} onTap={quickAdd} onDelete={f.custom ? onDeleteCustomFood : null} />
+                    <FoodButton key={f.id} food={f} foodDb={foodDb} items={items} onTap={quickAdd} onDelete={f.custom ? onDeleteCustomFood : null} favorite={history.favorites.includes(f.id)} />
                   ))}
                 </div>
               </div>
@@ -305,11 +376,17 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
 
       {/* Add button when picker is closed */}
       {!disabled && !pickerOpen && !hasItems && (
-        <div className="px-3 pb-2.5 pt-0.5">
+        <div className="px-3 pb-2.5 pt-0.5 flex gap-2">
           <button onClick={() => setPickerOpen(true)}
-            className="w-full py-1.5 text-xs font-semibold text-door-500 hover:text-door-700 hover:bg-door-50 rounded-lg transition-colors">
+            className="flex-1 py-1.5 text-xs font-semibold text-door-600 hover:text-door-800 hover:bg-door-50 rounded-lg transition-colors">
             {t('composer.addFood')}
           </button>
+          {yesterdayKcal > 0 && (
+            <button onClick={() => onChange(yesterdayItems.map((it) => ({ ...it })))}
+              className="flex-1 py-1.5 text-xs font-semibold text-ink-700 bg-white border border-ink-200 hover:bg-ink-100 rounded-lg flex items-center justify-center gap-1.5">
+              <ArrowCounterClockwise size={14} aria-hidden="true" />{t('composer.sameAsYesterday', { kcal: yesterdayKcal })}
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -317,7 +394,7 @@ export default function MealComposer({ mealNum, items = [], onChange, disabled, 
 }
 
 /** Food button */
-function FoodButton({ food, foodDb, items, onTap, onDelete }) {
+function FoodButton({ food, foodDb, items, onTap, onDelete, favorite }) {
   const { t } = useTranslation();
   const inMeal = items.some(it => it.food_id === food.id);
   const defaultN = getFoodNutrition(foodDb, food.id, food.default_amount);
@@ -334,13 +411,18 @@ function FoodButton({ food, foodDb, items, onTap, onDelete }) {
  }`}
       >
         <span className="text-xl shrink-0">{food.emoji}</span>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 pe-5">
           <div className="text-xs font-bold text-ink-800 truncate">{food.name.split('(')[0].trim()}</div>
           <div className="text-[10px] text-ink-400">{unitLabel} · {Math.round(defaultN.kcal)}{t('composer.kcal')}</div>
         </div>
         {inMeal && (
-          <span className="absolute -top-1 -end-1 w-4 h-4 bg-door-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center shadow">+</span>
+          <span className="absolute -top-1 -start-1 w-4 h-4 bg-door-600 text-white rounded-full text-[9px] font-bold flex items-center justify-center">+</span>
         )}
+      </button>
+      <button type="button" onClick={(e) => { e.stopPropagation(); toggleFavorite(food.id); }}
+        aria-label={favorite ? t('composer.unfavorite', { name: food.name }) : t('composer.favorite', { name: food.name })} aria-pressed={!!favorite}
+        className={`absolute top-1 end-1 w-6 h-6 flex items-center justify-center rounded-md ${favorite ? 'text-saffron-500' : 'text-ink-300 hover:text-ink-500'}`}>
+        <Star size={14} weight={favorite ? 'fill' : 'regular'} />
       </button>
       {onDelete && !inMeal && (
         <button onClick={(e) => { e.stopPropagation(); onDelete(food.id); }}
@@ -461,5 +543,26 @@ function CustomFoodForm({ onCreate, onCancel }) {
         {saving ? t('customFood.creating') : t('customFood.create', { name: name || t('customFood.foodDefault') })}
       </button>
     </form>
+  );
+}
+
+function ChipRow({ icon: Icon, label, children }) {
+  return (
+    <div>
+      <div className="flex items-center gap-1.5 text-[11px] font-semibold text-ink-500 mb-1.5 px-0.5"><Icon size={13} aria-hidden="true" />{label}</div>
+      <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-0.5 px-0.5" data-scroll>{children}</div>
+    </div>
+  );
+}
+
+/** One tap = add this food again, in the amount shown. */
+function Chip({ food, sub, onTap }) {
+  return (
+    <button type="button" onClick={onTap}
+      className="shrink-0 inline-flex items-center gap-1.5 h-9 ps-2 pe-3 rounded-lg border border-ink-200 bg-white hover:border-door-300 text-start">
+      <span aria-hidden="true">{food.emoji}</span>
+      <span className="text-xs font-semibold text-ink-800 max-w-[9rem] truncate">{food.name.split('(')[0].trim()}</span>
+      <span className="text-[11px] text-ink-500 tabular-nums">{sub}</span>
+    </button>
   );
 }

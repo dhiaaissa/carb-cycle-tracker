@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
+import { invalidateFoodHistory } from '../lib/foodHistory';
 
 export function useAppData() {
   const [config, setConfig]     = useState(null);
@@ -54,6 +55,7 @@ export function useAppData() {
   const updateDay = useCallback(async (dayIndex, data) => {
     const updated = await api.updateDay(dayIndex, data);
     setDays(prev => ({ ...prev, [dayIndex]: updated }));
+    invalidateFoodHistory();
     const st = await api.getStats();
     setStats(st);
     return updated;

@@ -3,14 +3,15 @@
  * Server is always the source of truth; this is for optimistic UI only.
  * Targets come from config.day_targets (resolved server-side by shared/dayTargets.js).
  */
-import { calculateFromMeals } from './foods.js';
+import { FOODS } from './foods.js';
+import { totalsFromMeals } from '../../../shared/mealItems.js';
 import { DEFAULT_DAY_TARGETS, WATER_GOALS } from '../../../shared/dayTargets.js';
 
 export { DEFAULT_DAY_TARGETS, WATER_GOALS };
 
 /** Full day calc from flexible mealsObj */
-export function calculateDay(dayType, mealsObj = {}, _workoutDone = false, dayTargets = DEFAULT_DAY_TARGETS) {
-  const nutrition = calculateFromMeals(mealsObj);
+export function calculateDay(dayType, mealsObj = {}, _workoutDone = false, dayTargets = DEFAULT_DAY_TARGETS, foodDb = FOODS) {
+  const nutrition = totalsFromMeals(mealsObj, foodDb);
   const target = dayTargets[dayType]?.calories ?? DEFAULT_DAY_TARGETS.low.calories;
   return {
     ...nutrition,

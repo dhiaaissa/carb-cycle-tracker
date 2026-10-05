@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Check } from '@phosphor-icons/react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../lib/api';
+import { invalidateFoodHistory } from '../lib/foodHistory';
+import { ArrowCounterClockwise } from '@phosphor-icons/react';
 import { DEFAULT_DAY_TARGETS } from '../lib/calories';
 import TodaySummary from './TodaySummary';
 import MealComposer from './MealComposer';
@@ -24,6 +26,18 @@ export default function MacroDayEditor({
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState('');
   const [loaded, setLoaded] = useState(false);
+  const [yesterday, setYesterday] = useState(null);
+
+  // Yesterday's meals power "same as yesterday" (per meal and whole day).
+  useEffect(() => {
+    let cancelled = false;
+    setYesterday(null);
+    if (dayIndex > 0) {
+      api.getDay(dayIndex - 1).then((log) => { if (!cancelled) setYesterday(log?.meals_json || null); }).catch(() => {});
+    }
+    return () => { cancelled = true; };
+  }, [dayIndex]);
+  const yesterdayHasMeals = !!yesterday && MEAL_KEYS.some((k) => yesterday[k]?.length);
   const [expandedMeal, setExpandedMeal] = useState('meal1');
 
   useEffect(() => {
@@ -62,6 +76,7 @@ export default function MacroDayEditor({
         notes,
         workout_done: workoutDone,
       });
+      invalidateFoodHistory();
       setToast(t('macroEditor.saved'));
       setTimeout(() => setToast(''), 2000);
       if (onSaved) onSaved();
@@ -123,7 +138,15 @@ export default function MacroDayEditor({
 
       {/* Meals */}
       <div className="bg-white rounded-3xl border border-ink-100 p-4 sm:p-6 mb-5">
-        <h2 className="text-lg font-bold text-ink-800 mb-3 flex items-center gap-2">{t('macroEditor.meals')}</h2>
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <h2 className="font-display text-lg font-semibold text-ink-900">{t('macroEditor.meals')}</h2>
+          {yesterdayHasMeals && MEAL_KEYS.every((k) => !meals[k]?.length) && (
+            <button type="button" onClick={() => setMeals({ meal1: [...(yesterday.meal1 || [])], meal2: [...(yesterday.meal2 || [])], meal3: [...(yesterday.meal3 || [])], meal4: [...(yesterday.meal4 || [])] })}
+              className="h-8 px-3 rounded-lg border border-ink-200 bg-white hover:bg-ink-100 text-xs font-semibold text-ink-800 flex items-center gap-1.5">
+              <ArrowCounterClockwise size={14} aria-hidden="true" />{t('modal.copyYesterday')}
+            </button>
+          )}
+        </div>
         <div className="space-y-2">
           {MEAL_KEYS.map(key => {
             const items = meals[key] || [];
@@ -159,6 +182,7 @@ export default function MacroDayEditor({
                       onDeletePreset={onDeletePreset}
                       onCreateCustomFood={onCreateCustomFood}
                       onDeleteCustomFood={onDeleteCustomFood}
+                      yesterdayItems={yesterday?.[key]}
                     />
                   </div>
                 )}

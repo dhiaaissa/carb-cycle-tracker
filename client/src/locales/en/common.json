@@ -997,5 +997,17 @@
   "admin.action.admin_password_reset": "Reset password",
   "admin.action.admin_role_change": "Changed role",
   "admin.action.admin_user_delete": "Deleted user",
-  "admin.action.admin_audit_export": "Exported activity log"
+  "admin.action.admin_audit_export": "Exported activity log",
+
+  "composer.quickAdd": "Quick add calories",
+  "composer.quickLabel": "What was it? (optional)",
+  "composer.quickHint": "For restaurant meals or anything not in the list. Macros are optional.",
+  "composer.quickItem": "Quick add",
+  "composer.add": "Add",
+  "composer.remove": "Remove",
+  "composer.favorites": "Favourites",
+  "composer.recent": "Recent",
+  "composer.favorite": "Add {{name}} to favourites",
+  "composer.unfavorite": "Remove {{name}} from favourites",
+  "composer.sameAsYesterday": "Same as yesterday · {{kcal}} kcal"
 }

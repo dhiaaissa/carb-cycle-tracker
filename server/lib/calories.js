@@ -2,7 +2,8 @@
  * Day calculation: consumed (from meal items) vs. the resolved target for the day type.
  * Targets come from shared/dayTargets.js via server/lib/targets.js.
  */
-import { calculateFromMeals } from './foods.js';
+import { FOODS } from './foods.js';
+import { totalsFromMeals } from '../../shared/mealItems.js';
 import { DEFAULT_DAY_TARGETS, WATER_GOALS } from '../../shared/dayTargets.js';
 
 export { WATER_GOALS };
@@ -12,9 +13,10 @@ export { WATER_GOALS };
  * @param {{ meal1, meal2, meal3, meal4 }} mealsObj
  * @param {boolean} _workoutDone — kept for API compatibility; workouts add no bonus calories
  * @param {object} [dayTargets] — resolved targets ({ low, med, high }); defaults to the legacy plan
+ * @param {object} [foodDb] — built-in + the user's custom foods (custom foods used to count as 0 kcal)
  */
-export function calculateDay(dayType, mealsObj, _workoutDone, dayTargets = DEFAULT_DAY_TARGETS) {
-  const nutrition = calculateFromMeals(mealsObj);
+export function calculateDay(dayType, mealsObj, _workoutDone, dayTargets = DEFAULT_DAY_TARGETS, foodDb = FOODS) {
+  const nutrition = totalsFromMeals(mealsObj, foodDb);
   const target = dayTargets[dayType]?.calories ?? DEFAULT_DAY_TARGETS.low.calories;
 
   return {

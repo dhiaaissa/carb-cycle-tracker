@@ -94,7 +94,8 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
   }, [onClose]);
 
   const cheatKcal = cheat && cheatMealChoice ? (CHEAT_KCAL[cheatMealChoice] || 0) : 0;
-  const baseCal = useMemo(() => calculateDay(day_type, meals, workout, dayTargets), [day_type, meals, workout, dayTargets]);
+  // Totals include custom foods (allFoods = built-in + custom) — same function the server uses.
+  const baseCal = useMemo(() => calculateDay(day_type, meals, workout, dayTargets, allFoods || undefined), [day_type, meals, workout, dayTargets, allFoods]);
   const cal = useMemo(() => ({
     ...baseCal,
     calories_consumed: baseCal.calories_consumed + cheatKcal,
@@ -259,6 +260,7 @@ export default function DayModal({ dayIndex, scheduleDay, dayLog, days, onSave, 
                   allFoods={allFoods}
                   onCreateCustomFood={onCreateCustomFood}
                   onDeleteCustomFood={onDeleteCustomFood}
+                  yesterdayItems={prevDayMeals?.[key]}
                 />
               ))}
             </div>

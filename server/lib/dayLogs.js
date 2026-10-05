@@ -9,6 +9,8 @@ import { dayContext } from './schedule.js';
 import { calculateDay, calculateScore } from './calories.js';
 import { dayTargetsFor } from './targets.js';
 import { getOrCreateConfig } from './userConfig.js';
+import { sanitizeMeals } from '../../shared/mealItems.js';
+import { loadFoodDb } from './foodDb.js';
 
 export function parseJsonFields(row) {
   let meals_json = {};
@@ -60,7 +62,7 @@ export async function upsertDay(userId, date, body = {}) {
 
   const pick = (k) => (body[k] !== undefined ? body[k] : base[k] ?? EMPTY[k]);
   const fields = Object.fromEntries(FIELDS.map((k) => [k, pick(k)]));
-  const meals = body.meals !== undefined ? body.meals : base.meals_json;
+  const meals = body.meals !== undefined ? sanitizeMeals(body.meals) : base.meals_json;
   const workoutLog = body.workout_json !== undefined ? body.workout_json : base.workout_json;
 
   // Carb cycle: keep the day type it was logged under, so a later start_date
@@ -68,7 +70,7 @@ export async function upsertDay(userId, date, body = {}) {
   // always flat (this also repairs rows that were mislabelled low/med/high).
   const isCycle = (cfg.programme ?? 'carb_cycle') === 'carb_cycle';
   const type = isCycle ? (existing?.day_type ?? day_type) : 'flat';
-  const cal = calculateDay(type, meals, fields.workout_done, dayTargetsFor(cfg, user));
+  const cal = calculateDay(type, meals, fields.workout_done, dayTargetsFor(cfg, user), await loadFoodDb(userId));
   const cheatKcal = body.cheat_kcal || 0;
   cal.calories_consumed += cheatKcal;
   cal.calories_remaining -= cheatKcal;

@@ -997,5 +997,17 @@
   "admin.action.admin_password_reset": "إعادة تعيين كلمة المرور",
   "admin.action.admin_role_change": "تغيير الدور",
   "admin.action.admin_user_delete": "حذف مستخدم",
-  "admin.action.admin_audit_export": "تصدير سجل النشاط"
+  "admin.action.admin_audit_export": "تصدير سجل النشاط",
+
+  "composer.quickAdd": "إضافة سريعة للسعرات",
+  "composer.quickLabel": "ماذا كان؟ (اختياري)",
+  "composer.quickHint": "لوجبات المطاعم أو أي طعام غير موجود في القائمة. المغذيات اختيارية.",
+  "composer.quickItem": "إضافة سريعة",
+  "composer.add": "إضافة",
+  "composer.remove": "إزالة",
+  "composer.favorites": "المفضلة",
+  "composer.recent": "الأخيرة",
+  "composer.favorite": "إضافة {{name}} إلى المفضلة",
+  "composer.unfavorite": "إزالة {{name}} من المفضلة",
+  "composer.sameAsYesterday": "مثل الأمس · {{kcal}} سعرة"
 }

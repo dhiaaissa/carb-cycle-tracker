@@ -997,5 +997,17 @@
   "admin.action.admin_password_reset": "Mot de passe réinitialisé",
   "admin.action.admin_role_change": "Rôle modifié",
   "admin.action.admin_user_delete": "Utilisateur supprimé",
-  "admin.action.admin_audit_export": "Journal exporté"
+  "admin.action.admin_audit_export": "Journal exporté",
+
+  "composer.quickAdd": "Ajout rapide de calories",
+  "composer.quickLabel": "Qu'est-ce que c'était ? (facultatif)",
+  "composer.quickHint": "Pour un repas au restaurant ou un aliment absent de la liste. Les macros sont facultatives.",
+  "composer.quickItem": "Ajout rapide",
+  "composer.add": "Ajouter",
+  "composer.remove": "Retirer",
+  "composer.favorites": "Favoris",
+  "composer.recent": "Récents",
+  "composer.favorite": "Ajouter {{name}} aux favoris",
+  "composer.unfavorite": "Retirer {{name}} des favoris",
+  "composer.sameAsYesterday": "Comme hier · {{kcal}} kcal"
 }
