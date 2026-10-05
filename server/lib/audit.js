@@ -8,7 +8,7 @@ import { auditLog } from '../db/schema.js';
 /** Event names shown in the admin activity log. Keep in sync with client i18n `admin.action.*`. */
 export const ACTIONS = [
   'auth.register', 'auth.login', 'auth.login_failed', 'auth.login_blocked', 'auth.password_change',
-  'programme.setup', 'config.start_date',
+  'programme.setup', 'programme.adaptive_tdee', 'config.start_date',
   'admin.user_view', 'admin.suspend', 'admin.unsuspend', 'admin.sign_out', 'admin.password_reset',
   'admin.role_change', 'admin.user_delete', 'admin.audit_export',
 ];

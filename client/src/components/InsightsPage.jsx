@@ -5,6 +5,7 @@ import { api } from '../lib/api';
 import { FOODS } from '../lib/foods';
 import { formatNumber } from '../lib/format';
 import { PageHeader, Panel, Ledger, EmptyState, TextButton } from './ui/primitives';
+import WeeklyInsightsCard from './WeeklyInsightsCard';
 
 /**
  * Adherence is a polarity around 100% of target, so it uses a diverging scale:
@@ -56,6 +57,7 @@ export default function InsightsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title={t('insights.heading')} eyebrow={t('insights.daysLogged', { count: data.total_days_logged })} />
+      <WeeklyInsightsCard className="" />
 
       <Ledger items={[
         { label: t('insights.avgAdherence'), value: avgAdherence, suffix: '%' },

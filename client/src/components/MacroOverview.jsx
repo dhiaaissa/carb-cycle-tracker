@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import WeightChart from './WeightChart';
+import WeeklyInsightsCard from './WeeklyInsightsCard';
+import AdaptiveTdeeCard from './AdaptiveTdeeCard';
 import { formatDate, formatNumber } from '../lib/format';
 import { PageHeader, Panel, Ledger } from './ui/primitives';
 
@@ -36,6 +38,9 @@ export default function MacroOverview({ stats, config, onSelectView }) {
         { label: t('macroStats.perfectDays'), value: stats.total_perfect },
         { label: t('macroStats.avgCalories'), value: stats.avg_calories ? formatNumber(stats.avg_calories) : '—', suffix: stats.avg_calories ? 'kcal' : '' },
       ]} />
+
+      <WeeklyInsightsCard />
+      <AdaptiveTdeeCard />
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         <Panel title={t('macroOverview.dailyTargets')}>

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatNumber } from '../lib/format';
 import { PageHeader, Panel, Ledger } from './ui/primitives';
+import WeeklyInsightsCard from './WeeklyInsightsCard';
 
 export default function MacroInsights({ stats, config }) {
   const { t } = useTranslation();
@@ -34,6 +35,7 @@ export default function MacroInsights({ stats, config }) {
   return (
     <div className="space-y-6">
       <PageHeader title={t('macroInsights.heading')} subtitle={t('macroInsights.subtitle')} />
+      <WeeklyInsightsCard className="" />
 
       <Ledger items={[
         { label: t('macroInsights.avgCalories'), value: formatNumber(stats.avg_calories || 0), suffix: calDiff != null ? `kcal · ${signed(calDiff)}` : 'kcal' },

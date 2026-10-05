@@ -10,6 +10,8 @@ import ThemeToggle from './components/ThemeToggle';
 import LogoutButton from './components/LogoutButton';
 import Sidebar from './components/Sidebar';
 import ProgrammeLog from './components/ProgrammeLog';
+import WeeklyInsightsCard from './components/WeeklyInsightsCard';
+import AdaptiveTdeeCard from './components/AdaptiveTdeeCard';
 import { BrandMark } from './components/ui/SideNav';
 import { List, BellRinging, BellSimpleSlash, PencilSimpleLine } from '@phosphor-icons/react';
 import { formatDate } from './lib/format';
@@ -204,6 +206,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
                   />
                 )}
 
+                <WeeklyInsightsCard />
                 <ProgrammeLog
                   schedule={schedule}
                   days={days}
@@ -212,6 +215,7 @@ function AuthedApp({ user, justRegistered, onSetupDone, onLogout }) {
                   onSelectDay={setSelectedDay}
                   onSelectWeek={setSelectedWeek}
                 />
+                <AdaptiveTdeeCard />
                 <WeightChart weightEntries={stats?.weight_entries} />
                 <NutritionReference />
               </div>
